@@ -1,0 +1,44 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "road-advisory",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const { route, traffic } = items[0].json;\n\n// Process the road advisory data here\n\nreturn [{ json: { message: 'Road advisory processed', route, traffic } }];"
+      },
+      "name": "Process Road Advisory",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        400,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Road Advisory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
