@@ -1,0 +1,22 @@
+**About ALTO Page Content & Statistics Update**
+
+**Objective:** Revise the "About ALTO" page to accurately reflect the new branding, mission, and updated company statistics and story.
+
+**Instructions:**
+
+1.  **Page Header:**
+    * Change the main header of the "About ALTO" page to: **"New Generation of Real Estate."**
+2.  **Main Description Update:**
+    * Replace the existing company description with: "A company built upon values of exceptional results and genuine care. From humble beginnings to becoming a premier property specialist servicing South-East Queensland, consistently delivering superior outcomes through market expertise, innovative technologies and unwavering client commitment."
+3.  **Statistics Section:**
+    * Update the displayed company statistics to:
+        * **100+ Properties Sold**
+        * **$100M Sold Value**
+        * **98.5% Client Satisfaction**
+        * **10+ years of combined experience**
+    * Ensure these statistics are presented clearly and prominently.
+4.  **"Our Story" Section (Built on Excellence and Trust):**
+    * Add or revise a section titled: **"Built on Excellence and Trust."**
+    * Populate this section with the following narrative: "Founded in 2025, Alto Property emerged from a simple vision: to revolutionize real estate services in South East Queensland through innovative systems and processes paired with genuine care for clients and team alike. What started as just a vision from a boy that knows nothing but real estate has now evolved into a premier real estate agency delivering exceptional value to clients via a clear vision and message. To Joshua this isn’t just a job, it has changed his life and he strives to help others achieve the same. Whatever part of the journey you are in, we would love to have a chat. Get in touch today."
+5.  **Consistency Check:**
+    * Ensure all other numbers, descriptions, or historical facts on the "About ALTO" page (e.g., properties managed, exact years of operation) are cross-referenced and updated to be consistent with the new information provided. No conflicting or outdated data should remain.

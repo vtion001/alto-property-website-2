@@ -1,0 +1,32 @@
+Error: `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+    at createUnhandledError (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/components/errors/console-error.js:27:71)
+    at handleClientError (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/components/errors/use-error-handler.js:45:56)
+    at console.error (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/components/globals/intercept-console-error.js:47:56)
+    at TitleWarning.useEffect (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:448:40)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:347:91)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:250:82)
+    at DialogContent (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:218:105)
+    at DialogContent (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:216:82)
+    at _c1 (webpack-internal:///(app-pages-browser)/./components/ui/sheet.tsx:67:88)
+    at Slot (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-slot@1.1.1_@types+react@19.1.8_react@19.1.0/node_modules/@radix-ui/react-slot/dist/index.mjs:30:80)
+    at Primitive.div (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-primitive@2.0.1_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19._nvvdbvbk7dvibfwgsgp5k4gfnu/node_modules/@radix-ui/react-primitive/dist/index.mjs:41:82)
+    at Portal (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-portal@1.1.3_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_7kkjmypal7b4dh4ub5wehr22wu/node_modules/@radix-ui/react-portal/dist/index.mjs:28:160)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:141:97)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:452:21)
+    at mapIntoArray (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:353:20)
+    at mapIntoArray (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:398:32)
+    at Object.mapChildren [as map] (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:451:7)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:139:63)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:139:156)
+    at eval (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:452:21)
+    at mapIntoArray (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:353:20)
+    at mapIntoArray (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:398:32)
+    at Object.mapChildren [as map] (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.2.4_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js:451:7)
+    at DialogPortal (webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/@radix-ui+react-dialog@1.1.4_@types+react-dom@19.1.6_@types+react@19.1.8__@types+react@19.1.8_g2m5ksn3zf74n662eawdcmie4u/node_modules/@radix-ui/react-dialog/dist/index.mjs:139:63)
+    at _c1 (webpack-internal:///(app-pages-browser)/./components/ui/sheet.tsx:60:87)
+    at Navigation (webpack-internal:///(app-pages-browser)/./components/navigation.tsx:651:100)
+    at SellingWithAltoPage (rsc://React/Server/webpack-internal:///(rsc)/./app/selling/selling-with-alto/page.tsx?154:23:88)
