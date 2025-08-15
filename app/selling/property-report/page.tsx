@@ -133,7 +133,7 @@ export default function PropertyReportPage() {
 
               <div className="space-y-4">
                 <p className="text-brown-600 font-light">
-                  Questions? Contact us at <a href="tel:(+61) 467 048 837" className="text-brown-800 underline">(+61) 467 048 837</a>
+                  Questions? Contact us at <a href="tel:0730000000" className="text-brown-800 underline">(07) 3000 0000</a>
                 </p>
                 <Button
                   onClick={() => {

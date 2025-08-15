@@ -64,7 +64,7 @@ export function Navigation() {
           />
           <div>
             <div className="font-bold text-brown-800 text-lg md:text-xl"></div>
-            <div className="text-brown-600 text-xs md:text-sm tracking-wider">South East Queensland's Premier</div>
+            <div className="text-brown-600 text-xs md:text-sm tracking-wider">SEQ’s Premier Agency</div>
           </div>
         </Link>
 
