@@ -143,6 +143,136 @@ export default function BuyingPage() {
           </div>
         </section>
 
+        {/* Buyers Agent Services Section */}
+        <section className="py-32 bg-brown-50">
+          <div className="container">
+            <div className="text-center space-y-8 mb-24">
+              <div className="inline-block">
+                <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Professional Guidance</div>
+                <div className="w-16 h-px bg-brown-300 mx-auto"></div>
+              </div>
+              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">Buyers Agent Services</h2>
+              <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
+                Don't navigate the property market alone. Our expert buyers agents protect your interests 
+                and ensure you never overpay or miss out on the perfect opportunity.
+              </p>
+            </div>
+
+            <div className="grid gap-12 lg:grid-cols-2">
+              {/* Left Column - Pain Points */}
+              <div className="space-y-8">
+                <h3 className="text-3xl font-light text-brown-800 mb-8">Are You Worried About...</h3>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4 p-6 bg-white rounded-2xl shadow-sm border border-brown-100">
+                    <div className="w-2 h-2 bg-brand-red rounded-full mt-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-medium text-brown-900 mb-2">Paying Too Much?</h4>
+                      <p className="text-brown-700 font-light">
+                        Without market expertise, you could overpay by tens of thousands. Our agents know true market value.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-6 bg-white rounded-2xl shadow-sm border border-brown-100">
+                    <div className="w-2 h-2 bg-brand-red rounded-full mt-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-medium text-brown-900 mb-2">Missing Out on Opportunities?</h4>
+                      <p className="text-brown-700 font-light">
+                        The best properties often sell before they hit the market. We have exclusive access to off-market gems.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-6 bg-white rounded-2xl shadow-sm border border-brown-100">
+                    <div className="w-2 h-2 bg-brand-red rounded-full mt-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-medium text-brown-900 mb-2">Making Costly Mistakes?</h4>
+                      <p className="text-brown-700 font-light">
+                        Hidden defects, poor locations, or legal issues can cost you dearly. We conduct thorough due diligence.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-6 bg-white rounded-2xl shadow-sm border border-brown-100">
+                    <div className="w-2 h-2 bg-brand-red rounded-full mt-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="text-lg font-medium text-brown-900 mb-2">Losing in Competitive Markets?</h4>
+                      <p className="text-brown-700 font-light">
+                        Without strong negotiation skills and market relationships, you'll struggle in bidding wars.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Solutions */}
+              <div className="space-y-8">
+                <h3 className="text-3xl font-light text-brown-800 mb-8">How We Protect You</h3>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4 p-6 bg-brown-900 rounded-2xl text-cream">
+                    <div className="w-8 h-8 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">1</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Market Intelligence & Pricing Strategy</h4>
+                      <p className="text-brown-100 font-light">
+                        Deep market analysis ensures you pay fair value. We know what properties are really worth.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-6 bg-brown-900 rounded-2xl text-cream">
+                    <div className="w-8 h-8 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Exclusive Access & Early Opportunities</h4>
+                      <p className="text-brown-100 font-light">
+                        First access to off-market properties and pre-market opportunities before competition arrives.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-6 bg-brown-900 rounded-2xl text-cream">
+                    <div className="w-8 h-8 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">3</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Professional Due Diligence</h4>
+                      <p className="text-brown-100 font-light">
+                        Comprehensive property inspections, legal checks, and market comparisons protect your investment.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-6 bg-brown-900 rounded-2xl text-cream">
+                    <div className="w-8 h-8 bg-brand-red rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">4</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium mb-2">Expert Negotiation & Winning Strategies</h4>
+                      <p className="text-brown-100 font-light">
+                        Professional negotiation skills and established relationships give you the competitive edge.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <Button
+                    size="lg"
+                    className="w-full bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide py-6 h-auto text-base"
+                  >
+                    Speak to a Buyers Agent Today
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-24 bg-brown-900 text-cream">
           <div className="container text-center">
