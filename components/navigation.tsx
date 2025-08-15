@@ -111,6 +111,9 @@ export function Navigation() {
                   <ListItem href="/buying/buying-with-alto" title="Buying with Alto">
                     Expert guidance through your property purchase.
                   </ListItem>
+                  <ListItem href="/buying/buyers-agent-services" title="Buyers Agent Services">
+                    Professional representation to protect your interests and secure the best deal.
+                  </ListItem>
                   <ListItem href="/buying/off-market" title="Off Market">
                     Access exclusive off-market opportunities.
                   </ListItem>
