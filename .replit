@@ -5,10 +5,10 @@ run = "npm run dev"
 channel = "stable-24_05"
 
 [deployment]
-deploymentTarget = "cloudrun"
+deploymentTarget = "static"
 buildCommand = "npm run build"
-run = ["sh", "-c", "npm start"]
 build = ["sh", "-c", "npm run build"]
+publicDir = "public"
 
 [[ports]]
 localPort = 3000
