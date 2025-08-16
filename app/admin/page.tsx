@@ -347,7 +347,7 @@ export default function AdminPage() {
     if (!selectedPropertyForMedia || !event.target.files) return;
 
     const newImages = Array.from(event.target.files).slice(0, 5).map(file => URL.createObjectURL(file));
-    
+
     setProperties(prevProperties => 
       prevProperties.map(prop => 
         prop.id === selectedPropertyForMedia.id 
@@ -595,7 +595,7 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                      <div className="grid gap-4 md:grid-cols-4">
+                      <div className="grid gap-4 md:grid-cols-3">
                         <div>
                           <Label htmlFor="prop-beds">Bedrooms</Label>
                           <Input
@@ -624,15 +624,6 @@ export default function AdminPage() {
                             value={newProperty.parking}
                             onChange={(e) => setNewProperty({...newProperty, parking: e.target.value})}
                             placeholder="2"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="prop-image">Primary Image URL</Label>
-                          <Input
-                            id="prop-image"
-                            value={newProperty.image}
-                            onChange={(e) => setNewProperty({...newProperty, image: e.target.value})}
-                            placeholder="Primary Image URL"
                           />
                         </div>
                       </div>
@@ -761,7 +752,7 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                      <div className="grid gap-4 md:grid-cols-4">
+                      <div className="grid gap-4 md:grid-cols-3">
                         <div>
                           <Label htmlFor="edit-prop-beds">Bedrooms</Label>
                           <Input
@@ -790,15 +781,6 @@ export default function AdminPage() {
                             value={editedProperty.parking}
                             onChange={(e) => setEditedProperty({...editedProperty, parking: parseInt(e.target.value) || 0})}
                             placeholder="2"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="edit-prop-image">Primary Image URL</Label>
-                          <Input
-                            id="edit-prop-image"
-                            value={editedProperty.image}
-                            onChange={(e) => setEditedProperty({...editedProperty, image: e.target.value})}
-                            placeholder="Image URL"
                           />
                         </div>
                       </div>
