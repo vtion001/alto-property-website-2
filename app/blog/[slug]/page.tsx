@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getPostBySlug, getAllPosts } from "@/lib/blog";
+import { getPostBySlug, getAllPosts } from "@/lib/blog.js";
 import { notFound } from "next/navigation";
 
 interface BlogPostPageProps {

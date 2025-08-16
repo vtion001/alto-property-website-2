@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowRight, Rss } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getAllPosts } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog.js";
 
 // Static blog posts data for export
 const staticPosts = [
@@ -38,7 +38,7 @@ const staticPosts = [
     title: "Property Styling Tips for Maximum Returns",
     slug: "property-styling-tips-maximum-returns",
     excerpt: "Simple styling techniques that can significantly increase your property's appeal and value.",
-    content: "When it comes to selling or renting your property, first impressions matter...",
+    content: "When selling or renting your property, first impressions matter...",
     date: "2024-03-05",
     author: "Emma Thompson",
     category: "Property Tips",
@@ -48,23 +48,6 @@ const staticPosts = [
 ];
 
 export default async function BlogPage() {
-  // Fetch and add RSS posts with timeout
-  try {
-    // Set a timeout for RSS fetching to avoid long delays
-    const rssPromise = fetchAndProcessAllFeeds();
-    const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('RSS fetch timeout')), 10000)
-    );
-
-    const rssPosts = await Promise.race([rssPromise, timeoutPromise]);
-    if (rssPosts.length > 0) {
-      addRSSPosts(rssPosts);
-    }
-  } catch (error) {
-    console.warn('RSS feeds temporarily unavailable:', error instanceof Error ? error.message : 'Unknown error');
-    // Continue with static posts only
-  }
-
   const posts = getAllPosts();
 
   return (
