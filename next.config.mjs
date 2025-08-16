@@ -5,6 +5,9 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
+  experimental: {
+    esmExternals: true
+  },
   async generateBuildId() {
     return 'build-' + Date.now();
   }
