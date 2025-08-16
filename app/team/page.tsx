@@ -67,9 +67,9 @@ export default function TeamPage() {
               - Behind-the-scenes shots
               This will enhance the authentic, personal connection with potential clients.
             */}
-            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-2">
+            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-2 justify-items-center max-w-4xl mx-auto">
               {teamMembers.map((member, index) => (
-                <Card key={index} className="group hover:shadow-xl transition-all duration-500 border border-brown-100">
+                <Card key={index} className="group hover:shadow-xl transition-all duration-500 border border-brown-100 w-full max-w-md">
                   <div className="relative">
                     <Image
                       src={member.image || "/placeholder.svg"}

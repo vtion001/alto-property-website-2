@@ -298,9 +298,9 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-3 justify-items-center">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2 justify-items-center">
               {/* Team Member 1 - Sales Director */}
-              <div className="text-center group max-w-sm">
+              <div className="text-center group max-w-sm mx-auto">
                 <div className="relative mb-6 mx-auto w-48 h-48 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
                   <Image
                     src="https://res.cloudinary.com/dbviya1rj/image/upload/v1752833883/ejat8ma5eh1c3nwabkim.jpg"
@@ -320,7 +320,7 @@ export default function HomePage() {
               </div>
 
               {/* Team Member 2 - Mortgage Broker */}
-              <div className="text-center group max-w-sm">
+              <div className="text-center group max-w-sm mx-auto">
                 <div className="relative mb-6 mx-auto w-48 h-48 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
                   <Image
                     src="https://res.cloudinary.com/dbviya1rj/image/upload/v1753060414/cceoxxs20bhuzjr2dkts.jpg"
