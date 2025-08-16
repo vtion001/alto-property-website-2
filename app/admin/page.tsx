@@ -33,7 +33,8 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  Camera // Import Camera icon
 } from "lucide-react"
 import Image from "next/image"
 
@@ -62,6 +63,7 @@ interface Property {
   type: 'house' | 'apartment' | 'townhouse' | 'land'
   listingType: 'sale' | 'rent'
   image: string
+  images?: string[] // Added for multiple images
   dateAdded: string
   description?: string
   features?: string[]
@@ -85,6 +87,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isMediaManagerOpen, setIsMediaManagerOpen] = useState(false) // State for media manager dialog
+  const [selectedPropertyForMedia, setSelectedPropertyForMedia] = useState<Property | null>(null) // To keep track of the property being managed
   const [createType, setCreateType] = useState<'blog' | 'property' | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
 
@@ -127,6 +131,7 @@ export default function AdminPage() {
       type: "apartment",
       listingType: "sale",
       image: "/placeholder.svg?height=200&width=300",
+      images: ["/placeholder.svg?height=200&width=300", "/placeholder.svg?height=200&width=301", "/placeholder.svg?height=200&width=302"], // Example images
       dateAdded: "2024-03-15",
       description: "A stunning apartment with river views.",
       features: ["Balcony", "Gym", "Pool"],
@@ -146,6 +151,7 @@ export default function AdminPage() {
       type: "house",
       listingType: "sale",
       image: "/placeholder.svg?height=200&width=300",
+      images: ["/placeholder.svg?height=200&width=303", "/placeholder.svg?height=200&width=304"],
       dateAdded: "2024-03-12",
       description: "A beautifully renovated heritage home.",
       features: ["Large Garden", "Fireplace", "Original Features"],
@@ -165,6 +171,7 @@ export default function AdminPage() {
       type: "townhouse",
       listingType: "rent",
       image: "/placeholder.svg?height=200&width=300",
+      images: ["/placeholder.svg?height=200&width=305"],
       dateAdded: "2024-03-10",
       description: "Contemporary townhouse living.",
       features: ["Balcony", "Modern Kitchen"],
@@ -228,6 +235,7 @@ export default function AdminPage() {
     description: "",
     features: [] as string[],
     image: "",
+    images: [] as string[], // Added for new property images
     commissionRate: ""
   })
 
@@ -245,6 +253,7 @@ export default function AdminPage() {
     type: "house",
     listingType: "sale",
     image: "",
+    images: [], // Added for edited property images
     dateAdded: "",
     description: "",
     features: [],
@@ -281,6 +290,7 @@ export default function AdminPage() {
       type: newProperty.type,
       listingType: newProperty.listingType,
       image: newProperty.image || "/placeholder.svg?height=200&width=300",
+      images: newProperty.images, // Store multiple images
       dateAdded: new Date().toISOString().split('T')[0],
       description: newProperty.description,
       features: newProperty.features,
@@ -290,7 +300,7 @@ export default function AdminPage() {
     setNewProperty({
       title: "", address: "", suburb: "", price: "", beds: "", baths: "", 
       parking: "", landSize: "", type: "house", listingType: "sale", 
-      description: "", features: [], image: "", commissionRate: ""
+      description: "", features: [], image: "", images: [], commissionRate: "" // Reset images
     })
     setIsCreateDialogOpen(false)
   }
@@ -311,6 +321,7 @@ export default function AdminPage() {
       type: property.type,
       listingType: property.listingType,
       image: property.image,
+      images: [...property.images!], // Copy existing images
       dateAdded: property.dateAdded,
       description: property.description || "",
       features: property.features || [],
@@ -324,6 +335,40 @@ export default function AdminPage() {
     setIsEditDialogOpen(false)
     setEditingProperty(null)
   }
+
+  // Function to open the media manager for a specific property
+  const openMediaManager = (property: Property) => {
+    setSelectedPropertyForMedia(property)
+    setIsMediaManagerOpen(true)
+  }
+
+  // Function to handle image upload (max 5 images)
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selectedPropertyForMedia || !event.target.files) return;
+
+    const newImages = Array.from(event.target.files).slice(0, 5).map(file => URL.createObjectURL(file));
+    
+    setProperties(prevProperties => 
+      prevProperties.map(prop => 
+        prop.id === selectedPropertyForMedia.id 
+          ? { ...prop, images: [...(prop.images || []), ...newImages].slice(0, 5) } 
+          : prop
+      )
+    );
+  };
+
+  // Function to remove an image
+  const removeImage = (imageUrl: string) => {
+    if (!selectedPropertyForMedia) return;
+
+    setProperties(prevProperties => 
+      prevProperties.map(prop => 
+        prop.id === selectedPropertyForMedia.id 
+          ? { ...prop, images: prop.images?.filter(img => img !== imageUrl) || [] } 
+          : prop
+      )
+    );
+  };
 
   const calculateGrossIncomeAndCommission = (property: Property) => {
     let priceValue = 0;
@@ -582,12 +627,12 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="prop-image">Image URL</Label>
+                          <Label htmlFor="prop-image">Primary Image URL</Label>
                           <Input
                             id="prop-image"
                             value={newProperty.image}
                             onChange={(e) => setNewProperty({...newProperty, image: e.target.value})}
-                            placeholder="Image URL"
+                            placeholder="Primary Image URL"
                           />
                         </div>
                       </div>
@@ -748,7 +793,7 @@ export default function AdminPage() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="edit-prop-image">Image URL</Label>
+                          <Label htmlFor="edit-prop-image">Primary Image URL</Label>
                           <Input
                             id="edit-prop-image"
                             value={editedProperty.image}
@@ -840,6 +885,66 @@ export default function AdminPage() {
                       </div>
                     </div>
                   )}
+                </DialogContent>
+              </Dialog>
+
+              {/* Media Manager Dialog */}
+              <Dialog open={isMediaManagerOpen} onOpenChange={(isOpen) => {
+                setIsMediaManagerOpen(isOpen);
+                if (!isOpen) setSelectedPropertyForMedia(null);
+              }}>
+                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Manage Photos for: {selectedPropertyForMedia?.title}</DialogTitle>
+                    <DialogDescription>Upload and manage up to 5 photos for this property.</DialogDescription>
+                  </DialogHeader>
+                  {selectedPropertyForMedia && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        {selectedPropertyForMedia.images?.map((imageUrl, index) => (
+                          <div key={index} className="relative group">
+                            <Image
+                              src={imageUrl}
+                              alt={`Property image ${index + 1}`}
+                              width={150}
+                              height={150}
+                              className="rounded-md object-cover w-full h-full"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1 invisible group-hover:visible"
+                              onClick={() => removeImage(imageUrl)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        {/* Placeholder for adding more images */}
+                        {selectedPropertyForMedia.images?.length! < 5 && (
+                          <label htmlFor="media-upload" className="flex items-center justify-center border-2 border-dashed rounded-md cursor-pointer h-40 bg-gray-50 hover:bg-gray-100">
+                            <Plus className="h-6 w-6 text-gray-500" />
+                            <Input
+                              id="media-upload"
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleImageUpload}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
+                      {selectedPropertyForMedia.images?.length! >= 5 && (
+                        <p className="text-sm text-center text-gray-500">Maximum of 5 photos reached.</p>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex gap-2 justify-end pt-4">
+                    <Button onClick={() => { setIsMediaManagerOpen(false); setSelectedPropertyForMedia(null); }} variant="outline">
+                      Done
+                    </Button>
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>
@@ -951,7 +1056,7 @@ export default function AdminPage() {
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <Image
-                                      src={property.image}
+                                      src={property.image || "/placeholder.svg"} // Fallback image
                                       alt={property.title}
                                       width={50}
                                       height={50}
@@ -1093,7 +1198,7 @@ export default function AdminPage() {
                         {properties.slice(0, 3).map((property) => (
                           <div key={property.id} className="flex items-center gap-4 p-4 border border-brown-100 rounded-lg">
                             <Image
-                              src={property.image}
+                              src={property.image || "/placeholder.svg"} // Fallback image
                               alt={property.title}
                               width={60}
                               height={60}
@@ -1171,7 +1276,7 @@ export default function AdminPage() {
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <Image
-                                      src={property.image}
+                                      src={property.image || "/placeholder.svg"} // Fallback image
                                       alt={property.title}
                                       width={50}
                                       height={50}
@@ -1215,6 +1320,9 @@ export default function AdminPage() {
                                     </Button>
                                     <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
                                       <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={() => openMediaManager(property)} title="Manage Photos">
+                                      <Camera className="h-4 w-4" />
                                     </Button>
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
@@ -1294,7 +1402,7 @@ export default function AdminPage() {
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <Image
-                                      src={property.image}
+                                      src={property.image || "/placeholder.svg"} // Fallback image
                                       alt={property.title}
                                       width={50}
                                       height={50}
@@ -1337,6 +1445,9 @@ export default function AdminPage() {
                                     </Button>
                                     <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
                                       <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={() => openMediaManager(property)} title="Manage Photos">
+                                      <Camera className="h-4 w-4" />
                                     </Button>
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
