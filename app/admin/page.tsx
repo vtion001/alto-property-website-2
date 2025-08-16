@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -64,6 +63,11 @@ interface Property {
   listingType: 'sale' | 'rent'
   image: string
   dateAdded: string
+  description?: string
+  features?: string[]
+  commissionRate?: number
+  grossIncome?: number
+  commissionEarned?: number
 }
 
 interface RentalApplication {
@@ -80,7 +84,9 @@ interface RentalApplication {
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [createType, setCreateType] = useState<'blog' | 'property' | null>(null)
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null)
 
   // Mock data - replace with actual data fetching
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
@@ -121,7 +127,10 @@ export default function AdminPage() {
       type: "apartment",
       listingType: "sale",
       image: "/placeholder.svg?height=200&width=300",
-      dateAdded: "2024-03-15"
+      dateAdded: "2024-03-15",
+      description: "A stunning apartment with river views.",
+      features: ["Balcony", "Gym", "Pool"],
+      commissionRate: 2.5
     },
     {
       id: "2",
@@ -137,7 +146,10 @@ export default function AdminPage() {
       type: "house",
       listingType: "sale",
       image: "/placeholder.svg?height=200&width=300",
-      dateAdded: "2024-03-12"
+      dateAdded: "2024-03-12",
+      description: "A beautifully renovated heritage home.",
+      features: ["Large Garden", "Fireplace", "Original Features"],
+      commissionRate: 2.5
     },
     {
       id: "3",
@@ -153,7 +165,10 @@ export default function AdminPage() {
       type: "townhouse",
       listingType: "rent",
       image: "/placeholder.svg?height=200&width=300",
-      dateAdded: "2024-03-10"
+      dateAdded: "2024-03-10",
+      description: "Contemporary townhouse living.",
+      features: ["Balcony", "Modern Kitchen"],
+      commissionRate: 10 // Assuming weekly rent for commission calc
     }
   ])
 
@@ -212,7 +227,28 @@ export default function AdminPage() {
     listingType: "sale" as const,
     description: "",
     features: [] as string[],
-    image: ""
+    image: "",
+    commissionRate: ""
+  })
+
+  const [editedProperty, setEditedProperty] = useState<Property>({
+    id: "",
+    title: "",
+    address: "",
+    suburb: "",
+    price: "",
+    beds: 0,
+    baths: 0,
+    parking: 0,
+    landSize: "",
+    status: 'available',
+    type: "house",
+    listingType: "sale",
+    image: "",
+    dateAdded: "",
+    description: "",
+    features: [],
+    commissionRate: 0
   })
 
   const handleCreateBlogPost = () => {
@@ -245,15 +281,65 @@ export default function AdminPage() {
       type: newProperty.type,
       listingType: newProperty.listingType,
       image: newProperty.image || "/placeholder.svg?height=200&width=300",
-      dateAdded: new Date().toISOString().split('T')[0]
+      dateAdded: new Date().toISOString().split('T')[0],
+      description: newProperty.description,
+      features: newProperty.features,
+      commissionRate: parseFloat(newProperty.commissionRate) || 0
     }
     setProperties([...properties, property])
     setNewProperty({
       title: "", address: "", suburb: "", price: "", beds: "", baths: "", 
       parking: "", landSize: "", type: "house", listingType: "sale", 
-      description: "", features: [], image: ""
+      description: "", features: [], image: "", commissionRate: ""
     })
     setIsCreateDialogOpen(false)
+  }
+
+  const handleEditProperty = (property: Property) => {
+    setEditingProperty(property)
+    setEditedProperty({
+      id: property.id,
+      title: property.title,
+      address: property.address,
+      suburb: property.suburb,
+      price: property.price,
+      beds: property.beds,
+      baths: property.baths,
+      parking: property.parking,
+      landSize: property.landSize,
+      status: property.status,
+      type: property.type,
+      listingType: property.listingType,
+      image: property.image,
+      dateAdded: property.dateAdded,
+      description: property.description || "",
+      features: property.features || [],
+      commissionRate: property.commissionRate || 0
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleSaveEditedProperty = () => {
+    setProperties(properties.map(p => p.id === editingProperty?.id ? editedProperty : p))
+    setIsEditDialogOpen(false)
+    setEditingProperty(null)
+  }
+
+  const calculateGrossIncomeAndCommission = (property: Property) => {
+    let priceValue = 0;
+    if (property.listingType === 'sale') {
+      const priceString = property.price.replace(/[^0-9.]/g, '');
+      priceValue = parseFloat(priceString) || 0;
+    } else { // For rent, assume price is weekly and multiply by 52 for annual
+      const priceString = property.price.replace(/[^0-9.]/g, '');
+      const weeklyPrice = parseFloat(priceString) || 0;
+      priceValue = weeklyPrice * 52;
+    }
+    const commissionRate = property.commissionRate || 0;
+    const grossIncome = priceValue;
+    const commissionEarned = (grossIncome * commissionRate) / 100;
+
+    return { grossIncome, commissionEarned };
   }
 
   const getStatusBadge = (status: string) => {
@@ -539,12 +625,213 @@ export default function AdminPage() {
                           rows={4}
                         />
                       </div>
+                      <div>
+                        <Label htmlFor="prop-features">Features</Label>
+                        <Input
+                          placeholder="Comma-separated features (e.g., Balcony, Gym)"
+                          onChange={(e) => setNewProperty({...newProperty, features: e.target.value.split(',').map(f => f.trim()).filter(f => f !== '')})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="prop-commission-rate">Commission Rate (%)</Label>
+                        <Input
+                          id="prop-commission-rate"
+                          type="number"
+                          value={newProperty.commissionRate}
+                          onChange={(e) => setNewProperty({...newProperty, commissionRate: e.target.value})}
+                          placeholder="e.g., 2.5 for sales, 10 for rentals"
+                        />
+                      </div>
                       <div className="flex gap-2">
                         <Button onClick={() => setCreateType(null)} variant="outline">
                           Back
                         </Button>
                         <Button onClick={handleCreateProperty} className="bg-brown-800 hover:bg-brown-900">
                           Create Property
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Edit Property: {editingProperty?.title}</DialogTitle>
+                    <DialogDescription>Update property details and view commission calculations.</DialogDescription>
+                  </DialogHeader>
+                  {editingProperty && (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <Label htmlFor="edit-prop-title">Property Title</Label>
+                          <Input
+                            id="edit-prop-title"
+                            value={editedProperty.title}
+                            onChange={(e) => setEditedProperty({...editedProperty, title: e.target.value})}
+                            placeholder="e.g., Luxury Riverside Apartment"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-address">Address</Label>
+                          <Input
+                            id="edit-prop-address"
+                            value={editedProperty.address}
+                            onChange={(e) => setEditedProperty({...editedProperty, address: e.target.value})}
+                            placeholder="Street address"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div>
+                          <Label htmlFor="edit-prop-suburb">Suburb</Label>
+                          <Input
+                            id="edit-prop-suburb"
+                            value={editedProperty.suburb}
+                            onChange={(e) => setEditedProperty({...editedProperty, suburb: e.target.value})}
+                            placeholder="Suburb"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-price">Price</Label>
+                          <Input
+                            id="edit-prop-price"
+                            value={editedProperty.price}
+                            onChange={(e) => setEditedProperty({...editedProperty, price: e.target.value})}
+                            placeholder="$850,000 or $650/week"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-land">Land Size</Label>
+                          <Input
+                            id="edit-prop-land"
+                            value={editedProperty.landSize}
+                            onChange={(e) => setEditedProperty({...editedProperty, landSize: e.target.value})}
+                            placeholder="607m² or N/A"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-4">
+                        <div>
+                          <Label htmlFor="edit-prop-beds">Bedrooms</Label>
+                          <Input
+                            id="edit-prop-beds"
+                            type="number"
+                            value={editedProperty.beds}
+                            onChange={(e) => setEditedProperty({...editedProperty, beds: parseInt(e.target.value) || 0})}
+                            placeholder="3"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-baths">Bathrooms</Label>
+                          <Input
+                            id="edit-prop-baths"
+                            type="number"
+                            value={editedProperty.baths}
+                            onChange={(e) => setEditedProperty({...editedProperty, baths: parseInt(e.target.value) || 0})}
+                            placeholder="2"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-parking">Parking</Label>
+                          <Input
+                            id="edit-prop-parking"
+                            type="number"
+                            value={editedProperty.parking}
+                            onChange={(e) => setEditedProperty({...editedProperty, parking: parseInt(e.target.value) || 0})}
+                            placeholder="2"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-image">Image URL</Label>
+                          <Input
+                            id="edit-prop-image"
+                            value={editedProperty.image}
+                            onChange={(e) => setEditedProperty({...editedProperty, image: e.target.value})}
+                            placeholder="Image URL"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <Label htmlFor="edit-prop-type">Property Type</Label>
+                          <Select value={editedProperty.type} onValueChange={(value: any) => setEditedProperty({...editedProperty, type: value})}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="house">House</SelectItem>
+                              <SelectItem value="apartment">Apartment</SelectItem>
+                              <SelectItem value="townhouse">Townhouse</SelectItem>
+                              <SelectItem value="land">Land</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-prop-listing-type">Listing Type</Label>
+                          <Select value={editedProperty.listingType} onValueChange={(value: any) => setEditedProperty({...editedProperty, listingType: value})}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sale">For Sale</SelectItem>
+                              <SelectItem value="rent">For Rent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-prop-description">Description</Label>
+                        <Textarea
+                          id="edit-prop-description"
+                          value={editedProperty.description}
+                          onChange={(e) => setEditedProperty({...editedProperty, description: e.target.value})}
+                          placeholder="Property description and features"
+                          rows={4}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-prop-features">Features</Label>
+                        <Input
+                          placeholder="Comma-separated features (e.g., Balcony, Gym)"
+                          defaultValue={editedProperty.features?.join(', ')}
+                          onChange={(e) => setEditedProperty({...editedProperty, features: e.target.value.split(',').map(f => f.trim()).filter(f => f !== '')})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-prop-commission-rate">Commission Rate (%)</Label>
+                        <Input
+                          id="edit-prop-commission-rate"
+                          type="number"
+                          value={editedProperty.commissionRate}
+                          onChange={(e) => setEditedProperty({...editedProperty, commissionRate: parseFloat(e.target.value) || 0})}
+                          placeholder="e.g., 2.5 for sales, 10 for rentals"
+                        />
+                      </div>
+                      <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+                        <h3 className="text-lg font-semibold mb-2">Calculated Income & Commission</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Gross Income</Label>
+                            <p className="font-medium text-brown-800">
+                              {calculateGrossIncomeAndCommission(editedProperty).grossIncome.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                            </p>
+                          </div>
+                          <div>
+                            <Label>Commission Earned</Label>
+                            <p className="font-medium text-green-700">
+                              {calculateGrossIncomeAndCommission(editedProperty).commissionEarned.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end pt-4">
+                        <Button onClick={() => setIsEditDialogOpen(false)} variant="outline">
+                          Cancel
+                        </Button>
+                        <Button onClick={handleSaveEditedProperty} className="bg-brown-800 hover:bg-brown-900">
+                          Save Changes
                         </Button>
                       </div>
                     </div>
@@ -735,7 +1022,7 @@ export default function AdminPage() {
                                 <Button variant="ghost" size="sm">
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <AlertDialog>
