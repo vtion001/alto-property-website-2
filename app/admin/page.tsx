@@ -362,7 +362,11 @@ export default function AdminPage() {
     totalBlogPosts: blogPosts.length,
     publishedPosts: blogPosts.filter(p => p.status === 'published').length,
     pendingApplications: rentalApplications.filter(a => a.status === 'pending').length,
-    totalApplications: rentalApplications.length
+    totalApplications: rentalApplications.length,
+    totalGCI: properties
+      .filter(p => p.listingType === 'sale')
+      .reduce((total, p) => total + calculateGrossIncomeAndCommission(p).commissionEarned, 0),
+    saleProperties: properties.filter(p => p.listingType === 'sale').length
   }
 
   return (
@@ -841,7 +845,7 @@ export default function AdminPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -861,6 +865,19 @@ export default function AdminPage() {
                       <p className="text-3xl font-light text-brown-800">{stats.availableProperties}</p>
                     </div>
                     <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-brown-600">Total GCI</p>
+                      <p className="text-3xl font-light text-brown-800">
+                        ${stats.totalGCI.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                      </p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-green-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -890,13 +907,179 @@ export default function AdminPage() {
 
             {/* Main Content Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+              <TabsList className="grid grid-cols-6 w-full max-w-3xl">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="gci">GCI</TabsTrigger>
                 <TabsTrigger value="properties">Properties</TabsTrigger>
                 <TabsTrigger value="blog">Blog</TabsTrigger>
                 <TabsTrigger value="rentals">Rentals</TabsTrigger>
                 <TabsTrigger value="management">Management</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="gci" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-light text-brown-800">Gross Commission Income (GCI)</h2>
+                  <div className="text-right">
+                    <p className="text-sm text-brown-600">Total Sales Commission</p>
+                    <p className="text-2xl font-light text-brown-800">
+                      ${stats.totalGCI.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </p>
+                  </div>
+                </div>
+
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Property</TableHead>
+                          <TableHead>Sale Price</TableHead>
+                          <TableHead>Commission Rate</TableHead>
+                          <TableHead>Commission Earned</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date Listed</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {properties
+                          .filter(property => property.listingType === 'sale')
+                          .map((property) => {
+                            const { commissionEarned } = calculateGrossIncomeAndCommission(property);
+                            return (
+                              <TableRow key={property.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <Image
+                                      src={property.image}
+                                      alt={property.title}
+                                      width={50}
+                                      height={50}
+                                      className="rounded object-cover"
+                                    />
+                                    <div>
+                                      <p className="font-medium text-brown-800">{property.title}</p>
+                                      <p className="text-sm text-brown-600">{property.address}, {property.suburb}</p>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="font-medium">{property.price}</TableCell>
+                                <TableCell>{property.commissionRate}%</TableCell>
+                                <TableCell className="font-medium text-green-700">
+                                  ${commissionEarned.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </TableCell>
+                                <TableCell>{getStatusBadge(property.status)}</TableCell>
+                                <TableCell>{property.dateAdded}</TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        {properties.filter(p => p.listingType === 'sale').length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-8 text-brown-600">
+                              No sale properties found
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-6 md:grid-cols-3">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg font-light">Sales Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Properties for Sale</span>
+                          <span className="font-semibold">{stats.saleProperties}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Average Commission</span>
+                          <span className="font-semibold">
+                            ${stats.saleProperties > 0 ? (stats.totalGCI / stats.saleProperties).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Total GCI</span>
+                          <span className="font-semibold text-green-700">
+                            ${stats.totalGCI.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg font-light">Property Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Available</span>
+                          <span className="font-semibold text-green-600">
+                            {properties.filter(p => p.listingType === 'sale' && p.status === 'available').length}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Pending</span>
+                          <span className="font-semibold text-orange-600">
+                            {properties.filter(p => p.listingType === 'sale' && p.status === 'pending').length}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Sold</span>
+                          <span className="font-semibold text-blue-600">
+                            {properties.filter(p => p.listingType === 'sale' && p.status === 'sold').length}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg font-light">Commission Rates</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Average Rate</span>
+                          <span className="font-semibold">
+                            {stats.saleProperties > 0 
+                              ? (properties
+                                  .filter(p => p.listingType === 'sale')
+                                  .reduce((sum, p) => sum + (p.commissionRate || 0), 0) / stats.saleProperties
+                                ).toFixed(2)
+                              : '0'
+                            }%
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Highest Rate</span>
+                          <span className="font-semibold text-green-600">
+                            {stats.saleProperties > 0 
+                              ? Math.max(...properties.filter(p => p.listingType === 'sale').map(p => p.commissionRate || 0))
+                              : '0'
+                            }%
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-brown-600">Lowest Rate</span>
+                          <span className="font-semibold text-blue-600">
+                            {stats.saleProperties > 0 
+                              ? Math.min(...properties.filter(p => p.listingType === 'sale').map(p => p.commissionRate || 0))
+                              : '0'
+                            }%
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
 
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
