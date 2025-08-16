@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowRight, Rss } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getAllPosts, addRSSPosts } from "@/lib/blog";
-import { fetchAndProcessAllFeeds } from "@/lib/rss-fetcher";
+import { getAllPosts } from "@/lib/blog";
 
 // Static blog posts data for export
 const staticPosts = [
