@@ -49,7 +49,7 @@ export default function BuyersAgentServicesPage() {
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="/placeholder.svg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1753060413/wonnpo3gatludlru78oh.jpg?height=700&width=600"
                     alt="Buyers agent consultation"
                     width={600}
                     height={700}
