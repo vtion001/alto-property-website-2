@@ -13,49 +13,7 @@ export interface BlogPost {
   originalUrl?: string;
 }
 
-// Load RSS posts from JSON file if available
-function loadRSSPosts(): BlogPost[] {
-  try {
-    if (typeof window === 'undefined') {
-      // Server-side: try to read from file system
-      const fs = require('fs');
-      const path = require('path');
-      const rssPath = path.join(process.cwd(), 'public/blog/rss-posts.json');
-      if (fs.existsSync(rssPath)) {
-        const rssData = fs.readFileSync(rssPath, 'utf8');
-        const rssItems = JSON.parse(rssData);
-        return rssItems.map((item: any, index: number) => {
-          // Ensure slug generation matches RSS fetcher
-          const slug = item.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '')
-            .substring(0, 100);
-
-          return {
-            id: `rss-${Date.now()}-${index}`,
-            title: item.title,
-            slug: slug,
-            excerpt: item.description.substring(0, 150) + '...',
-            content: `<div class="prose max-w-none">${item.description}</div>`,
-            date: new Date(item.pubDate).toISOString().split('T')[0],
-            author: `Alto Property Group`,
-            category: 'Market Insights',
-            image: item.image && item.image.startsWith('https://') 
-              ? item.image 
-              : 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=entropy&auto=format&q=80',
-            published: true,
-            isExternal: true,
-            originalUrl: item.link
-          };
-        });
-      }
-    }
-  } catch (error) {
-    console.log('No RSS posts file found or error loading:', error);
-  }
-  return [];
-}
+// RSS functionality removed for static deployment
 
 // Static blog posts data for export
 let blogPosts: BlogPost[] = [
@@ -251,108 +209,14 @@ let blogPosts: BlogPost[] = [
   }
 ];
 
-let rssPosts: BlogPost[] = []; // Define rssPosts here
-
 export function getAllPosts(): BlogPost[] {
-  const rssPostsFromFile = loadRSSPosts();
-  const allPosts = [...blogPosts, ...rssPostsFromFile];
-
-  return allPosts.filter(post => post.published).sort((a, b) => 
+  return blogPosts.filter(post => post.published).sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 }
 
-export function addRSSPosts(rssPosts: BlogPost[]): void {
-  // Remove existing RSS posts to avoid duplicates
-  blogPosts = blogPosts.filter(post => 
-    !post.id.startsWith('rss-') && !post.id.startsWith('mock-')
-  );
-
-  // Filter out any duplicates within the new RSS posts themselves
-  const uniqueRSSPosts = removeDuplicatesByTitle(rssPosts);
-
-  // Filter out any posts that might duplicate existing blog posts
-  const filteredRSSPosts = uniqueRSSPosts.filter(rssPost => {
-    return !blogPosts.some(existingPost => 
-      areSimilarPosts(rssPost, existingPost)
-    );
-  });
-
-  // Add new RSS posts with enhanced content
-  blogPosts.push(...filteredRSSPosts);
-
-  // Sort posts by date (newest first)
-  blogPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  console.log(`Added ${filteredRSSPosts.length} unique RSS posts (${rssPosts.length - filteredRSSPosts.length} duplicates filtered)`);
-}
-
-function removeDuplicatesByTitle(posts: BlogPost[]): BlogPost[] {
-  const seen = new Set<string>();
-  const uniquePosts: BlogPost[] = [];
-
-  for (const post of posts) {
-    const normalizedTitle = post.title.toLowerCase().trim();
-    if (!seen.has(normalizedTitle)) {
-      seen.add(normalizedTitle);
-      uniquePosts.push(post);
-    }
-  }
-
-  return uniquePosts;
-}
-
-function areSimilarPosts(post1: BlogPost, post2: BlogPost): boolean {
-  // Check exact title match
-  const title1 = post1.title.toLowerCase().trim();
-  const title2 = post2.title.toLowerCase().trim();
-
-  if (title1 === title2) {
-    return true;
-  }
-
-  // Check URL match
-  if (post1.originalUrl && post2.originalUrl && 
-      post1.originalUrl === post2.originalUrl) {
-    return true;
-  }
-
-  // Check slug match
-  if (post1.slug === post2.slug) {
-    return true;
-  }
-
-  // Check if titles are very similar (90% or more)
-  const similarity = calculateStringSimilarity(title1, title2);
-  return similarity > 0.9;
-}
-
-function calculateStringSimilarity(str1: string, str2: string): number {
-  if (str1 === str2) return 1;
-  if (str1.length === 0 || str2.length === 0) return 0;
-
-  const longer = str1.length > str2.length ? str1 : str2;
-  const shorter = str1.length > str2.length ? str2 : str1;
-
-  if (longer.length === 0) return 1;
-
-  // Simple character-based similarity
-  let matches = 0;
-  const maxLength = Math.max(str1.length, str2.length);
-
-  for (let i = 0; i < Math.min(str1.length, str2.length); i++) {
-    if (str1[i] === str2[i]) {
-      matches++;
-    }
-  }
-
-  return matches / maxLength;
-}
-
 export function getPostBySlug(slug: string): BlogPost | undefined {
-  const rssPostsFromFile = loadRSSPosts();
-  const allPosts = [...blogPosts, ...rssPostsFromFile];
-  return allPosts.find(post => post.slug === slug && post.published);
+  return blogPosts.find(post => post.slug === slug && post.published);
 }
 
 export function createPost(post: Omit<BlogPost, 'id'>): BlogPost {

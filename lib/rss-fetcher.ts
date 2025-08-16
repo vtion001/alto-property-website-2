@@ -1,5 +1,5 @@
 
-import { BlogPost } from './blog';
+import { BlogPost } from './blog.js';
 
 export interface RSSFeed {
   url: string;
