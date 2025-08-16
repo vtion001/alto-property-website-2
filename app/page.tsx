@@ -339,26 +339,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Team Member 3 - Property Manager */}
-              <div className="text-center group max-w-sm">
-                <div className="relative mb-6 mx-auto w-48 h-48 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
-                  <Image
-                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1753060413/wonnpo3gatludlru78oh.jpg"
-                    alt="Property Manager"
-                    fill
-                    className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
-                </div>
-                <h3 className="text-xl font-light text-brown-800 mb-2">Property Manager</h3>
-                <p className="text-brown-600 text-sm mb-4">Diligent Property Manager</p>
-                <div className="flex justify-center space-x-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-xs text-brown-500 italic">*Replace with actual team photo</p>
-              </div>
+              
             </div>
 
             <div className="text-center mt-16">

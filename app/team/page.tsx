@@ -26,14 +26,7 @@ export default function TeamPage() {
       email: "amber.h@ausunfinance.com.au",
       phone: "(+61) 466 623 689",
     },
-    {
-      name: "Connor Reilly",
-      role: "Property Manager",
-      image: "https://res.cloudinary.com/dbviya1rj/image/upload/v1753060413/wonnpo3gatludlru78oh.jpg",
-      description: "As a diligent Property Manager, Connor applies his expertise to maximize the return on your investment property. He excels at securing reliable tenants, managing maintenance, and ensuring your asset is protected and profitable, giving property owners complete peace of mind.",
-      email: "info.altopm@gmail.com",
-      phone: "(+61) 437 139 314",
-    },
+    
   ]
 
   return (
@@ -74,7 +67,7 @@ export default function TeamPage() {
               - Behind-the-scenes shots
               This will enhance the authentic, personal connection with potential clients.
             */}
-            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-2">
               {teamMembers.map((member, index) => (
                 <Card key={index} className="group hover:shadow-xl transition-all duration-500 border border-brown-100">
                   <div className="relative">
