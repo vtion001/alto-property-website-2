@@ -91,6 +91,7 @@ export default function AdminPage() {
   const [selectedPropertyForMedia, setSelectedPropertyForMedia] = useState<Property | null>(null) // To keep track of the property being managed
   const [createType, setCreateType] = useState<'blog' | 'property' | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
+  const [viewingProperty, setViewingProperty] = useState<Property | null>(null) // State for viewing property details
 
   // Mock data - replace with actual data fetching
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
@@ -328,6 +329,11 @@ export default function AdminPage() {
       commissionRate: property.commissionRate || 0
     })
     setIsEditDialogOpen(true)
+  }
+
+  // Function to handle viewing a property, sets viewingProperty state
+  const handleViewProperty = (property: Property) => {
+    setViewingProperty(property)
   }
 
   const handleSaveEditedProperty = () => {
@@ -929,6 +935,97 @@ export default function AdminPage() {
                   </div>
                 </DialogContent>
               </Dialog>
+
+              {/* Property View Dialog (New) */}
+              <Dialog open={!!viewingProperty} onOpenChange={(isOpen) => {
+                if (!isOpen) setViewingProperty(null);
+              }}>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{viewingProperty?.title}</DialogTitle>
+                    <DialogDescription>{viewingProperty?.address}, {viewingProperty?.suburb}</DialogDescription>
+                  </DialogHeader>
+                  {viewingProperty && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Image Gallery */}
+                        <div>
+                          <Image
+                            src={viewingProperty.image || "/placeholder.svg"}
+                            alt={viewingProperty.title}
+                            width={400}
+                            height={300}
+                            className="rounded-lg shadow-md w-full object-cover"
+                          />
+                          {/* You could add a carousel for multiple images here */}
+                        </div>
+
+                        {/* Property Details */}
+                        <div className="space-y-4">
+                          <h3 className="text-2xl font-semibold text-brown-800 border-b pb-2">{viewingProperty.title}</h3>
+                          <p className="text-brown-600 leading-relaxed">{viewingProperty.description || 'No description available.'}</p>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-2">
+                              <Bed className="h-5 w-5 text-brown-600" />
+                              <span className="font-medium">{viewingProperty.beds} Beds</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Bath className="h-5 w-5 text-brown-600" />
+                              <span className="font-medium">{viewingProperty.baths} Baths</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Car className="h-5 w-5 text-brown-600" />
+                              <span className="font-medium">{viewingProperty.parking} Parking</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Square className="h-5 w-5 text-brown-600" />
+                              <span className="font-medium">{viewingProperty.landSize} Land Size</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-brown-600" />
+                            <span className="font-medium">{viewingProperty.address}, {viewingProperty.suburb}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-5 w-5 text-brown-600" />
+                            <span className="font-medium text-xl text-brown-800">{viewingProperty.price}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{viewingProperty.type.charAt(0).toUpperCase() + viewingProperty.type.slice(1)}</Badge>
+                            <Badge variant="outline">{viewingProperty.listingType.charAt(0).toUpperCase() + viewingProperty.listingType.slice(1)}</Badge>
+                            {getStatusBadge(viewingProperty.status)}
+                          </div>
+
+                          {viewingProperty.features && viewingProperty.features.length > 0 && (
+                            <div>
+                              <h4 className="text-lg font-semibold text-brown-800 mb-2">Key Features:</h4>
+                              <ul className="list-disc list-inside text-brown-600">
+                                {viewingProperty.features.map((feature, index) => (
+                                  <li key={index}>{feature}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2 mt-4">
+                            <Calendar className="h-5 w-5 text-brown-600" />
+                            <span className="text-sm text-brown-600">Added: {viewingProperty.dateAdded}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex gap-2 justify-end pt-4">
+                    <Button onClick={() => setViewingProperty(null)} variant="outline">
+                      Close
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* Stats Cards */}
@@ -1034,7 +1131,7 @@ export default function AdminPage() {
                           .map((property) => {
                             const { commissionEarned } = calculateGrossIncomeAndCommission(property);
                             return (
-                              <TableRow key={property.id}>
+                              <TableRow key={property.id} className="cursor-pointer hover:bg-gray-50" onClick={() => handleViewProperty(property)}>
                                 <TableCell>
                                   <div className="flex items-center gap-3">
                                     <Image
@@ -1297,7 +1394,7 @@ export default function AdminPage() {
                                 <TableCell>{getStatusBadge(property.status)}</TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" title="View property details">
+                                    <Button variant="ghost" size="sm" onClick={() => handleViewProperty(property)} title="View property details">
                                       <Eye className="h-4 w-4" />
                                     </Button>
                                     <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)} title="Edit property details">
@@ -1422,7 +1519,7 @@ export default function AdminPage() {
                                 <TableCell>{getStatusBadge(property.status)}</TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" title="View property details">
+                                    <Button variant="ghost" size="sm" onClick={() => handleViewProperty(property)} title="View property details">
                                       <Eye className="h-4 w-4" />
                                     </Button>
                                     <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)} title="Edit property details">
