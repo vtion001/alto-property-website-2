@@ -907,10 +907,11 @@ export default function AdminPage() {
 
             {/* Main Content Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid grid-cols-6 w-full max-w-3xl">
+              <TabsList className="grid grid-cols-7 w-full max-w-4xl">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="gci">GCI</TabsTrigger>
-                <TabsTrigger value="properties">Properties</TabsTrigger>
+                <TabsTrigger value="sale-properties">Sale Properties</TabsTrigger>
+                <TabsTrigger value="rent-properties">Rent Properties</TabsTrigger>
                 <TabsTrigger value="blog">Blog</TabsTrigger>
                 <TabsTrigger value="rentals">Rentals</TabsTrigger>
                 <TabsTrigger value="management">Management</TabsTrigger>
@@ -1130,9 +1131,9 @@ export default function AdminPage() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="properties" className="space-y-6">
+              <TabsContent value="sale-properties" className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-light text-brown-800">Property Listings</h2>
+                  <h2 className="text-2xl font-light text-brown-800">Sale Properties</h2>
                   <Button 
                     onClick={() => {
                       setCreateType('property')
@@ -1141,7 +1142,7 @@ export default function AdminPage() {
                     className="bg-brown-800 hover:bg-brown-900"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Property
+                    Add Sale Property
                   </Button>
                 </div>
 
@@ -1152,87 +1153,224 @@ export default function AdminPage() {
                         <TableRow>
                           <TableHead>Property</TableHead>
                           <TableHead>Type</TableHead>
-                          <TableHead>Price</TableHead>
+                          <TableHead>Sale Price</TableHead>
+                          <TableHead>Commission Rate</TableHead>
+                          <TableHead>GCI</TableHead>
                           <TableHead>Details</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {properties.map((property) => (
-                          <TableRow key={property.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Image
-                                  src={property.image}
-                                  alt={property.title}
-                                  width={50}
-                                  height={50}
-                                  className="rounded object-cover"
-                                />
-                                <div>
-                                  <p className="font-medium text-brown-800">{property.title}</p>
-                                  <p className="text-sm text-brown-600">{property.address}, {property.suburb}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{property.type}</Badge>
-                              <Badge variant="secondary" className="ml-1">
-                                {property.listingType === 'sale' ? 'Sale' : 'Rent'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-medium">{property.price}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-3 text-sm text-brown-600">
-                                <span className="flex items-center gap-1">
-                                  <Bed className="h-3 w-3" />
-                                  {property.beds}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Bath className="h-3 w-3" />
-                                  {property.baths}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Car className="h-3 w-3" />
-                                  {property.parking}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(property.status)}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
+                        {properties
+                          .filter(property => property.listingType === 'sale')
+                          .map((property) => {
+                            const { commissionEarned } = calculateGrossIncomeAndCommission(property);
+                            return (
+                              <TableRow key={property.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <Image
+                                      src={property.image}
+                                      alt={property.title}
+                                      width={50}
+                                      height={50}
+                                      className="rounded object-cover"
+                                    />
+                                    <div>
+                                      <p className="font-medium text-brown-800">{property.title}</p>
+                                      <p className="text-sm text-brown-600">{property.address}, {property.suburb}</p>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline">{property.type}</Badge>
+                                </TableCell>
+                                <TableCell className="font-medium">{property.price}</TableCell>
+                                <TableCell className="font-medium">{property.commissionRate}%</TableCell>
+                                <TableCell className="font-medium text-green-700">
+                                  ${commissionEarned.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-3 text-sm text-brown-600">
+                                    <span className="flex items-center gap-1">
+                                      <Bed className="h-3 w-3" />
+                                      {property.beds}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Bath className="h-3 w-3" />
+                                      {property.baths}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Car className="h-3 w-3" />
+                                      {property.parking}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>{getStatusBadge(property.status)}</TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
                                     <Button variant="ghost" size="sm">
-                                      <Trash2 className="h-4 w-4" />
+                                      <Eye className="h-4 w-4" />
                                     </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete this property listing? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction className="bg-red-600 hover:bg-red-700">
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to delete this property listing? This action cannot be undone.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                                            Delete
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        {properties.filter(p => p.listingType === 'sale').length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center py-8 text-brown-600">
+                              No sale properties found
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="rent-properties" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-light text-brown-800">Rent Properties</h2>
+                  <Button 
+                    onClick={() => {
+                      setCreateType('property')
+                      setIsCreateDialogOpen(true)
+                    }}
+                    className="bg-brown-800 hover:bg-brown-900"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Rental Property
+                  </Button>
+                </div>
+
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Property</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Weekly Rent</TableHead>
+                          <TableHead>Annual Income</TableHead>
+                          <TableHead>Details</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {properties
+                          .filter(property => property.listingType === 'rent')
+                          .map((property) => {
+                            const { grossIncome } = calculateGrossIncomeAndCommission(property);
+                            return (
+                              <TableRow key={property.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <Image
+                                      src={property.image}
+                                      alt={property.title}
+                                      width={50}
+                                      height={50}
+                                      className="rounded object-cover"
+                                    />
+                                    <div>
+                                      <p className="font-medium text-brown-800">{property.title}</p>
+                                      <p className="text-sm text-brown-600">{property.address}, {property.suburb}</p>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline">{property.type}</Badge>
+                                </TableCell>
+                                <TableCell className="font-medium">{property.price}</TableCell>
+                                <TableCell className="font-medium text-blue-700">
+                                  ${grossIncome.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-3 text-sm text-brown-600">
+                                    <span className="flex items-center gap-1">
+                                      <Bed className="h-3 w-3" />
+                                      {property.beds}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Bath className="h-3 w-3" />
+                                      {property.baths}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Car className="h-3 w-3" />
+                                      {property.parking}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>{getStatusBadge(property.status)}</TableCell>
+                                <TableCell>
+                                  <div className="flex gap-2">
+                                    <Button variant="ghost" size="sm">
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to delete this property listing? This action cannot be undone.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                                            Delete
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        {properties.filter(p => p.listingType === 'rent').length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-brown-600">
+                              No rental properties found
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     </Table>
                   </CardContent>
