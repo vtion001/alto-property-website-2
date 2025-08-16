@@ -964,7 +964,7 @@ export default function AdminPage() {
                         <div className="space-y-4">
                           <h3 className="text-2xl font-semibold text-brown-800 border-b pb-2">{viewingProperty.title}</h3>
                           <p className="text-brown-600 leading-relaxed">{viewingProperty.description || 'No description available.'}</p>
-                          
+
                           <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-2">
                               <Bed className="h-5 w-5 text-brown-600" />
