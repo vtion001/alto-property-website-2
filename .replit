@@ -9,6 +9,7 @@ deploymentTarget = "static"
 buildCommand = "npm run build"
 build = ["sh", "-c", "npm run build"]
 publicDir = "public"
+run = ["sh", "-c", ""]
 
 [[ports]]
 localPort = 3000
