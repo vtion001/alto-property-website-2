@@ -1297,13 +1297,13 @@ export default function AdminPage() {
                                 <TableCell>{getStatusBadge(property.status)}</TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" title="View property details">
                                       <Eye className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)} title="Edit property details">
                                       <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => openMediaManager(property)} title="Manage Photos">
+                                    <Button variant="ghost" size="sm" onClick={() => openMediaManager(property)} title="Manage photos (up to 5 images)">
                                       <Camera className="h-4 w-4" />
                                     </Button>
                                     <AlertDialog>
@@ -1422,13 +1422,13 @@ export default function AdminPage() {
                                 <TableCell>{getStatusBadge(property.status)}</TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" title="View property details">
                                       <Eye className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)}>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)} title="Edit property details">
                                       <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => openMediaManager(property)} title="Manage Photos">
+                                    <Button variant="ghost" size="sm" onClick={() => openMediaManager(property)} title="Manage photos (up to 5 images)">
                                       <Camera className="h-4 w-4" />
                                     </Button>
                                     <AlertDialog>
@@ -1517,10 +1517,10 @@ export default function AdminPage() {
                             <TableCell>{post.views || 0}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" title="View post">
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" title="Edit post">
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <AlertDialog>
@@ -1588,13 +1588,14 @@ export default function AdminPage() {
                             <TableCell>{getStatusBadge(application.status)}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" title="View application">
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
                                   className="text-green-600 hover:text-green-700"
+                                  title="Approve application"
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
@@ -1602,6 +1603,7 @@ export default function AdminPage() {
                                   variant="ghost" 
                                   size="sm"
                                   className="text-red-600 hover:text-red-700"
+                                  title="Reject application"
                                 >
                                   <AlertCircle className="h-4 w-4" />
                                 </Button>
