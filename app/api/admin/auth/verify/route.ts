@@ -1,7 +1,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
-import { findUserById } from '@/lib/auth'
+import { jwtVerify } from 'jose'
+import { findUserById } from '@/lib/auth-supabase'
+
+export const runtime = 'edge'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
@@ -18,10 +20,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as any
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
+    const { payload } = await jwtVerify(token, secret)
     
     // Find user to ensure they still exist
-    const user = findUserById(decoded.userId)
+    const user = await findUserById((payload as any).userId)
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -29,11 +32,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Return user data (without password)
-    const { password: _, ...userWithoutPassword } = user
+    // Return user data
     return NextResponse.json({
       valid: true,
-      user: userWithoutPassword
+      user
     }, { status: 200 })
 
   } catch (error) {

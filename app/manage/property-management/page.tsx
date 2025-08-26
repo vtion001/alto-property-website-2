@@ -59,7 +59,7 @@ export default function PropertyManagementPage() {
                     alt="Professional property management"
                     width={600}
                     height={700}
-                    className="object-cover"
+                    className="object-cover w-full h-auto"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
                 </div>

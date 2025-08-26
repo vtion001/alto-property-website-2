@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Shield, Target, TrendingUp, Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import GoogleReviewsSection from "@/components/reviews/GoogleReviewsSection"
 
 export default function BuyersAgentServicesPage() {
   return (
@@ -33,14 +34,14 @@ export default function BuyersAgentServicesPage() {
                 <div className="flex flex-col sm:flex-row gap-6">
                   <Button
                     size="lg"
-                    className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base"
+                    className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     Speak to a Buyers Agent
                   </Button>
                   <Button
                     variant="outline"
                     size="lg"
-                    className="font-light tracking-wide px-12 py-6 h-auto text-base border-brown-300 text-brown-800 hover:bg-brown-50 bg-transparent"
+                    className="font-light tracking-wide px-12 py-6 h-auto text-base border-2 border-brown-300 text-brown-800 hover:bg-brown-50 hover:border-brown-400 bg-transparent shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     Learn More
                   </Button>
@@ -53,7 +54,8 @@ export default function BuyersAgentServicesPage() {
                     alt="Buyers agent consultation"
                     width={600}
                     height={700}
-                    className="object-cover"
+                    priority
+                    className="object-cover w-full h-auto"
                   />
                 </div>
               </div>
@@ -204,6 +206,9 @@ export default function BuyersAgentServicesPage() {
           </div>
         </section>
 
+        {/* Google Reviews Section */}
+        <GoogleReviewsSection />
+
         {/* How It Works */}
         <section className="py-32 bg-white">
           <div className="container">
@@ -272,14 +277,14 @@ export default function BuyersAgentServicesPage() {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
+                  className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50 shadow-lg hover:shadow-xl transition-all duration-300 font-medium"
                 >
                   Speak to a Buyers Agent Today
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-lg px-10 py-4 h-auto border-cream text-cream hover:bg-cream/10"
+                  className="text-lg px-10 py-4 h-auto border-2 border-cream text-cream hover:bg-cream/10 hover:border-cream/80 shadow-lg hover:shadow-xl transition-all duration-300 font-medium"
                 >
                   Request a Free Consultation
                 </Button>

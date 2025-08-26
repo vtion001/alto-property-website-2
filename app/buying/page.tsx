@@ -54,7 +54,7 @@ export default function BuyingPage() {
                     alt="Property search"
                     width={600}
                     height={700}
-                    className="object-cover"
+                    className="object-cover w-full h-auto"
                   />
                 </div>
               </div>

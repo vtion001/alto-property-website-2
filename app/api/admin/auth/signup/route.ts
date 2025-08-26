@@ -1,6 +1,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createUser, findUserByEmail, hashPassword } from '@/lib/auth'
+import { createUser, findUserByEmail } from '@/lib/auth-supabase'
+
+export const runtime = 'edge'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = findUserByEmail(email)
+    const existingUser = await findUserByEmail(email)
     if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
@@ -39,16 +41,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password and create user
-    const hashedPassword = await hashPassword(password)
-    const user = createUser({
-      name,
-      email,
-      password: hashedPassword,
-      role
-    })
+    const user = await createUser({ name, email, password, role })
 
     // Return success response (don't include password)
-    const { password: _, ...userWithoutPassword } = user
+    const { ...userWithoutPassword } = user
     return NextResponse.json({
       message: 'User created successfully',
       user: userWithoutPassword

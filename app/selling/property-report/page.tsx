@@ -222,7 +222,8 @@ export default function PropertyReportPage() {
                     alt="Professional property analysis and market report"
                     width={500}
                     height={600}
-                    className="object-cover"
+                    priority
+                    className="object-cover w-full h-auto"
                   />
                 </div>
               </div>

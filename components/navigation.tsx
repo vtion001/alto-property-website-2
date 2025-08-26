@@ -60,6 +60,7 @@ export function Navigation() {
             alt="ALTO Property"
             width={60}
             height={60}
+            priority
             className="object-contain md:w-[120px] md:h-[80px]"
           />
           <div>

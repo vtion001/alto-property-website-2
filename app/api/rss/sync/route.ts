@@ -1,3 +1,4 @@
-// This file is not compatible with static export and should be removed
-// RSS sync is now handled at build time
-export {};
+export const runtime = 'edge'
+export async function POST() {
+  return new Response(JSON.stringify({ status: 'ok' }), { headers: { 'content-type': 'application/json' } })
+}

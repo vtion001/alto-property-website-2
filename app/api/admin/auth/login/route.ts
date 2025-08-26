@@ -1,9 +1,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import { findUserByEmail, comparePassword } from '@/lib/auth'
-import jwt from 'jsonwebtoken'
+import { findUserByEmail, comparePassword } from '@/lib/auth-supabase'
+import { SignJWT } from 'jose'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+export const runtime = 'edge'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const user = findUserByEmail(email)
+    const user = await findUserByEmail(email)
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const isValidPassword = await comparePassword(password, user.password)
+    const isValidPassword = await comparePassword(password, user.password_hash)
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -36,18 +36,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user.id,
-        email: user.email,
-        role: user.role 
-      },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    )
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
+    const token = await new SignJWT({
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime('24h')
+      .sign(secret)
 
     // Return success response
-    const { password: _, ...userWithoutPassword } = user
+    const { password_hash: _, ...userWithoutPassword } = user
     return NextResponse.json({
       message: 'Login successful',
       token,

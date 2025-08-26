@@ -74,7 +74,8 @@ export default function SellingPage() {
                     alt="Property for sale"
                     width={600}
                     height={700}
-                    className="object-cover"
+                    priority
+                    className="object-cover w-full h-auto"
                   />
                 </div>
               </div>

@@ -42,7 +42,7 @@ export default function ApplyNowPage() {
                     alt="Online rental application"
                     width={600}
                     height={700}
-                    className="object-cover"
+                    className="object-cover w-full h-auto"
                   />
                 </div>
               </div>

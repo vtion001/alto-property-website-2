@@ -56,6 +56,7 @@ export default function AboutAltoPage() {
                   alt="Alto Property Group office"
                   width={500}
                   height={600}
+                  priority
                   className="rounded-3xl shadow-2xl"
                 />
               </div>

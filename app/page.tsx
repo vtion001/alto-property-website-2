@@ -109,7 +109,8 @@ export default function HomePage() {
                       alt="Luxury Brisbane property showcasing ALTO's premium service"
                       width={600}
                       height={700}
-                      className="object-cover"
+                      priority
+                      className="object-cover w-full h-auto"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
                   </div>
