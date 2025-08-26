@@ -26,6 +26,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { PopupManager } from "@/components/popup-manager"
+import Footer from "@/components/ui/footer"
 
 export default function HomePage() {
   return (
@@ -700,102 +701,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-brown-900 text-cream py-16">
-        <div className="container">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <Image src="/alto-logo.png" alt="Alto Property Group" width={40} height={40} className="h-10 w-10" />
-                <div className="flex flex-col">
-                  <span className="font-bold text-lg tracking-wider">ALTO</span>
-                  <span className="text-xs text-brown-200 tracking-widest">PROPERTY GROUP</span>
-                </div>
-              </div>
-              <p className="text-brown-200 leading-relaxed">
-                South East Queensland's premier all-in-one real estate agency, consistently building lifelong 
-                relationships through delivering outstanding results and service.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="font-medium text-lg">Services</h3>
-              <ul className="space-y-3 text-brown-200">
-                <li>
-                  <Link href="/selling" className="hover:text-cream transition-colors">
-                    Property Sales
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/buying" className="hover:text-cream transition-colors">
-                    Buyer Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/renting" className="hover:text-cream transition-colors">
-                    Rental Properties
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/finance" className="hover:text-cream transition-colors">
-                    Finance Solutions
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="font-medium text-lg">Company</h3>
-              <ul className="space-y-3 text-brown-200">
-                <li>
-                  <Link href="/contact/about-alto" className="hover:text-cream transition-colors">
-                    About ALTO
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/team" className="hover:text-cream transition-colors">
-                    Our Team
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact/join-team" className="hover:text-cream transition-colors">
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-cream transition-colors">
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="font-medium text-lg">Contact Info</h3>
-              <ul className="space-y-3 text-brown-200">
-                <li>(+61) 467 048 837</li>
-                <li>sales@altoproperty.com.au</li>
-                <li>
-                  4/66 Condamine St, Runcorn
-                  <br />
-                  QLD 4113, Australia
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-brown-800 mt-16 pt-8 flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-brown-200">© {new Date().getFullYear()} Alto Property Group. All rights reserved.</p>
-            <div className="flex space-x-8 mt-4 sm:mt-0">
-              <Link href="#" className="text-brown-200 hover:text-cream transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="#" className="text-brown-200 hover:text-cream transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

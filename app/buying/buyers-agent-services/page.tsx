@@ -2,7 +2,8 @@
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Shield, Target, TrendingUp, Users } from "lucide-react"
-import Image from "next/image"
+import ClientImage from "@/components/ui/client-image"
+import Footer from "@/components/ui/footer"
 import Link from "next/link"
 import GoogleReviewsSection from "@/components/reviews/GoogleReviewsSection"
 
@@ -49,7 +50,7 @@ export default function BuyersAgentServicesPage() {
               </div>
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                  <Image
+                  <ClientImage
                     src="https://res.cloudinary.com/dbviya1rj/image/upload/v1753060413/wonnpo3gatludlru78oh.jpg?height=700&width=600"
                     alt="Buyers agent consultation"
                     width={600}
@@ -295,13 +296,7 @@ export default function BuyersAgentServicesPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-brown-900 text-cream py-16">
-        <div className="container">
-          <div className="text-center">
-            <p className="text-brown-200">© {new Date().getFullYear()} Alto Property Group. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
