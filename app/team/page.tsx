@@ -1,34 +1,11 @@
 
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Mail, Phone } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
+import { teamMembers } from "@/data/team"
+import TeamMemberCard from "@/components/team/TeamMemberCard"
 
 export default function TeamPage() {
-  const teamMembers = [
-    {
-      name: "Joshua Kim",
-      role: "Sales Director",
-      image: "https://res.cloudinary.com/dbviya1rj/image/upload/v1752833883/ejat8ma5eh1c3nwabkim.jpg",
-      description:
-        "As a strategic Sales Director, Joshua is an expert in driving revenue growth and expanding market share. He leads our high-performing sales team with a clear vision, developing innovative strategies and fostering a culture of excellence. With a proven track record of exceeding targets, he excels at building lasting client partnerships and ensuring the team delivers exceptional value and results.",
-      email: "joshuakim@altoproperty.com",
-      phone: "(+61) 467 048 837",
-    },
-    {
-      name: "Amber Hsiao",
-      role: "Mortgage Broker",
-      image: "https://res.cloudinary.com/dbviya1rj/image/upload/v1753060414/cceoxxs20bhuzjr2dkts.jpg",
-      description: "As a dedicated Mortgage Broker, Amber leverages deep market knowledge and sharp negotiation skills to find the perfect home loan for her clients. She is committed to simplifying the complexities of financing, guiding you every step of the way to ensure a smooth and successful path to property ownership.",
-      email: "amber.h@ausunfinance.com.au",
-      phone: "(+61) 466 623 689",
-    },
-    
-  ]
-
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
@@ -67,40 +44,9 @@ export default function TeamPage() {
               - Behind-the-scenes shots
               This will enhance the authentic, personal connection with potential clients.
             */}
-            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-2 justify-items-center max-w-4xl mx-auto">
-              {teamMembers.map((member, index) => (
-                <Card key={index} className="group hover:shadow-xl transition-all duration-500 border border-brown-100 w-full max-w-md">
-                  <div className="relative">
-                    <Image
-                      src={member.image || "/placeholder.svg"}
-                      alt={member.name}
-                      width={300}
-                      height={400}
-                      className="w-full h-80 object-cover object-center rounded-t-lg"
-                    />
-                  </div>
-                  <CardContent className="p-8">
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-2xl font-light text-brown-900 mb-2">{member.name}</h3>
-                        <Badge variant="secondary" className="bg-brown-100 text-brown-800">
-                          {member.role}
-                        </Badge>
-                      </div>
-                      <p className="text-brown-700 font-light leading-relaxed">{member.description}</p>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-3">
-                          <Mail className="h-4 w-4 text-brown-600" />
-                          <span className="text-sm text-brown-700">{member.email}</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Phone className="h-4 w-4 text-brown-600" />
-                          <span className="text-sm text-brown-700">{member.phone}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3 justify-items-center max-w-6xl mx-auto">
+              {teamMembers.map((member) => (
+                <TeamMemberCard key={member.id} member={member} />
               ))}
             </div>
           </div>

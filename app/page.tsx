@@ -27,6 +27,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { PopupManager } from "@/components/popup-manager"
 import Footer from "@/components/ui/footer"
+import { getHomePageTeamMembers } from "@/data/team"
+import TeamMemberCard from "@/components/team/TeamMemberCard"
 
 export default function HomePage() {
   return (
@@ -300,48 +302,10 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2 justify-items-center">
-              {/* Team Member 1 - Sales Director */}
-              <div className="text-center group max-w-sm mx-auto">
-                <div className="relative mb-6 mx-auto w-48 h-48 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
-                  <Image
-                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1752833883/ejat8ma5eh1c3nwabkim.jpg"
-                    alt="Sales Director"
-                    fill
-                    className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
-                </div>
-                <h3 className="text-xl font-light text-brown-800 mb-2">Sales Director</h3>
-                <p className="text-brown-600 text-sm mb-4">Strategic Sales Director</p>
-                <div className="flex justify-center space-x-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-              </div>
-
-              {/* Team Member 2 - Mortgage Broker */}
-              <div className="text-center group max-w-sm mx-auto">
-                <div className="relative mb-6 mx-auto w-48 h-48 rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
-                  <Image
-                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1753060414/cceoxxs20bhuzjr2dkts.jpg"
-                    alt="Mortgage Broker"
-                    fill
-                    className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
-                </div>
-                <h3 className="text-xl font-light text-brown-800 mb-2">Mortgage Broker</h3>
-                <p className="text-brown-600 text-sm mb-4">Dedicated Mortgage Broker</p>
-                <div className="flex justify-center space-x-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-              </div>
-
-              
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+              {getHomePageTeamMembers().map((member) => (
+                <TeamMemberCard key={member.id} member={member} variant="compact" />
+              ))}
             </div>
 
             <div className="text-center mt-16">
