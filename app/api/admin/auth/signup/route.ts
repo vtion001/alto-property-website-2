@@ -1,15 +1,16 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createUser, findUserByEmail } from '@/lib/auth-supabase'
+import { createUser, findUserByUsername } from '@/lib/auth-supabase'
 
-export const runtime = 'edge'
+// Use Node.js runtime for compatibility with supabase server client
+export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, role } = await request.json()
+    const { username, password, role } = await request.json()
 
     // Validation
-    if (!name || !email || !password || !role) {
+    if (!username || !password || !role) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -23,25 +24,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email address' },
-        { status: 400 }
-      )
-    }
-
     // Check if user already exists
-    const existingUser = await findUserByEmail(email)
+    const existingUser = await findUserByUsername(username)
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User with this email already exists' },
+        { error: 'User already exists' },
         { status: 409 }
       )
     }
 
     // Hash password and create user
-    const user = await createUser({ name, email, password, role })
+    const user = await createUser({ username, password, role })
 
     // Return success response (don't include password)
     const { ...userWithoutPassword } = user

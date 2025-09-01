@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 import { findUserById } from '@/lib/auth-supabase'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 

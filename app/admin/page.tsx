@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,16 +37,21 @@ import {
   Camera // Import Camera icon
 } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Footer from "@/components/ui/footer"
 
 interface BlogPost {
   id: string
   title: string
   excerpt: string
+  content?: string
   author: string
   category: string
   date: string
   status: 'published' | 'draft'
   views?: number
+  slug?: string
 }
 
 interface Property {
@@ -84,6 +89,9 @@ interface RentalApplication {
 }
 
 export default function AdminPage() {
+  const makeSlug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
+  const blogPathFor = (post: BlogPost) => `/blog/${(post as any).slug || makeSlug(post.title)}`
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("overview")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -92,6 +100,10 @@ export default function AdminPage() {
   const [createType, setCreateType] = useState<'blog' | 'property' | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [viewingProperty, setViewingProperty] = useState<Property | null>(null) // State for viewing property details
+  const [isBlogViewOpen, setIsBlogViewOpen] = useState(false)
+  const [isBlogEditOpen, setIsBlogEditOpen] = useState(false)
+  const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null)
+  const [editedBlogPost, setEditedBlogPost] = useState<BlogPost | null>(null)
 
   // Mock data - replace with actual data fetching
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
@@ -180,6 +192,93 @@ export default function AdminPage() {
     }
   ])
 
+  // Load properties from API (falls back to localStorage on failure)
+  useEffect(() => {
+    const mapPropertyRow = (row: any): Property => ({
+      id: row.id,
+      title: row.title,
+      address: row.address,
+      suburb: row.suburb,
+      price: row.price,
+      beds: row.beds,
+      baths: row.baths,
+      parking: row.parking,
+      landSize: row.land_size || row.landSize || '',
+      status: row.status,
+      type: row.type,
+      listingType: row.listing_type || row.listingType,
+      image: row.image,
+      images: row.images || [],
+      dateAdded: row.date_added || row.dateAdded || '',
+      description: row.description || '',
+      features: row.features || [],
+      commissionRate: row.commission_rate ?? row.commissionRate ?? 0,
+    })
+    ;(async () => {
+      try {
+        const res = await fetch('/api/properties', { cache: 'no-store' })
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setProperties(data.map(mapPropertyRow))
+          return
+        }
+      } catch {}
+      try {
+        const stored = localStorage.getItem('alto:properties')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed)) setProperties(parsed)
+        }
+      } catch {}
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('alto:properties', JSON.stringify(properties))
+    } catch {}
+  }, [properties])
+
+  // Load blog posts from API (falls back to localStorage on failure)
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const res = await fetch('/api/blog-posts', { cache: 'no-store' })
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          const mapped = data.map((b: any) => ({
+            id: b.id,
+            title: b.title,
+            excerpt: b.excerpt,
+            author: b.author,
+            category: b.category,
+            date: b.date,
+            status: (b.published ? 'published' : 'draft') as 'published' | 'draft',
+            views: b.views || 0,
+            slug: b.slug,
+          }))
+          setBlogPosts(mapped)
+          return
+        }
+      } catch {}
+      try {
+        const stored = localStorage.getItem('alto:blogPosts')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed)) setBlogPosts(parsed)
+        }
+      } catch {}
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('alto:blogPosts', JSON.stringify(blogPosts))
+    } catch {}
+  }, [blogPosts])
+
   const [rentalApplications, setRentalApplications] = useState<RentalApplication[]>([
     {
       id: "1",
@@ -262,23 +361,75 @@ export default function AdminPage() {
   })
 
   const handleCreateBlogPost = () => {
-    const blogPost: BlogPost = {
-      id: Date.now().toString(),
+    const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
+    const payload = {
       title: newBlogPost.title,
+      slug: slugify(newBlogPost.title || `post-${Date.now()}`),
       excerpt: newBlogPost.excerpt,
+      content: newBlogPost.content,
       author: newBlogPost.author,
       category: newBlogPost.category,
-      date: new Date().toISOString().split('T')[0],
-      status: 'draft'
+      image: newBlogPost.image,
+      published: false,
     }
-    setBlogPosts([...blogPosts, blogPost])
-    setNewBlogPost({ title: "", excerpt: "", content: "", author: "", category: "", image: "" })
-    setIsCreateDialogOpen(false)
+    ;(async () => {
+      try {
+        const res = await fetch('/api/blog-posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        const created = await res.json()
+        if (res.ok) {
+          setBlogPosts([created, ...blogPosts])
+          setNewBlogPost({ title: "", excerpt: "", content: "", author: "", category: "", image: "" })
+          setIsCreateDialogOpen(false)
+        }
+      } catch {}
+    })()
+  }
+
+  const handleViewBlogPost = (post: BlogPost) => {
+    setSelectedBlogPost(post)
+    setIsBlogViewOpen(true)
+  }
+
+  const handleOpenEditBlogPost = (post: BlogPost) => {
+    setEditedBlogPost({ ...post })
+    setIsBlogEditOpen(true)
+  }
+
+  const handleSaveEditedBlogPost = () => {
+    if (!editedBlogPost) return
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/blog-posts/${editedBlogPost.id}` , { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          title: editedBlogPost.title,
+          slug: editedBlogPost.title?.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-') || `post-${editedBlogPost.id}`,
+          excerpt: editedBlogPost.excerpt,
+          content: (editedBlogPost.content as string) || '',
+          date: editedBlogPost.date,
+          author: editedBlogPost.author,
+          category: editedBlogPost.category,
+          image: '',
+          status: editedBlogPost.status,
+        }) })
+        const updated = await res.json()
+        if (res.ok) {
+          setBlogPosts(prev => prev.map(p => p.id === editedBlogPost.id ? { ...p, ...updated } : p))
+          setIsBlogEditOpen(false)
+        }
+      } catch {}
+    })()
+  }
+
+  const handleDeleteBlogPost = (postId: string) => {
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/blog-posts/${postId}`, { method: 'DELETE' })
+        if (res.ok) setBlogPosts(prev => prev.filter(p => p.id !== postId))
+      } catch {}
+    })()
   }
 
   const handleCreateProperty = () => {
-    const property: Property = {
-      id: Date.now().toString(),
+    const payload = {
       title: newProperty.title,
       address: newProperty.address,
       suburb: newProperty.suburb,
@@ -291,19 +442,22 @@ export default function AdminPage() {
       type: newProperty.type,
       listingType: newProperty.listingType,
       image: newProperty.image || "/placeholder.svg?height=200&width=300",
-      images: newProperty.images, // Store multiple images
       dateAdded: new Date().toISOString().split('T')[0],
       description: newProperty.description,
       features: newProperty.features,
       commissionRate: parseFloat(newProperty.commissionRate) || 0
     }
-    setProperties([...properties, property])
-    setNewProperty({
-      title: "", address: "", suburb: "", price: "", beds: "", baths: "", 
-      parking: "", landSize: "", type: "house", listingType: "sale", 
-      description: "", features: [], image: "", images: [], commissionRate: "" // Reset images
-    })
-    setIsCreateDialogOpen(false)
+    ;(async () => {
+      try {
+        const res = await fetch('/api/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        const created = await res.json()
+        if (res.ok) {
+          setProperties([created, ...properties])
+          setNewProperty({ title: "", address: "", suburb: "", price: "", beds: "", baths: "", parking: "", landSize: "", type: "house", listingType: "sale", description: "", features: [], image: "", images: [], commissionRate: "" })
+          setIsCreateDialogOpen(false)
+        }
+      } catch {}
+    })()
   }
 
   const handleEditProperty = (property: Property) => {
@@ -337,9 +491,35 @@ export default function AdminPage() {
   }
 
   const handleSaveEditedProperty = () => {
-    setProperties(properties.map(p => p.id === editingProperty?.id ? editedProperty : p))
-    setIsEditDialogOpen(false)
-    setEditingProperty(null)
+    if (!editingProperty) return
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/properties/${editingProperty.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          title: editedProperty.title,
+          address: editedProperty.address,
+          suburb: editedProperty.suburb,
+          price: editedProperty.price,
+          beds: editedProperty.beds,
+          baths: editedProperty.baths,
+          parking: editedProperty.parking,
+          landSize: editedProperty.landSize,
+          status: editedProperty.status,
+          type: editedProperty.type,
+          listingType: editedProperty.listingType,
+          image: editedProperty.image,
+          dateAdded: editedProperty.dateAdded,
+          description: editedProperty.description,
+          features: editedProperty.features,
+          commissionRate: editedProperty.commissionRate,
+        }) })
+        const updated = await res.json()
+        if (res.ok) {
+          setProperties(props => props.map(p => p.id === editingProperty.id ? { ...p, ...updated } : p))
+          setIsEditDialogOpen(false)
+          setEditingProperty(null)
+        }
+      } catch {}
+    })()
   }
 
   // Function to open the media manager for a specific property
@@ -393,6 +573,15 @@ export default function AdminPage() {
     return { grossIncome, commissionEarned };
   }
 
+  const handleDeleteProperty = (id: string) => {
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' })
+        if (res.ok) setProperties(prev => prev.filter(p => p.id !== id))
+      } catch {}
+    })()
+  }
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       published: "default",
@@ -433,6 +622,8 @@ export default function AdminPage() {
                 <h1 className="text-4xl font-light text-brown-800">Admin Dashboard</h1>
                 <p className="text-brown-600 font-light">Manage your properties, blog posts, and rental applications</p>
               </div>
+              <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={async () => { try { await fetch('/api/admin/auth/logout', { method: 'POST' }) } catch {} router.push('/admin/auth/login') }}>Logout</Button>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-brown-800 hover:bg-brown-900">
@@ -700,6 +891,7 @@ export default function AdminPage() {
                   )}
                 </DialogContent>
               </Dialog>
+              </div>
 
               <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -1090,15 +1282,17 @@ export default function AdminPage() {
             </div>
 
             {/* Main Content Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid grid-cols-7 w-full max-w-4xl">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" id="admin-tabs" data-component="admin-tabs">
+              <TabsList className="grid grid-cols-9 w-full max-w-6xl" id="admin-tabs-list" data-element="tabs-list">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="gci">GCI</TabsTrigger>
-                <TabsTrigger value="sale-properties">Sale Properties</TabsTrigger>
-                <TabsTrigger value="rent-properties">Rent Properties</TabsTrigger>
+                <TabsTrigger value="sale-properties" id="tab-sale-properties" data-tab="sale-properties">Sale Properties</TabsTrigger>
+                <TabsTrigger value="rent-properties" id="tab-rent-properties" data-tab="rent-properties">Rent Properties</TabsTrigger>
                 <TabsTrigger value="blog">Blog</TabsTrigger>
                 <TabsTrigger value="rentals">Rentals</TabsTrigger>
                 <TabsTrigger value="management">Management</TabsTrigger>
+                <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                <TabsTrigger value="google-reviews">Google Reviews</TabsTrigger>
               </TabsList>
 
               <TabsContent value="gci" className="space-y-6">
@@ -1315,7 +1509,7 @@ export default function AdminPage() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="sale-properties" className="space-y-6">
+              <TabsContent value="sale-properties" className="space-y-6" id="content-sale-properties" data-content="sale-properties">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-light text-brown-800">Sale Properties</h2>
                   <Button 
@@ -1394,9 +1588,13 @@ export default function AdminPage() {
                                 <TableCell>{getStatusBadge(property.status)}</TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" onClick={() => handleViewProperty(property)} title="View property details">
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
+                                    <Link href="/buying/search-properties" target="_blank" aria-label={`View ${property.title} on site`}>
+                                      <Button asChild variant="ghost" size="sm" title="View listing on site">
+                                        <span>
+                                          <Eye className="h-4 w-4" />
+                                        </span>
+                                      </Button>
+                                    </Link>
                                     <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)} title="Edit property details">
                                       <Edit className="h-4 w-4" />
                                     </Button>
@@ -1418,7 +1616,7 @@ export default function AdminPage() {
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                                          <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteProperty(property.id)}>
                                             Delete
                                           </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -1442,7 +1640,7 @@ export default function AdminPage() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="rent-properties" className="space-y-6">
+              <TabsContent value="rent-properties" className="space-y-6" id="content-rent-properties" data-content="rent-properties">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-light text-brown-800">Rent Properties</h2>
                   <Button 
@@ -1519,9 +1717,13 @@ export default function AdminPage() {
                                 <TableCell>{getStatusBadge(property.status)}</TableCell>
                                 <TableCell>
                                   <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" onClick={() => handleViewProperty(property)} title="View property details">
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
+                                    <Link href="/buying/search-properties" target="_blank" aria-label={`View ${property.title} on site`}>
+                                      <Button asChild variant="ghost" size="sm" title="View listing on site">
+                                        <span>
+                                          <Eye className="h-4 w-4" />
+                                        </span>
+                                      </Button>
+                                    </Link>
                                     <Button variant="ghost" size="sm" onClick={() => handleEditProperty(property)} title="Edit property details">
                                       <Edit className="h-4 w-4" />
                                     </Button>
@@ -1543,7 +1745,7 @@ export default function AdminPage() {
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                                          <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteProperty(property.id)}>
                                             Delete
                                           </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -1614,9 +1816,13 @@ export default function AdminPage() {
                             <TableCell>{post.views || 0}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="ghost" size="sm" title="View post">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
+                                <Link href={blogPathFor(post)} target="_blank" aria-label={`View ${post.title} on site`}>
+                                  <Button asChild variant="ghost" size="sm" title="View post on site">
+                                    <span>
+                                      <Eye className="h-4 w-4" />
+                                    </span>
+                                  </Button>
+                                </Link>
                                 <Button variant="ghost" size="sm" title="Edit post">
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -1635,7 +1841,7 @@ export default function AdminPage() {
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction className="bg-red-600 hover:bg-red-700">
+                                      <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteBlogPost(post.id)}>
                                         Delete
                                       </AlertDialogAction>
                                     </AlertDialogFooter>
@@ -1649,6 +1855,75 @@ export default function AdminPage() {
                     </Table>
                   </CardContent>
                 </Card>
+              {/* Blog View Dialog */}
+              <Dialog open={isBlogViewOpen} onOpenChange={setIsBlogViewOpen}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{selectedBlogPost?.title}</DialogTitle>
+                    <DialogDescription>
+                      {selectedBlogPost?.author} • {selectedBlogPost?.date} • {selectedBlogPost?.category}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-brown-700">{selectedBlogPost?.excerpt}</p>
+                    <div className="text-sm text-brown-600">Status: {selectedBlogPost?.status}</div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Blog Edit Dialog */}
+              <Dialog open={isBlogEditOpen} onOpenChange={setIsBlogEditOpen}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Edit Blog Post</DialogTitle>
+                    <DialogDescription>Update title, excerpt, author, category and status.</DialogDescription>
+                  </DialogHeader>
+                  {editedBlogPost && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="edit-blog-title">Title</Label>
+                        <Input id="edit-blog-title" value={editedBlogPost.title} onChange={(e) => setEditedBlogPost({ ...editedBlogPost, title: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-blog-excerpt">Excerpt</Label>
+                        <Textarea id="edit-blog-excerpt" value={editedBlogPost.excerpt} onChange={(e) => setEditedBlogPost({ ...editedBlogPost, excerpt: e.target.value })} rows={4} />
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <Label htmlFor="edit-blog-author">Author</Label>
+                          <Input id="edit-blog-author" value={editedBlogPost.author} onChange={(e) => setEditedBlogPost({ ...editedBlogPost, author: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-blog-category">Category</Label>
+                          <Input id="edit-blog-category" value={editedBlogPost.category} onChange={(e) => setEditedBlogPost({ ...editedBlogPost, category: e.target.value })} />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <Label htmlFor="edit-blog-date">Date</Label>
+                          <Input id="edit-blog-date" type="date" value={editedBlogPost.date} onChange={(e) => setEditedBlogPost({ ...editedBlogPost, date: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-blog-status">Status</Label>
+                          <Select value={editedBlogPost.status} onValueChange={(v: any) => setEditedBlogPost({ ...editedBlogPost, status: v })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="draft">Draft</SelectItem>
+                              <SelectItem value="published">Published</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsBlogEditOpen(false)}>Cancel</Button>
+                        <Button className="bg-brown-800 hover:bg-brown-900" onClick={handleSaveEditedBlogPost}>Save</Button>
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
               </TabsContent>
 
               <TabsContent value="rentals" className="space-y-6">
@@ -1822,17 +2097,144 @@ export default function AdminPage() {
                   </Card>
                 </div>
               </TabsContent>
+
+              <TabsContent value="integrations" className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {/* Google Reviews Integration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Google Reviews</CardTitle>
+                      <CardDescription>Connect your Google Business to sync reviews</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <p className="text-brown-600 text-sm">Showcase verified Google Reviews across your site. Manage, sync and display reviews on key pages.</p>
+                        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                          <Link href="/admin/integrations/google-reviews" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full sm:w-auto">
+                            Manage
+                          </Link>
+                          <Link href="/admin/integrations/google-reviews/oauth" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full sm:w-auto">
+                            Sync Now
+                          </Link>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Placeholder for future integrations */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Zapier (Coming Soon)</CardTitle>
+                      <CardDescription>Automate workflows with zaps</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-brown-600 text-sm">We are preparing native Zapier integration to push new leads and reviews to your CRM.</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Webhook (Coming Soon)</CardTitle>
+                      <CardDescription>Send events to external services</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-brown-600 text-sm">Configure outbound webhooks for new review events and lead submissions.</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="google-reviews" className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-light text-brown-800">Google Reviews Integration</h2>
+                  <p className="text-brown-600">Manage customer reviews from Google Business</p>
+                </div>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">Quick Access</CardTitle>
+                    <CardDescription>Access Google Reviews management tools</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span>Total Reviews</span>
+                        <span className="font-semibold">24</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Average Rating</span>
+                        <span className="font-semibold text-green-600">4.8/5</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Recent Reviews</span>
+                        <span className="font-semibold text-blue-600">5 this month</span>
+                      </div>
+                      <Button className="w-full" variant="outline" asChild>
+                        <a href="/admin/integrations/google-reviews">
+                          Manage Google Reviews
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Review Analytics</CardTitle>
+                      <CardDescription>Performance insights</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span>5-Star Reviews</span>
+                          <span className="font-semibold text-green-600">18</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>4-Star Reviews</span>
+                          <span className="font-semibold text-blue-600">4</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Response Rate</span>
+                          <span className="font-semibold text-green-600">100%</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Integration Status</CardTitle>
+                      <CardDescription>Google Business connection</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span>Connection Status</span>
+                          <span className="font-semibold text-green-600">Connected</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Last Sync</span>
+                          <span className="font-semibold">2 hours ago</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Auto-Sync</span>
+                          <span className="font-semibold text-green-600">Enabled</span>
+                        </div>
+                        <Button className="w-full" variant="outline">
+                          Sync Now
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
             </Tabs>
           </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-brown-900 text-cream py-8">
-        <div className="container text-center">
-          <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

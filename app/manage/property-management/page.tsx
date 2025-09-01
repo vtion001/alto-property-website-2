@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Users, TrendingUp, CheckCircle, Settings, Shield, Clock, FileText, Phone, Calculator, Home, Camera, Wrench } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { PopupManager, openManagementOfferPopup } from "@/components/popup-manager"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -13,6 +15,7 @@ export default function PropertyManagementPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
+      <PopupManager />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -318,6 +321,84 @@ export default function PropertyManagementPage() {
                   Property styling, market analysis, insurance coordination, and concierge services.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Transparent Pricing */}
+        <section className="py-32 bg-white">
+          <div className="container">
+            <div className="text-center space-y-8 mb-16">
+              <div className="inline-block">
+                <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Transparent Pricing</div>
+                <div className="w-16 h-px bg-brown-300 mx-auto"></div>
+              </div>
+              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">Management Fee</h2>
+              <p className="text-xl font-light text-brown-700 max-w-3xl mx-auto leading-relaxed">
+                All‑inclusive package designed to maximize returns and minimize hassle.
+              </p>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <Card className="border border-brown-100 shadow-xl">
+                <CardHeader className="pb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <CardTitle className="text-3xl text-brown-900 font-light">Management Fee</CardTitle>
+                    <CardDescription className="text-brown-700 font-light text-lg">All inclusive package</CardDescription>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-5xl sm:text-6xl font-extralight text-brown-900">6.9% +</div>
+                    <div className="text-5xl sm:text-6xl font-extralight text-brown-900 -mt-2">GST</div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="my-6 h-px bg-brown-200" />
+                  <div className="mb-6">
+                    <h3 className="text-brown-900 text-lg font-medium">Inclusions:</h3>
+                  </div>
+                  <ul className="space-y-4 text-brown-800">
+                    {[
+                      "Rent Collection & Payment",
+                      "Maintenance Coordination",
+                      "Payment Disbursement",
+                      "Inspections & Entry Reports",
+                      "Software & Administration",
+                      "Tenant Selection & Screening",
+                      "Annual Rent Review & Increase",
+                      "Bond Lodgement & Processing",
+                      "Letting Fee: 1.5 Weeks' Rent",
+                      "Flexible contract terms",
+                      "Lease Renegotiation Fee: 0.5 Weeks of Rent",
+                      "EOFY Statements: $50",
+                      "$5.50 Admin & Technology Fee",
+                      "Online landlord portal",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start space-x-3">
+                        <CheckCircle className="h-5 w-5 text-brown-600 mt-0.5" />
+                        <span className="font-light">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                    <Link href="#claim-offer">
+                      <Button
+                        size="lg"
+                        className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide w-full"
+                      >
+                        Claim Up To 3 Months Free
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="font-light tracking-wide w-full border-brown-300 text-brown-800 hover:bg-brown-50"
+                      asChild
+                    >
+                      <Link href="#claim-offer">Learn More</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>

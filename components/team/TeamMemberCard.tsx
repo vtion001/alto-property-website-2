@@ -14,8 +14,9 @@ export default function TeamMemberCard({ member, variant = 'default' }: TeamMemb
           <Image
             src={member.image}
             alt={`${member.name} - ${member.role}`}
-            fill
-            className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            width={192}
+            height={192}
+            className="object-cover object-center w-full h-full group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
         </div>

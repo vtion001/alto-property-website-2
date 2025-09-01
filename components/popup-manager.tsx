@@ -3,6 +3,13 @@
 import { useState, useEffect, useCallback } from "react"
 import { LeadCapturePopup } from "./lead-capture-popup"
 
+// Helper to allow other components to request opening the popup
+export function openManagementOfferPopup() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("open-lead-popup"))
+  }
+}
+
 export function PopupManager() {
   const [showPopup, setShowPopup] = useState(false)
   const [hasShown, setHasShown] = useState(false)
@@ -26,6 +33,8 @@ export function PopupManager() {
 
     let timer: NodeJS.Timeout
     let scrollHandler: (() => void) | null = null
+    let hashHandler: (() => void) | null = null
+    let openEventHandler: (() => void) | null = null
 
     // Set up timer for 3 seconds
     timer = setTimeout(() => {
@@ -54,11 +63,33 @@ export function PopupManager() {
     scrollHandler = handleScroll
     window.addEventListener("scroll", scrollHandler, { passive: true })
 
+    // Hash trigger: #claim-offer opens popup immediately
+    const checkHash = () => {
+      if (window.location.hash === "#claim-offer") {
+        triggerPopup()
+        if (timer) clearTimeout(timer)
+      }
+    }
+    checkHash()
+    hashHandler = () => checkHash()
+    window.addEventListener("hashchange", hashHandler)
+
+    // Custom event trigger so buttons can open popup without hash
+    const handleOpenEvent = () => triggerPopup()
+    openEventHandler = handleOpenEvent
+    window.addEventListener("open-lead-popup", openEventHandler as EventListener)
+
     // Cleanup function
     return () => {
       if (timer) clearTimeout(timer)
       if (scrollHandler) {
         window.removeEventListener("scroll", scrollHandler)
+      }
+      if (hashHandler) {
+        window.removeEventListener("hashchange", hashHandler)
+      }
+      if (openEventHandler) {
+        window.removeEventListener("open-lead-popup", openEventHandler as EventListener)
       }
     }
   }, [triggerPopup])

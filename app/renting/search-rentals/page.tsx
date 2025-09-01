@@ -1,3 +1,5 @@
+"use client"
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,47 +9,26 @@ import { Search, MapPin, Bed, Bath, Car } from "lucide-react"
 import Image from "next/image"
 
 export default function SearchRentalsPage() {
-  const rentals = [
-    {
-      image: "/placeholder.svg?height=300&width=400",
-      title: "Modern Apartment",
-      location: "South Brisbane",
-      rent: "$650/week",
-      beds: 2,
-      baths: 2,
-      parking: 1,
-      type: "Apartment",
-      available: "Available Now",
-    },
-    {
-      image: "/placeholder.svg?height=300&width=400",
-      title: "Family Home",
-      location: "New Farm",
-      rent: "$850/week",
-      beds: 4,
-      baths: 3,
-      parking: 2,
-      type: "House",
-      available: "Available March 30",
-    },
-    {
-      image: "/placeholder.svg?height=300&width=400",
-      title: "Luxury Townhouse",
-      location: "Teneriffe",
-      rent: "$1,200/week",
-      beds: 3,
-      baths: 2,
-      parking: 2,
-      type: "Townhouse",
-      available: "Available Now",
-    },
-  ]
+  const [mounted, setMounted] = useState(false)
+  const [rentals, setRentals] = useState<any[]>([])
+  useEffect(() => {
+    setMounted(true)
+    ;(async () => {
+      try {
+        const res = await fetch('/api/properties', { cache: 'no-store' })
+        const data = await res.json()
+        const rentOnly = (data || []).filter((p: any) => p.listing_type === 'rent' || p.listingType === 'rent')
+        setRentals(rentOnly)
+      } catch {}
+    })()
+  }, [])
+  if (!mounted) return null
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
 
-      <main className="flex-1">
+      <main className="flex-1" id="search-rentals" data-section="search-rentals">
         <section className="relative py-32 lg:py-40 overflow-hidden bg-gradient-to-br from-cream via-white to-brown-50">
           <div className="container relative">
             <div className="text-center space-y-12">
@@ -106,7 +87,7 @@ export default function SearchRentalsPage() {
         <section className="py-32 bg-white">
           <div className="container">
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {rentals.map((rental, index) => (
+              {rentals.map((rental: any, index: number) => (
                 <Card
                   key={index}
                   className="overflow-hidden hover:shadow-xl transition-all duration-500 border border-brown-100"
@@ -119,8 +100,8 @@ export default function SearchRentalsPage() {
                       height={300}
                       className="w-full h-64 object-cover"
                     />
-                    <Badge className="absolute top-6 left-6 bg-brown-900 text-cream">{rental.type}</Badge>
-                    <Badge className="absolute top-6 right-6 bg-green-600 text-white">{rental.available}</Badge>
+                    <Badge className="absolute top-6 left-6 bg-brown-900 text-cream">{(rental.type || '').toString().replace(/^./, (c: string) => c.toUpperCase())}</Badge>
+                    <Badge className="absolute top-6 right-6 bg-green-600 text-white">{rental.status === 'available' ? 'Available Now' : rental.status}</Badge>
                   </div>
                   <CardContent className="p-8">
                     <div className="space-y-6">
@@ -128,11 +109,11 @@ export default function SearchRentalsPage() {
                         <h3 className="font-medium text-xl text-brown-900 mb-2">{rental.title}</h3>
                         <p className="text-brown-700 flex items-center">
                           <MapPin className="h-4 w-4 mr-2" />
-                          {rental.location}
+                          {rental.suburb || rental.location}
                         </p>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="text-3xl font-light text-brown-900">{rental.rent}</div>
+                        <div className="text-3xl font-light text-brown-900">{rental.price}</div>
                         <div className="flex items-center space-x-4 text-sm text-brown-700">
                           <div className="flex items-center">
                             <Bed className="h-4 w-4 mr-1" />
@@ -153,6 +134,9 @@ export default function SearchRentalsPage() {
                   </CardContent>
                 </Card>
               ))}
+              {rentals.length === 0 && (
+                <div className="col-span-full text-center text-brown-600">No rental properties available.</div>
+              )}
             </div>
           </div>
         </section>

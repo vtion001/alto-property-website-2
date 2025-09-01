@@ -1,15 +1,14 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production'
 const nextConfig = {
-  trailingSlash: true,
+  trailingSlash: false,
   images: {
     unoptimized: true
   },
   experimental: {
     esmExternals: true
   },
-  async generateBuildId() {
-    return 'build-' + Date.now();
-  }
-};
+  // In dev, reduce HMR 404 noise by avoiding custom buildId or assetPrefix
+}
 
 export default nextConfig;

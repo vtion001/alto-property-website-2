@@ -1,3 +1,5 @@
+"use client";
+import { useEffect, useState } from "react";
 import { Navigation } from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,50 +7,36 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowRight, Rss } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getAllPosts } from "@/lib/blog";
+type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  date: string;
+  author: string;
+  category: string;
+  image: string;
+  published: boolean;
+};
 
-// Static blog posts data for export
-const staticPosts = [
-  {
-    id: "1",
-    title: "Brisbane Property Market Outlook 2024",
-    slug: "brisbane-property-market-outlook-2024",
-    excerpt: "Discover the key trends shaping Brisbane's property market and what it means for investors.",
-    content: "The Brisbane property market continues to show strong fundamentals heading into 2024...",
-    date: "2024-03-15",
-    author: "Sarah Mitchell",
-    category: "Market Analysis",
-    image: "/placeholder.svg?height=300&width=400",
-    published: true,
-  },
-  {
-    id: "2",
-    title: "Top 10 Investment Suburbs in Brisbane",
-    slug: "top-10-investment-suburbs-brisbane",
-    excerpt: "Our expert analysis of Brisbane's most promising suburbs for property investment.",
-    content: "Investment opportunities in Brisbane are abundant, but knowing where to look is key...",
-    date: "2024-03-10",
-    author: "David Chen",
-    category: "Investment Tips",
-    image: "/placeholder.svg?height=300&width=400",
-    published: true,
-  },
-  {
-    id: "3",
-    title: "Property Styling Tips for Maximum Returns",
-    slug: "property-styling-tips-maximum-returns",
-    excerpt: "Simple styling techniques that can significantly increase your property's appeal and value.",
-    content: "When selling or renting your property, first impressions matter...",
-    date: "2024-03-05",
-    author: "Emma Thompson",
-    category: "Property Tips",
-    image: "/placeholder.svg?height=300&width=400",
-    published: true,
-  },
-];
+export default function BlogPage() {
+  const [mounted, setMounted] = useState(false);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
 
-export default async function BlogPage() {
-  const posts = getAllPosts();
+  useEffect(() => {
+    setMounted(true);
+    (async () => {
+      try {
+        const res = await fetch('/api/blog-posts', { cache: 'no-store' })
+        const data = await res.json()
+        const published = (data || []).filter((p: any) => p.published !== false)
+        const sorted = published.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        setPosts(sorted)
+      } catch {}
+    })()
+  }, []);
+  if (!mounted) return null;
 
   return (
     <div className="flex flex-col min-h-screen">

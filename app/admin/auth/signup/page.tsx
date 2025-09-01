@@ -21,8 +21,7 @@ export default function AdminSignupPage() {
   const [messageType, setMessageType] = useState<"success" | "error" | "">("")
   
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    username: "",
     password: "",
     confirmPassword: "",
     role: "admin" as "admin" | "super_admin"
@@ -33,7 +32,7 @@ export default function AdminSignupPage() {
   }
 
   const validateForm = () => {
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.username || !formData.password || !formData.confirmPassword) {
       setMessage("All fields are required")
       setMessageType("error")
       return false
@@ -47,13 +46,6 @@ export default function AdminSignupPage() {
 
     if (formData.password.length < 6) {
       setMessage("Password must be at least 6 characters long")
-      setMessageType("error")
-      return false
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(formData.email)) {
-      setMessage("Please enter a valid email address")
       setMessageType("error")
       return false
     }
@@ -76,8 +68,7 @@ export default function AdminSignupPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
+          username: formData.username,
           password: formData.password,
           role: formData.role
         }),
@@ -134,26 +125,15 @@ export default function AdminSignupPage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="name"
+                    id="username"
+                    name="username"
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    placeholder="Enter your full name"
-                    className="border-brown-200 focus:border-brown-400"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="admin@altoproperty.com"
+                    value={formData.username}
+                    onChange={(e) => handleInputChange("username", e.target.value)}
+                    placeholder="Choose a username"
+                    autoComplete="username"
                     className="border-brown-200 focus:border-brown-400"
                     required
                   />
@@ -177,10 +157,12 @@ export default function AdminSignupPage() {
                   <div className="relative">
                     <Input
                       id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
                       placeholder="Enter your password"
+                      autoComplete="new-password"
                       className="border-brown-200 focus:border-brown-400 pr-10"
                       required
                     />
@@ -205,10 +187,12 @@ export default function AdminSignupPage() {
                   <div className="relative">
                     <Input
                       id="confirmPassword"
+                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                       placeholder="Confirm your password"
+                      autoComplete="new-password"
                       className="border-brown-200 focus:border-brown-400 pr-10"
                       required
                     />

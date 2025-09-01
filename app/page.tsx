@@ -26,6 +26,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { PopupManager } from "@/components/popup-manager"
+// import removed: SellerPopupManager and related 2% commission popup
 import Footer from "@/components/ui/footer"
 import { getHomePageTeamMembers } from "@/data/team"
 import TeamMemberCard from "@/components/team/TeamMemberCard"
@@ -35,6 +36,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen">
       <Navigation />
       <PopupManager />
+      {/* SellerPopupManager removed per revert */}
 
       <main className="flex-1">
         {/* Hero Section with Video Background */}
@@ -71,13 +73,21 @@ export default function HomePage() {
                       relationships through delivering outstanding results and service.
                     </p>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-6">
                     <Link href="/selling/property-report#report-form">
                       <Button
                         size="lg"
                         className="bg-cream hover:bg-white text-brown-800 font-light tracking-wide px-12 py-6 h-auto text-base w-full sm:w-auto"
                       >
                         Free Property Appraisal
+                      </Button>
+                    </Link>
+                    <Link href="/manage/property-management#claim-offer">
+                      <Button
+                        size="lg"
+                        className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base w-full sm:w-auto"
+                      >
+                        Claim Up To 3 Months Free
                       </Button>
                     </Link>
                     <Link href="/contact">
@@ -175,11 +185,13 @@ export default function HomePage() {
                       <span className="text-brown-800 font-light">Expert negotiation for best price</span>
                     </li>
                   </ul>
-                  <Link href="/selling">
-                    <Button variant="outline" className="w-full group-hover:bg-brand-red group-hover:text-white group-hover:border-brand-red transition-all duration-300">
-                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <div className="grid gap-3">
+                    <Link href="/selling">
+                      <Button variant="outline" className="w-full group-hover:bg-brand-red group-hover:text-white group-hover:border-brand-red transition-all duration-300">
+                        Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -441,7 +453,7 @@ export default function HomePage() {
         </section>
 
         {/* Featured Properties Section */}
-        <section className="py-32 bg-white">
+        <section id="featured-properties" data-section="featured-properties" className="py-32 bg-white">
           <div className="container">
             <div className="text-center space-y-8 mb-24">
               <div className="inline-block">

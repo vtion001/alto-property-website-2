@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
   const [messageType, setMessageType] = useState<"success" | "error" | "">("")
   
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: ""
   })
 
@@ -30,8 +30,8 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.email || !formData.password) {
-      setMessage("Please enter both email and password")
+    if (!formData.username || !formData.password) {
+      setMessage("Please enter both username and password")
       setMessageType("error")
       return
     }
@@ -53,8 +53,6 @@ export default function AdminLoginPage() {
       if (response.ok) {
         setMessage("Login successful! Redirecting...")
         setMessageType("success")
-        // Store session token
-        localStorage.setItem('admin_token', data.token)
         setTimeout(() => {
           router.push('/admin')
         }, 1000)
@@ -101,13 +99,14 @@ export default function AdminLoginPage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="admin@altoproperty.com"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={(e) => handleInputChange("username", e.target.value)}
+                    placeholder="altoadmin"
+                    autoComplete="username"
                     className="border-brown-200 focus:border-brown-400"
                     required
                   />
@@ -118,10 +117,12 @@ export default function AdminLoginPage() {
                   <div className="relative">
                     <Input
                       id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
                       placeholder="Enter your password"
+                      autoComplete="current-password"
                       className="border-brown-200 focus:border-brown-400 pr-10"
                       required
                     />

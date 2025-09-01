@@ -1,3 +1,5 @@
+"use client"
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,44 +9,25 @@ import { Search, MapPin, Bed, Bath, Car } from "lucide-react"
 import Image from "next/image"
 
 export default function SearchPropertiesPage() {
-  const properties = [
-    {
-      image: "/placeholder.svg?height=300&width=400",
-      title: "Modern Apartment",
-      location: "South Brisbane",
-      price: "$750,000",
-      beds: 2,
-      baths: 2,
-      parking: 1,
-      type: "Apartment",
-    },
-    {
-      image: "/placeholder.svg?height=300&width=400",
-      title: "Family Home",
-      location: "New Farm",
-      price: "$1,250,000",
-      beds: 4,
-      baths: 3,
-      parking: 2,
-      type: "House",
-    },
-    {
-      image: "/placeholder.svg?height=300&width=400",
-      title: "Luxury Townhouse",
-      location: "Teneriffe",
-      price: "$1,750,000",
-      beds: 3,
-      baths: 2,
-      parking: 2,
-      type: "Townhouse",
-    },
-  ]
+  const [mounted, setMounted] = useState(false)
+  const [properties, setProperties] = useState<any[]>([])
+  useEffect(() => {
+    setMounted(true)
+    ;(async () => {
+      try {
+        const res = await fetch('/api/properties', { cache: 'no-store' })
+        const data = await res.json()
+        setProperties((data || []).filter((p: any) => p.listing_type === 'sale' || p.listingType === 'sale'))
+      } catch {}
+    })()
+  }, [])
+  if (!mounted) return null
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
 
-      <main className="flex-1">
+      <main className="flex-1" id="search-properties" data-section="search-properties">
         <section className="relative py-32 lg:py-40 overflow-hidden bg-gradient-to-br from-cream via-white to-brown-50">
           <div className="container relative">
             <div className="text-center space-y-12">
@@ -103,7 +86,7 @@ export default function SearchPropertiesPage() {
         <section className="py-32 bg-white">
           <div className="container">
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {properties.map((property, index) => (
+              {properties.map((property: any, index: number) => (
                 <Card
                   key={index}
                   className="overflow-hidden hover:shadow-xl transition-all duration-500 border border-brown-100"
@@ -116,7 +99,7 @@ export default function SearchPropertiesPage() {
                       height={300}
                       className="w-full h-64 object-cover"
                     />
-                    <Badge className="absolute top-6 left-6 bg-brown-900 text-cream">{property.type}</Badge>
+                    <Badge className="absolute top-6 left-6 bg-brown-900 text-cream">{(property.type || '').toString().replace(/^./, (c: string) => c.toUpperCase())}</Badge>
                   </div>
                   <CardContent className="p-8">
                     <div className="space-y-6">
@@ -124,7 +107,7 @@ export default function SearchPropertiesPage() {
                         <h3 className="font-medium text-xl text-brown-900 mb-2">{property.title}</h3>
                         <p className="text-brown-700 flex items-center">
                           <MapPin className="h-4 w-4 mr-2" />
-                          {property.location}
+                          {property.suburb || property.location}
                         </p>
                       </div>
                       <div className="flex items-center justify-between">
@@ -148,6 +131,9 @@ export default function SearchPropertiesPage() {
                   </CardContent>
                 </Card>
               ))}
+              {properties.length === 0 && (
+                <div className="col-span-full text-center text-brown-600">No sale properties available.</div>
+              )}
             </div>
           </div>
         </section>

@@ -205,10 +205,10 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
             Limited Time Offer
           </Badge>
           <CardTitle className="text-lg sm:text-2xl font-light text-brown-800 mb-1">
-            Exclusive Property Management Deal
+            Claim Up To 3 Months Free Management
           </CardTitle>
           <CardDescription className="text-sm sm:text-base text-brown-700">
-            Switch to Alto Property Group and unlock exceptional value
+            Switch to Alto Property Group and secure our best introductory offer
           </CardDescription>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
@@ -230,10 +230,10 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-brown-700" />
               </div>
               <h3 className="font-medium text-brown-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">
-                First Month Free
+                Up To 3 Months Free
               </h3>
               <p className="text-xs text-brown-600 hidden sm:block">
-                No management fees for your first month with us
+                Guaranteed 1 month free. Chance to receive 2–3 months.
               </p>
             </div>
 
@@ -410,10 +410,9 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
             )}
 
             <p className="text-xs text-brown-500 text-center leading-tight px-2 sm:px-0">
-              * Terms and conditions apply. Offer valid for new clients only.
-              Minimum 12-month management agreement required. We'll beat your
-              current rate by 1% or provide first month free (whichever is
-              greater value).
+              * New clients only. Minimum 12-month agreement. 1 month free
+              guaranteed; eligible clients may receive 2–3 months. If not
+              applicable, we'll beat your current rate by 1%.
             </p>
           </form>
         </CardContent>

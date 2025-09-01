@@ -6,8 +6,21 @@ import ClientImage from "@/components/ui/client-image"
 import Footer from "@/components/ui/footer"
 import Link from "next/link"
 import GoogleReviewsSection from "@/components/reviews/GoogleReviewsSection"
+import { useGoogleReviews } from '@/hooks/use-google-reviews'
+import { useEffect } from 'react'
 
 export default function BuyersAgentServicesPage() {
+  // On mount, ensure the latest reviews are fetched (from DB/fallback)
+  // This is a client page? If not, wrap below section in a ClientOnly approach.
+  // The section itself uses static mock data, but we call the API to ensure DB is warm.
+  if (typeof window !== 'undefined') {
+    // lazy import to avoid affecting SSR
+    ;(async () => {
+      try {
+        await fetch('/api/reviews/google', { cache: 'no-store' })
+      } catch {}
+    })()
+  }
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
