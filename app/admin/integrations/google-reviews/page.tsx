@@ -164,9 +164,19 @@ export default function GoogleReviewsIntegration() {
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <Link href="/admin/integrations/google-reviews/oauth" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                <Button
+                  variant="outline"
+                  className="border-brown-300 text-brown-800"
+                  onClick={() => {
+                    try {
+                      const origin = typeof window !== 'undefined' ? window.location.origin : ''
+                      const url = `/admin/integrations/google-reviews/oauth?base_url=${encodeURIComponent(origin)}`
+                      window.location.href = url
+                    } catch {}
+                  }}
+                >
                   Connect Google
-                </Link>
+                </Button>
                 <Button onClick={handleSync} disabled={syncing} className="bg-brown-800 hover:bg-brown-900">
                   {syncing ? 'Importing…' : 'Import Reviews'}
                 </Button>
