@@ -835,8 +835,8 @@ export default function HomePage() {
                 <div className="bg-cream/10 w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto">
                   <Award className="h-10 w-10 text-cream" />
                 </div>
-                <div className="text-4xl font-extralight text-cream mb-2">$2.8B+</div>
-                <div className="text-sm text-cream/80 tracking-wide font-light">Property Value Managed</div>
+                <div className="text-4xl font-extralight text-cream mb-2">$100M+</div>
+                <div className="text-sm text-cream/80 tracking-wide font-light">Property Value Sold</div>
               </div>
 
               <div className="text-center">
@@ -851,8 +851,8 @@ export default function HomePage() {
                 <div className="bg-cream/10 w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto">
                   <Target className="h-10 w-10 text-cream" />
                 </div>
-                <div className="text-4xl font-extralight text-cream mb-2">97.2%</div>
-                <div className="text-sm text-cream/80 tracking-wide font-light">Sale Price Accuracy</div>
+                <div className="text-4xl font-extralight text-cream mb-2">83%</div>
+                <div className="text-sm text-cream/80 tracking-wide font-light">Sold Over Expectations</div>
               </div>
 
               <div className="text-center">
