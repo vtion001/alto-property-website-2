@@ -852,7 +852,7 @@ export default function HomePage() {
                   <Target className="h-10 w-10 text-cream" />
                 </div>
                 <div className="text-4xl font-extralight text-cream mb-2">83%</div>
-                <div className="text-sm text-cream/80 tracking-wide font-light">Sold Over Expectations</div>
+                <div className="text-sm text-cream/80 tracking-wide font-light">Sold Over Expectation</div>
               </div>
 
               <div className="text-center">

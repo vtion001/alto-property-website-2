@@ -173,11 +173,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <div className="font-medium text-brown-900 text-lg">Office</div>
-                      <div className="text-brown-700">
-                        4/66 Condamine St, Runcorn
-                        <br />
-                        QLD 4113, Australia
-                      </div>
+                      <div className="text-brown-700">Office address coming soon</div>
                     </div>
                   </div>
 

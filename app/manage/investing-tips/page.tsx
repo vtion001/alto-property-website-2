@@ -511,11 +511,7 @@ export default function InvestingTipsPage() {
               <ul className="space-y-3 text-brown-200">
                 <li>(07) 3000 0000</li>
                 <li>info@altopropertygroup.com.au</li>
-                <li>
-                  4/66 Condamine St, Runcorn
-                  <br />
-                  QLD 4113, Australia
-                </li>
+                <li>Office address coming soon</li>
               </ul>
             </div>
           </div>

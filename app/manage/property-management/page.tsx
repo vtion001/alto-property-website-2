@@ -597,11 +597,7 @@ export default function PropertyManagementPage() {
               <ul className="space-y-3 text-brown-200">
                 <li>(+61) 467 048 837</li>
                 <li>sales@altoproperty.com.au</li>
-                <li>
-                  4/66 Condamine St, Runcorn
-                  <br />
-                  QLD 4113, Australia
-                </li>
+                <li>Office address coming soon</li>
               </ul>
             </div>
           </div>

@@ -78,7 +78,7 @@ export default function TeamPage() {
         <div className="container">
           <div className="text-center">
             <div className="text-center space-y-4">
-              <p className="text-brown-200">4/66 Condamine St, Runcorn QLD 4113, Australia</p>
+              <p className="text-brown-200">Office address coming soon</p>
               <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
             </div>
           </div>

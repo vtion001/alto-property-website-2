@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Edit, Trash2, Plus, Star } from 'lucide-react';
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Navigation } from '@/components/navigation'
 import Footer from '@/components/ui/footer'
 
@@ -28,6 +29,11 @@ export default function GoogleReviewsIntegration() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingReview, setEditingReview] = useState<GoogleReview | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const [accounts, setAccounts] = useState<any[]>([])
+  const [locations, setLocations] = useState<any[]>([])
+  const [selectedAccount, setSelectedAccount] = useState<string>('')
   const [formData, setFormData] = useState({
     reviewer_name: '',
     rating: 5,
@@ -53,6 +59,40 @@ export default function GoogleReviewsIntegration() {
     }
     setLoading(false);
   };
+  const loadAccounts = async () => {
+    try {
+      const res = await fetch('/api/google-reviews/accounts')
+      const json = await res.json()
+      if (json?.ok) setAccounts(json.data?.accounts || json.data?.accountSummaries || [])
+      else alert(json?.error || 'Failed to fetch accounts')
+    } catch {}
+  }
+  const loadLocations = async (accountId: string) => {
+    try {
+      const res = await fetch(`/api/google-reviews/accounts/${encodeURIComponent(accountId)}/locations`)
+      const json = await res.json()
+      if (json?.ok) setLocations(json.data?.locations || [])
+      else alert(json?.error || 'Failed to fetch locations')
+    } catch {}
+  }
+
+  const handleSync = async () => {
+    setSyncing(true)
+    try {
+      const res = await fetch('/api/google-reviews/sync', { method: 'POST' })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        alert(`Sync failed: ${json?.error || res.statusText}`)
+      } else {
+        await fetchReviews()
+        alert(`Imported ${json?.imported ?? 0} reviews from Google.`)
+      }
+    } catch (e: any) {
+      alert(`Sync error: ${e?.message || String(e)}`)
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,11 +159,17 @@ export default function GoogleReviewsIntegration() {
               <div>
                 <h1 className="text-3xl font-light text-brown-900">Google Reviews Integration</h1>
                 <p className="text-brown-600 mt-2">Manage customer reviews from Google Business</p>
+                {params?.get('oauth') === 'success' && (
+                  <p className="text-green-700 mt-2">Google connected successfully. You can now import reviews.</p>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <Link href="/admin/integrations/google-reviews/oauth" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-                  Sync Now
+                  Connect Google
                 </Link>
+                <Button onClick={handleSync} disabled={syncing} className="bg-brown-800 hover:bg-brown-900">
+                  {syncing ? 'Importing…' : 'Import Reviews'}
+                </Button>
                 <Button
                   onClick={() => setShowAddForm(!showAddForm)}
                   className="bg-brown-800 hover:bg-brown-900"
@@ -133,6 +179,39 @@ export default function GoogleReviewsIntegration() {
                 </Button>
               </div>
             </div>
+
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="text-brown-900">Find Your Google Account & Location IDs</CardTitle>
+                <CardDescription className="text-brown-600">Use these helpers after connecting Google to discover IDs for env vars.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-3 flex-wrap items-center">
+                  <Button onClick={loadAccounts} variant="outline" className="border-brown-300 text-brown-800">List Accounts</Button>
+                  <Select onValueChange={(val) => { setSelectedAccount(val); loadLocations(val) }}>
+                    <SelectTrigger className="w-80"><SelectValue placeholder="Select Account" /></SelectTrigger>
+                    <SelectContent>
+                      {accounts.map((a: any) => (
+                        <SelectItem key={a.name || a.accountName} value={(a.name || a.accountName || '').replace('accounts/', '')}>
+                          {(a.accountName || a.name || '').toString()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select>
+                    <SelectTrigger className="w-96"><SelectValue placeholder="Select Location" /></SelectTrigger>
+                    <SelectContent>
+                      {locations.map((l: any) => (
+                        <SelectItem key={l.name} value={(l.name || '').replace(/^accounts\/[^/]+\//, '')}>
+                          {(l.locationName || l.title || l.name || '').toString()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-sm text-brown-600">Set <code>GOOGLE_ACCOUNT_ID</code> and <code>GOOGLE_LOCATION_ID</code> in your env once selected, then restart.</p>
+              </CardContent>
+            </Card>
 
       {showAddForm && (
         <Card className="mb-8">
