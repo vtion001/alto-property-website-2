@@ -27,11 +27,11 @@ export default function BuyersAgentServicesPage() {
               <div className="space-y-12">
                 <div className="space-y-8">
                   <div className="inline-block">
-                    <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Dedicated Buyer Advocacy</div>
+                    <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Dedicated Buyer Agent</div>
                     <div className="w-16 h-px bg-brand-red"></div>
                   </div>
                   <h1 className="text-6xl font-extralight tracking-tight sm:text-7xl lg:text-8xl text-brown-800 leading-none">
-                    Home Buyer’s
+                    ALTO Buyer’s
                     <span className="block font-light text-brown-700 mt-2">Agent</span>
                   </h1>
                   <p className="text-xl font-light text-brown-700 max-w-xl leading-relaxed">
@@ -165,7 +165,7 @@ export default function BuyersAgentServicesPage() {
           <div className="container">
             <div className="text-center space-y-8 mb-24">
               <div className="inline-block">
-                <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Why Work With Alto</div>
+                <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Personalised Service Tailored To You</div>
                 <div className="w-16 h-px bg-brand-red mx-auto"></div>
               </div>
               <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">We Save You—Time, Money, Clarity</h2>

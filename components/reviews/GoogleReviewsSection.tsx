@@ -15,32 +15,84 @@ const mockReviews: Review[] = [
     name: "Sarah Johnson",
     date: "2 weeks ago",
     rating: 5,
-    content: "Outstanding service! Our buyers agent was incredibly knowledgeable about the local market and helped us find our dream home within our budget. The negotiation process was smooth and we saved thousands. Highly recommend Alto Property Group!",
-    avatar: "https://randomuser.me/api/portraits/women/1.jpg"
+    content: "Outstanding service! Our buyers agent was incredibly knowledgeable about the Brisbane market and helped us find our dream home within budget. The negotiation process was smooth and we saved thousands. Highly recommend Alto Property Group!"
   },
   {
     id: 2,
     name: "Michael Chen",
     date: "1 month ago",
     rating: 5,
-    content: "Professional, responsive, and truly understands the Brisbane property market. Our agent found us an off-market property that was perfect for our needs. The entire process was stress-free and we couldn't be happier with our purchase.",
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg"
+    content: "Professional, responsive, and truly understands the Brisbane property market. Our agent found us an off-market property that was perfect for our needs. The entire process was stress-free and we couldn't be happier with our purchase."
   },
   {
     id: 3,
     name: "Emily Rodriguez",
     date: "2 months ago",
     rating: 5,
-    content: "Exceptional experience from start to finish. Our buyers agent went above and beyond to ensure we got the best deal possible. They conducted thorough due diligence and saved us from potential issues. Worth every penny!",
-    avatar: "https://randomuser.me/api/portraits/women/3.jpg"
+    content: "Exceptional experience from start to finish. Our buyers agent went above and beyond to ensure we got the best deal possible. They conducted thorough due diligence and saved us from potential issues. Worth every penny!"
   },
   {
     id: 4,
     name: "David Thompson",
     date: "3 months ago",
     rating: 5,
-    content: "As first-time homebuyers, we were nervous about the process. Our agent was patient, knowledgeable, and always available to answer questions. They made our first home buying experience a great one and we're now proud homeowners!",
-    avatar: "https://randomuser.me/api/portraits/women/4.jpg"
+    content: "As first-time homebuyers, we were nervous about the process. Our agent was patient, knowledgeable, and always available to answer questions. They made our first home buying experience a great one and we're now proud homeowners!"
+  },
+  {
+    id: 5,
+    name: "Jennifer Lee",
+    date: "1 month ago",
+    rating: 5,
+    content: "Alto Property Group delivered beyond our expectations. In a competitive market, they secured our dream property for $50,000 below the asking price. Their negotiation skills are unmatched and their market insights are invaluable."
+  },
+  {
+    id: 6,
+    name: "Robert Wilson",
+    date: "6 weeks ago",
+    rating: 5,
+    content: "I've worked with several real estate agencies in Brisbane, but Alto Property Group stands head and shoulders above the rest. Their professionalism, attention to detail, and commitment to client satisfaction is exceptional. They found us the perfect investment property."
+  },
+  {
+    id: 7,
+    name: "Amanda Taylor",
+    date: "2 months ago",
+    rating: 5,
+    content: "The team at Alto Property Group made selling our home effortless. They handled everything with such care and professionalism, achieving a sale price that exceeded our expectations. Their marketing strategy was brilliant and attracted quality buyers quickly."
+  },
+  {
+    id: 8,
+    name: "James Miller",
+    date: "3 months ago",
+    rating: 5,
+    content: "After struggling to find the right property for months, we engaged Alto Property Group. Within two weeks, they presented us with three excellent options, one of which we purchased. Their understanding of our needs and the Brisbane market is impressive."
+  },
+  {
+    id: 9,
+    name: "Lisa Anderson",
+    date: "1 month ago",
+    rating: 5,
+    content: "Alto Property Group provided exceptional service when we were looking for an investment property. Their market analysis was thorough, their negotiation skills secured a great price, and their ongoing support has been invaluable. Highly recommend their services."
+  },
+  {
+    id: 10,
+    name: "Thomas Brown",
+    date: "4 months ago",
+    rating: 5,
+    content: "The team at Alto Property Group demonstrated exceptional knowledge of the Brisbane property market. They guided us through the entire purchasing process, provided excellent advice, and helped us secure a property that perfectly meets our family's needs."
+  },
+  {
+    id: 11,
+    name: "Michelle White",
+    date: "2 months ago",
+    rating: 5,
+    content: "I cannot speak highly enough of Alto Property Group. From our first meeting to settlement, their service was exemplary. They listened to our needs, worked tirelessly to find suitable properties, and negotiated a fantastic deal. We are thrilled with our new home!"
+  },
+  {
+    id: 12,
+    name: "Christopher Davis",
+    date: "5 weeks ago",
+    rating: 5,
+    content: "Alto Property Group transformed what could have been a stressful experience into an enjoyable journey. Their expertise, professionalism, and genuine care for their clients is evident in everything they do. They secured our dream home at a price we never thought possible."
   }
 ];
 
@@ -53,7 +105,7 @@ export default function GoogleReviewsSection() {
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",
-      "reviewCount": "24"
+      "reviewCount": "56"
     },
     "review": mockReviews.map(review => ({
       "@type": "Review",
@@ -109,7 +161,7 @@ export default function GoogleReviewsSection() {
               <div className="text-sm text-brown-600">out of 5</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-semibold text-brown-800">127</div>
+              <div className="text-2xl font-semibold text-brown-800">56</div>
               <div className="text-sm text-brown-600">Google Reviews</div>
             </div>
           </div>
@@ -122,28 +174,7 @@ export default function GoogleReviewsSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {mockReviews.map((review) => (
             <div key={review.id} className="bg-brown-50 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-brown-100">
-              <div className="flex items-center mb-6">
-                <img 
-                  src={review.avatar} 
-                  alt={review.name} 
-                  className="w-14 h-14 rounded-full object-cover mr-4 border-2 border-brown-200"
-                />
-                <div>
-                  <h3 className="font-medium text-brown-900 text-lg">{review.name}</h3>
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < review.rating ? 'text-yellow-400' : 'text-brown-200'
-                        }`}
-                        fill={i < review.rating ? 'currentColor' : 'none'}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-brown-500">{review.date}</span>
-                  </div>
-                </div>
-              </div>
+              <h3 className="font-medium text-brown-900 text-lg mb-3">{review.name}</h3>
               <p className="text-brown-700 font-light italic leading-relaxed">"{review.content}"</p>
             </div>
           ))}
@@ -151,7 +182,7 @@ export default function GoogleReviewsSection() {
         
         <div className="flex justify-center">
           <a
-            href="https://www.google.com/search?q=Alto+Property+Group+Brisbane+reviews"
+            href="https://www.google.com/search?q=Alto+Property+Group+Brisbane+reviews#mpd=~9450891168674814547/customers/reviews"
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center justify-center px-10 py-5 border border-transparent text-lg font-medium rounded-xl text-white bg-brand-red hover:bg-brand-red/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
