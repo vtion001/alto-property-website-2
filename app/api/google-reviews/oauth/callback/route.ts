@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Redirect back to admin with a success flag.
+  const baseUrl = `${url.protocol}//${url.host}`
   const redirect = new URL(`/admin/integrations/google-reviews?oauth=success&state=${encodeURIComponent(state)}`, baseUrl)
   return NextResponse.redirect(redirect)
 }
