@@ -102,11 +102,11 @@ export default function HomePage() {
                   </div>
                   <div className="grid grid-cols-3 gap-8 pt-12">
                     <div className="text-center">
-                      <div className="text-4xl font-extralight text-cream mb-2">15+</div>
-                      <div className="text-sm text-cream/80 tracking-wide font-light">Years Experience</div>
+                      <div className="text-4xl font-extralight text-cream mb-2">10+</div>
+                      <div className="text-sm text-cream/80 tracking-wide font-light">Combined Experience</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-4xl font-extralight text-cream mb-2">2,800+</div>
+                      <div className="text-4xl font-extralight text-cream mb-2">973+</div>
                       <div className="text-sm text-cream/80 tracking-wide font-light">Happy Clients</div>
                     </div>
                     <div className="text-center">
@@ -152,12 +152,12 @@ export default function HomePage() {
                 <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Our Services</div>
                 <div className="w-16 h-px bg-brand-red"></div>
               </div>
-              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">What ALTO Can Do For You</h2>
+              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">Why Alto</h2>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
-                Comprehensive real estate solutions tailored to your unique needs, backed by 15+ years of proven results.
+                Comprehensive real estate solutions tailored to your unique needs, backed by 10+ years of combined experience and proven results.
               </p>
             </div>
-
+     
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {/* Sell */}
               <Card className="group hover:shadow-xl transition-all duration-500 border border-brown-100 hover:border-brown-200 h-full">
@@ -349,7 +349,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {/* Testimonial 1 */}
               <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-8">
                   <div className="space-y-6">
@@ -359,22 +360,22 @@ export default function HomePage() {
                       ))}
                     </div>
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
-                      "ALTO sold our property for 15% above our expectations! Their market knowledge and negotiation 
-                      skills are outstanding. The team made the entire process stress-free and kept us informed every step."
+                      "Joshua is an absolute superstar! Sold our family home in just 3 days for $120k over asking price. His marketing strategy was brilliant and negotiation skills unmatched."
                     </blockquote>
                     <div className="flex items-center space-x-4">
                       <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">SM</span>
+                        <span className="text-brown-700 font-medium">TC</span>
                       </div>
                       <div>
-                        <div className="font-medium text-brown-800">Sarah & Michael</div>
-                        <div className="text-sm text-brown-600">Sold in New Farm • $1.2M</div>
+                        <div className="font-medium text-brown-800">Thomas & Claire</div>
+                        <div className="text-sm text-brown-600">Sold in Chatswood • $2.1M</div>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Testimonial 2 */}
               <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-8">
                   <div className="space-y-6">
@@ -384,8 +385,157 @@ export default function HomePage() {
                       ))}
                     </div>
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
-                      "As first-time buyers, ALTO guided us through everything with patience and expertise. They found us 
-                      the perfect home and negotiated a great price. We couldn't be happier!"
+                      "Professional, responsive, and gets results! Joshua sold our investment property during a market downturn. His strategic pricing and buyer targeting were exceptional."
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">RJ</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Robert Johnson</div>
+                        <div className="text-sm text-brown-600">Sold in Parramatta • $950K</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 3 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "Joshua made selling our deceased estate effortless. His empathy, professionalism, and attention to detail were outstanding. Achieved 10% above market value."
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">EW</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Emily Wong</div>
+                        <div className="text-sm text-brown-600">Sold in Eastwood • $1.35M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 4 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "From appraisal to settlement, Joshua was exceptional. His market knowledge is second to none. Sold our apartment in 5 days with multiple offers!"
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">LP</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Lisa & Peter</div>
+                        <div className="text-sm text-brown-600">Sold in Rhodes • $780K</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 5 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "Joshua's negotiation skills are phenomenal! He secured $85k above our reserve price. His communication throughout the process was flawless."
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">MK</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Michael Khan</div>
+                        <div className="text-sm text-brown-600">Sold in Burwood • $1.6M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 6 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "We interviewed 5 agents - Joshua was by far the most impressive. His presentation, market analysis, and strategy were exceptional. Sold for 12% above expectations!"
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">ST</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Sarah & Tom</div>
+                        <div className="text-sm text-brown-600">Sold in Ryde • $1.45M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 7 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "Joshua transformed our property presentation. His styling advice and professional photography attracted premium buyers. Sold in 10 days!"
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">NG</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Nina Grant</div>
+                        <div className="text-sm text-brown-600">Sold in Top Ryde • $1.1M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 8 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "As first-time sellers, Joshua guided us through everything. His patience, expertise, and transparent communication made the process stress-free. Exceeded all expectations!"
                     </blockquote>
                     <div className="flex items-center space-x-4">
                       <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
@@ -393,13 +543,14 @@ export default function HomePage() {
                       </div>
                       <div>
                         <div className="font-medium text-brown-800">David & Lisa</div>
-                        <div className="text-sm text-brown-600">Bought in Paddington • First Home</div>
+                        <div className="text-sm text-brown-600">Sold in Epping • $920K</div>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Testimonial 9 */}
               <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-8">
                   <div className="space-y-6">
@@ -409,16 +560,90 @@ export default function HomePage() {
                       ))}
                     </div>
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
-                      "ALTO manages our investment portfolio beautifully. Their property management is professional, 
-                      thorough, and delivers consistent returns. Genuine care shows in everything they do."
+                      "Joshua's auction campaign was masterful. He created incredible competition and achieved $150k above reserve. His energy and enthusiasm are contagious!"
                     </blockquote>
                     <div className="flex items-center space-x-4">
                       <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">JW</span>
+                        <span className="text-brown-700 font-medium">HC</span>
                       </div>
                       <div>
-                        <div className="font-medium text-brown-800">Jennifer Wong</div>
-                        <div className="text-sm text-brown-600">Property Investor • 4 Properties</div>
+                        <div className="font-medium text-brown-800">Helen Chen</div>
+                        <div className="text-sm text-brown-600">Sold in Macquarie Park • $1.8M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 10 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "Joshua sold our difficult property with easement issues. His creative solutions and persistence resulted in a sale at full asking price. Highly recommend!"
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">AB</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Andrew Brown</div>
+                        <div className="text-sm text-brown-600">Sold in Meadowbank • $1.05M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 11 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "Joshua's international marketing campaign attracted overseas buyers we never would have reached. Sold our luxury property for record price in the building."
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">JL</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">James & Lucy</div>
+                        <div className="text-sm text-brown-600">Sold in Sydney CBD • $3.2M</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Testimonial 12 */}
+              <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <blockquote className="text-brown-700 font-light leading-relaxed italic">
+                      "After 3 months with another agent with no offers, Joshua listed and sold in 2 weeks! His pricing strategy and buyer database are exceptional. True professional!"
+                    </blockquote>
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span className="text-brown-700 font-medium">PM</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-brown-800">Patricia Miller</div>
+                        <div className="text-sm text-brown-600">Sold in Carlingford • $1.25M</div>
                       </div>
                     </div>
                   </div>

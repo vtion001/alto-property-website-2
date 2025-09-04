@@ -34,12 +34,16 @@ import {
   Clock,
   AlertCircle,
   TrendingUp,
-  Camera // Import Camera icon
+  Camera, // Import Camera icon
+  Phone,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Footer from "@/components/ui/footer"
+import Dialer from "@/components/dialer/dialer"
 
 interface BlogPost {
   id: string
@@ -104,6 +108,21 @@ export default function AdminPage() {
   const [isBlogEditOpen, setIsBlogEditOpen] = useState(false)
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null)
   const [editedBlogPost, setEditedBlogPost] = useState<BlogPost | null>(null)
+  const [isDialerOpen, setIsDialerOpen] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  const adminNavItems = [
+    { value: 'overview', label: 'Overview', icon: Home },
+    { value: 'gci', label: 'GCI', icon: TrendingUp },
+    { value: 'sale-properties', label: 'Sale Properties', icon: Home },
+    { value: 'rent-properties', label: 'Rent Properties', icon: Home },
+    { value: 'blog', label: 'Blog', icon: FileText },
+    { value: 'rentals', label: 'Rentals', icon: Users },
+    { value: 'management', label: 'Management', icon: Settings },
+    { value: 'dialer', label: 'Dialer', icon: Phone },
+    { value: 'integrations', label: 'Integrations', icon: Settings },
+    { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
+  ]
 
   // Mock data - replace with actual data fetching
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
@@ -1281,19 +1300,35 @@ export default function AdminPage() {
               </Card>
             </div>
 
-            {/* Main Content Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" id="admin-tabs" data-component="admin-tabs">
-              <TabsList className="grid grid-cols-9 w-full max-w-6xl" id="admin-tabs-list" data-element="tabs-list">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="gci">GCI</TabsTrigger>
-                <TabsTrigger value="sale-properties" id="tab-sale-properties" data-tab="sale-properties">Sale Properties</TabsTrigger>
-                <TabsTrigger value="rent-properties" id="tab-rent-properties" data-tab="rent-properties">Rent Properties</TabsTrigger>
-                <TabsTrigger value="blog">Blog</TabsTrigger>
-                <TabsTrigger value="rentals">Rentals</TabsTrigger>
-                <TabsTrigger value="management">Management</TabsTrigger>
-                <TabsTrigger value="integrations">Integrations</TabsTrigger>
-                <TabsTrigger value="google-reviews">Google Reviews</TabsTrigger>
-              </TabsList>
+            {/* Main Content with collapsible sidebar */}
+            <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+              <aside className={`rounded-lg border p-3 md:p-4 bg-white h-max sticky top-6 ${isSidebarCollapsed ? 'w-16' : 'w-64'} transition-all`}>
+                <div className="flex items-center justify-between mb-2">
+                  {!isSidebarCollapsed && <span className="text-sm font-medium text-brown-700">Navigation</span>}
+                  <Button variant="ghost" size="sm" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} aria-label="Toggle sidebar">
+                    {isSidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <nav className="space-y-1">
+                  {adminNavItems.map((item) => {
+                    const Icon = item.icon
+                    const isActive = activeTab === item.value
+                    return (
+                      <button
+                        key={item.value}
+                        onClick={() => setActiveTab(item.value)}
+                        className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors ${isActive ? 'bg-brown-100 text-brown-900' : 'hover:bg-brown-50 text-brown-700'}`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
+                      </button>
+                    )
+                  })}
+                </nav>
+              </aside>
+
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" id="admin-tabs" data-component="admin-tabs">
 
               <TabsContent value="gci" className="space-y-6">
                 <div className="flex justify-between items-center">
@@ -1459,6 +1494,38 @@ export default function AdminPage() {
                   </Card>
                 </div>
               </TabsContent>
+
+              <TabsContent value="dialer" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-light text-brown-800">Twilio Dialer</h2>
+                  <Button variant="outline" onClick={() => setIsDialerOpen(true)}>Open Dialer</Button>
+                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">Phone Dialing System</CardTitle>
+                    <CardDescription>Place calls and manage Twilio configuration. Clicking "Open Dialer" will take you to the dedicated dialer interface.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 text-brown-700 text-sm">
+                      <p>What you can do:</p>
+                      <ul className="list-disc list-inside">
+                        <li>Dial phone numbers via Twilio</li>
+                        <li>Configure Account SID, Auth Token and Number</li>
+                        <li>View recent call history and saved contacts</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <Dialog open={isDialerOpen} onOpenChange={setIsDialerOpen}>
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Dialer</DialogTitle>
+                    <DialogDescription>Place calls and manage configuration</DialogDescription>
+                  </DialogHeader>
+                  <Dialer />
+                </DialogContent>
+              </Dialog>
 
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
@@ -2230,6 +2297,7 @@ export default function AdminPage() {
                 </div>
               </TabsContent>
             </Tabs>
+            </div>
           </div>
         </div>
       </main>

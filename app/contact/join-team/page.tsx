@@ -31,11 +31,11 @@ export default function JoinTeamPage() {
 
   const openPositions = [
     {
-      title: "Property Manager",
+      title: "Mortgage Broker",
       type: "Full-time",
       location: "Brisbane CBD",
       description:
-        "Seeking an experienced property manager to join our growing team. Manage a portfolio of premium properties with full support and training.",
+        "Work closely with our sales team to deliver finance solutions for buyers. Access 40+ lenders, warm lead flow, and strong support to help clients secure the best outcomes.",
     },
     {
       title: "Sales Associate",
@@ -43,13 +43,6 @@ export default function JoinTeamPage() {
       location: "Brisbane CBD",
       description:
         "Opportunity for an ambitious sales professional to work with luxury properties and high-net-worth clients.",
-    },
-    {
-      title: "Leasing Consultant",
-      type: "Part-time/Full-time",
-      location: "Brisbane CBD",
-      description:
-        "Join our leasing team to help match quality tenants with premium rental properties across Brisbane.",
     },
   ]
 
@@ -205,10 +198,8 @@ export default function JoinTeamPage() {
                     <label className="text-sm font-medium text-brown-900">Position of Interest</label>
                     <select className="flex h-10 w-full rounded-md border border-brown-200 bg-background px-3 py-2 text-sm">
                       <option>Select a position</option>
-                      <option>Property Manager</option>
+                      <option>Mortgage Broker</option>
                       <option>Sales Associate</option>
-                      <option>Leasing Consultant</option>
-                      <option>Other</option>
                     </select>
                   </div>
                   <div className="space-y-2">
