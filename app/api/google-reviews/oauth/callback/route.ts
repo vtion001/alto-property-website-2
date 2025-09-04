@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
 
   const clientId = process.env.GOOGLE_CLIENT_ID
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${url.protocol}//${url.host}`
-  const redirectUri = `${baseUrl}/api/google-reviews/oauth/callback`
+  // Use the exact URL that Google redirected to, to avoid redirect_uri mismatch
+  const redirectUri = `${url.protocol}//${url.host}${url.pathname}`
 
   if (!clientId || !clientSecret) {
     return NextResponse.json(
