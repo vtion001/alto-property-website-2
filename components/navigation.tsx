@@ -271,6 +271,13 @@ export function Navigation() {
                     Buying with Alto
                   </Link>
                   <Link 
+                    href="/buying/buyers-agent-services" 
+                    className="text-sm text-muted-foreground hover:text-brown-800 transition-colors py-2 block"
+                    onClick={closeSheet}
+                  >
+                    Buyers Agent Services
+                  </Link>
+                  <Link 
                     href="/buying/off-market" 
                     className="text-sm text-muted-foreground hover:text-brown-800 transition-colors py-2 block"
                     onClick={closeSheet}

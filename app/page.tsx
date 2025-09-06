@@ -40,10 +40,10 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section with Video Background */}
-        <section className="relative overflow-hidden min-h-screen flex items-center">
+        <section className="relative overflow-hidden min-h-[80vh] sm:min-h-screen flex items-center">
           {/* Video Background */}
-          <div className="absolute inset-0 z-0" style={{ top: '-20vh', bottom: '-20vh', left: '-10vw', right: '-10vw' }}>
-            <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-110">
+          <div className="absolute inset-0 z-0">
+            <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover">
               <source
                 src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752811390/ahkwwnqzlasp5ab5xub0.mp4"
                 type="video/mp4"
@@ -53,9 +53,9 @@ export default function HomePage() {
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 w-full py-32 lg:py-40">
+          <div className="relative z-10 w-full py-20 sm:py-28 lg:py-40">
             <div className="container">
-              <div className="grid gap-20 lg:grid-cols-2 items-center">
+              <div className="grid gap-10 sm:gap-14 lg:gap-20 lg:grid-cols-2 items-center">
                 <div className="space-y-12">
                   <div className="space-y-8">
                     <div className="inline-block">
@@ -64,28 +64,28 @@ export default function HomePage() {
                       </div>
                       <div className="w-16 h-px bg-brand-red"></div>
                     </div>
-                    <h1 className="text-5xl font-extralight tracking-tight sm:text-6xl lg:text-7xl text-cream leading-tight">
+                    <h1 className="text-4xl font-extralight tracking-tight sm:text-6xl lg:text-7xl text-cream leading-tight">
                       ALTO
                       <span className="block font-light text-cream/90 mt-2">PROPERTY</span>
                     </h1>
-                    <p className="text-xl font-light text-cream/90 max-w-2xl leading-relaxed">
+                    <p className="text-base sm:text-lg md:text-xl font-light text-cream/90 max-w-2xl leading-relaxed">
                       South East Queensland's premier all-in-one real estate agency, consistently building lifelong 
                       relationships through delivering outstanding results and service.
                     </p>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-6">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-6">
                     <Link href="/selling/property-report#report-form">
                       <Button
-                        size="lg"
-                        className="bg-cream hover:bg-white text-brown-800 font-light tracking-wide px-12 py-6 h-auto text-base w-full sm:w-auto"
+                        size="sm"
+                        className="bg-cream hover:bg-white text-brown-800 font-light tracking-wide px-6 sm:px-10 py-4 sm:py-6 h-auto text-sm sm:text-base w-full sm:w-auto"
                       >
                         Free Property Appraisal
                       </Button>
                     </Link>
                     <Link href="/manage/property-management#claim-offer">
                       <Button
-                        size="lg"
-                        className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base w-full sm:w-auto"
+                        size="sm"
+                        className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-6 sm:px-10 py-4 sm:py-6 h-auto text-sm sm:text-base w-full sm:w-auto"
                       >
                         Claim Up To 3 Months Free
                       </Button>
@@ -93,29 +93,29 @@ export default function HomePage() {
                     <Link href="/contact">
                       <Button
                         variant="outline"
-                        size="lg"
-                        className="font-light tracking-wide px-12 py-6 h-auto text-base border-cream text-cream hover:bg-cream hover:text-brown-800 bg-transparent w-full sm:w-auto"
+                        size="sm"
+                        className="font-light tracking-wide px-6 sm:px-10 py-4 sm:py-6 h-auto text-sm sm:text-base border-cream text-cream hover:bg-cream hover:text-brown-800 bg-transparent w-full sm:w-auto"
                       >
                         Speak to Our Team
                       </Button>
                     </Link>
                   </div>
-                  <div className="grid grid-cols-3 gap-8 pt-12">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 pt-8 sm:pt-12">
                     <div className="text-center">
-                      <div className="text-4xl font-extralight text-cream mb-2">10+</div>
-                      <div className="text-sm text-cream/80 tracking-wide font-light">Combined Experience</div>
+                      <div className="text-3xl sm:text-4xl font-extralight text-cream mb-1 sm:mb-2">10+</div>
+                      <div className="text-xs sm:text-sm text-cream/80 tracking-wide font-light">Combined Experience</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-4xl font-extralight text-cream mb-2">973+</div>
-                      <div className="text-sm text-cream/80 tracking-wide font-light">Happy Clients</div>
+                      <div className="text-3xl sm:text-4xl font-extralight text-cream mb-1 sm:mb-2">973+</div>
+                      <div className="text-xs sm:text-sm text-cream/80 tracking-wide font-light">Happy Clients</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-4xl font-extralight text-cream mb-2">98.5%</div>
-                      <div className="text-sm text-cream/80 tracking-wide font-light">Success Rate</div>
+                      <div className="text-3xl sm:text-4xl font-extralight text-cream mb-1 sm:mb-2">98.5%</div>
+                      <div className="text-xs sm:text-sm text-cream/80 tracking-wide font-light">Success Rate</div>
                     </div>
                   </div>
                 </div>
-                <div className="relative">
+                <div className="relative mt-6 sm:mt-0">
                   <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                     <Image
                       src="https://res.cloudinary.com/dbviya1rj/image/upload/v1752833883/ejat8ma5eh1c3nwabkim.jpg"
@@ -127,14 +127,14 @@ export default function HomePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brown-900/20 to-transparent" />
                   </div>
-                  <div className="absolute -bottom-8 -left-8 bg-white rounded-2xl shadow-xl p-8 border border-brown-100">
+                  <div className="hidden sm:block absolute -bottom-8 -left-8 bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-brown-100">
                     <div className="flex items-center space-x-4">
-                      <div className="bg-brown-50 p-3 rounded-full">
-                        <Heart className="h-8 w-8 text-brown-700" />
+                      <div className="bg-brown-50 p-2 lg:p-3 rounded-full">
+                        <Heart className="h-6 w-6 lg:h-8 lg:w-8 text-brown-700" />
                       </div>
                       <div>
-                        <div className="font-light text-brown-800 text-sm tracking-wide">Client Satisfaction</div>
-                        <div className="text-3xl font-light text-brown-800">4.9★</div>
+                        <div className="font-light text-brown-800 text-xs lg:text-sm tracking-wide">Client Satisfaction</div>
+                        <div className="text-2xl lg:text-3xl font-light text-brown-800">4.9★</div>
                       </div>
                     </div>
                   </div>
