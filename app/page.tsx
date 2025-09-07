@@ -40,17 +40,18 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section with Video Background */}
-        <section className="relative overflow-hidden min-h-[80vh] sm:min-h-screen flex items-center">
-          {/* Video Background */}
-          <div className="absolute inset-0 z-0">
-            <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover">
-              <source
-                src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752811390/ahkwwnqzlasp5ab5xub0.mp4"
-                type="video/mp4"
-              />
-            </video>
-            <div className="absolute inset-0 bg-gradient-to-r from-brown-900/80 via-brown-800/60 to-brown-900/40" />
-          </div>
+        <section className="relative overflow-hidden min-h-[100svh] sm:min-h-screen flex items-center">
+  {/* Video Background */}
+  <div className="absolute inset-0 z-0">
+    <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-150">
+      <source
+        src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752811390/ahkwwnqzlasp5ab5xub0.mp4"
+        type="video/mp4"
+      />
+    </video>
+    {/* THIS IS THE LINE TO REMOVE */}
+    <div className="absolute inset-0 bg-black/30 sm:bg-gradient-to-r sm:from-brown-900/80 sm:via-brown-800/60 sm:to-brown-900/40" />
+  </div>  
 
           {/* Content Container */}
           <div className="relative z-10 w-full py-20 sm:py-28 lg:py-40">
