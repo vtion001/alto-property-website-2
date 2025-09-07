@@ -1302,14 +1302,34 @@ export default function AdminPage() {
 
             {/* Main Content with collapsible sidebar */}
             <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
-              <aside className={`rounded-lg border p-3 md:p-4 bg-white h-max sticky top-6 ${isSidebarCollapsed ? 'w-16' : 'w-64'} transition-all`}>
+              <aside
+                className={`rounded-lg border p-3 md:p-4 bg-white h-max sticky top-6 ${
+                  isSidebarCollapsed ? 'w-16' : 'w-64'
+                } transition-all`}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  {!isSidebarCollapsed && <span className="text-sm font-medium text-brown-700">Navigation</span>}
-                  <Button variant="ghost" size="sm" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} aria-label="Toggle sidebar">
-                    {isSidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                  {!isSidebarCollapsed && (
+                    <span className="text-sm font-medium text-brown-700">Navigation</span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                    aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                    aria-expanded={!isSidebarCollapsed}
+                  >
+                    {isSidebarCollapsed ? (
+                      <ChevronRight className="h-4 w-4" />
+                    ) : (
+                      <ChevronLeft className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
-                <nav className="space-y-1">
+                <nav
+                  className="space-y-1"
+                  role="navigation"
+                  aria-label="Admin navigation"
+                >
                   {adminNavItems.map((item) => {
                     const Icon = item.icon
                     const isActive = activeTab === item.value
@@ -1317,17 +1337,24 @@ export default function AdminPage() {
                       <button
                         key={item.value}
                         onClick={() => setActiveTab(item.value)}
-                        className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors ${isActive ? 'bg-brown-100 text-brown-900' : 'hover:bg-brown-50 text-brown-700'}`}
+                        className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors ${
+                          isActive
+                            ? 'bg-brown-100 text-brown-900'
+                            : 'hover:bg-brown-50 text-brown-700'
+                        }`}
                         aria-current={isActive ? 'page' : undefined}
+                        aria-label={isSidebarCollapsed ? item.label : undefined}
+                        title={isSidebarCollapsed ? item.label : undefined}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
-                        {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
+                        {!isSidebarCollapsed && (
+                          <span className="truncate">{item.label}</span>
+                        )}
                       </button>
                     )
                   })}
                 </nav>
               </aside>
-
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" id="admin-tabs" data-component="admin-tabs">
 
               <TabsContent value="gci" className="space-y-6">

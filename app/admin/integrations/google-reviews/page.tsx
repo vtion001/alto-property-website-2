@@ -129,13 +129,13 @@ export default function GoogleReviewsIntegration() {
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`/api/google-reviews/${id}`, { method: 'DELETE' });
-      fetchReviews();
+      const res = await fetch(`/api/google-reviews/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+      await fetchReviews();
     } catch (error) {
       console.error('Error deleting review:', error);
     }
   };
-
   const renderStars = (rating: number) => {
     return (
       <div className="flex">
