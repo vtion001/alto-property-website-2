@@ -363,15 +363,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua is an absolute superstar! Sold our family home in just 3 days for $120k over asking price. His marketing strategy was brilliant and negotiation skills unmatched."
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">TC</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Thomas & Claire</div>
-                        <div className="text-sm text-brown-600">Sold in Chatswood • $2.1M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -388,15 +379,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Professional, responsive, and gets results! Joshua sold our investment property during a market downturn. His strategic pricing and buyer targeting were exceptional."
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">RJ</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Robert Johnson</div>
-                        <div className="text-sm text-brown-600">Sold in Parramatta • $950K</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -413,15 +395,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua made selling our deceased estate effortless. His empathy, professionalism, and attention to detail were outstanding. Achieved 10% above market value."
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">EW</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Emily Wong</div>
-                        <div className="text-sm text-brown-600">Sold in Eastwood • $1.35M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -438,15 +411,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "From appraisal to settlement, Joshua was exceptional. His market knowledge is second to none. Sold our apartment in 5 days with multiple offers!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">LP</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Lisa & Peter</div>
-                        <div className="text-sm text-brown-600">Sold in Rhodes • $780K</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -463,15 +427,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua's negotiation skills are phenomenal! He secured $85k above our reserve price. His communication throughout the process was flawless."
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">MK</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Michael Khan</div>
-                        <div className="text-sm text-brown-600">Sold in Burwood • $1.6M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -488,15 +443,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "We interviewed 5 agents - Joshua was by far the most impressive. His presentation, market analysis, and strategy were exceptional. Sold for 12% above expectations!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">ST</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Sarah & Tom</div>
-                        <div className="text-sm text-brown-600">Sold in Ryde • $1.45M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -513,15 +459,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua transformed our property presentation. His styling advice and professional photography attracted premium buyers. Sold in 10 days!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">NG</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Nina Grant</div>
-                        <div className="text-sm text-brown-600">Sold in Top Ryde • $1.1M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -538,15 +475,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "As first-time sellers, Joshua guided us through everything. His patience, expertise, and transparent communication made the process stress-free. Exceeded all expectations!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">DL</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">David & Lisa</div>
-                        <div className="text-sm text-brown-600">Sold in Epping • $920K</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -563,15 +491,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua's auction campaign was masterful. He created incredible competition and achieved $150k above reserve. His energy and enthusiasm are contagious!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">HC</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Helen Chen</div>
-                        <div className="text-sm text-brown-600">Sold in Macquarie Park • $1.8M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -588,15 +507,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua sold our difficult property with easement issues. His creative solutions and persistence resulted in a sale at full asking price. Highly recommend!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">AB</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Andrew Brown</div>
-                        <div className="text-sm text-brown-600">Sold in Meadowbank • $1.05M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -613,15 +523,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "Joshua's international marketing campaign attracted overseas buyers we never would have reached. Sold our luxury property for record price in the building."
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">JL</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">James & Lucy</div>
-                        <div className="text-sm text-brown-600">Sold in Sydney CBD • $3.2M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -638,15 +539,6 @@ export default function HomePage() {
                     <blockquote className="text-brown-700 font-light leading-relaxed italic">
                       "After 3 months with another agent with no offers, Joshua listed and sold in 2 weeks! His pricing strategy and buyer database are exceptional. True professional!"
                     </blockquote>
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-brown-100 w-12 h-12 rounded-full flex items-center justify-center">
-                        <span className="text-brown-700 font-medium">PM</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-brown-800">Patricia Miller</div>
-                        <div className="text-sm text-brown-600">Sold in Carlingford • $1.25M</div>
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -678,144 +570,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Properties Section */}
-        <section id="featured-properties" data-section="featured-properties" className="py-32 bg-white">
-          <div className="container">
-            <div className="text-center space-y-8 mb-24">
-              <div className="inline-block">
-                <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Portfolio Showcase</div>
-                <div className="w-16 h-px bg-brand-red"></div>
-              </div>
-              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">Featured Properties</h2>
-              <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
-                Discover exceptional properties across South East Queensland, each representing our commitment to quality and value.
-              </p>
-            </div>
-
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500">
-                <div className="relative overflow-hidden">
-                  <Image
-                    src="/placeholder.svg?height=300&width=400"
-                    alt="Luxury apartment in South Bank with river views"
-                    width={400}
-                    height={300}
-                    className="object-cover w-full h-64 group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-brown-800 text-cream">Just Listed</Badge>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
-                      <MapPin className="h-4 w-4 text-brown-700" />
-                    </div>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-light text-brown-800">Riverside Executive Apartment</h3>
-                      <p className="text-brown-600 text-sm">South Bank, Brisbane • 4101</p>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="text-2xl font-light text-brown-800">$1,850,000</div>
-                      <div className="flex space-x-4 text-sm text-brown-600">
-                        <span>3 bed</span>
-                        <span>2 bath</span>
-                        <span>2 car</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500">
-                <div className="relative overflow-hidden">
-                  <Image
-                    src="/placeholder.svg?height=300&width=400"
-                    alt="Heritage character home in New Farm"
-                    width={400}
-                    height={300}
-                    className="object-cover w-full h-64 group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-brown-800 text-cream">Price Reduced</Badge>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
-                      <MapPin className="h-4 w-4 text-brown-700" />
-                    </div>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-light text-brown-800">Heritage Queenslander</h3>
-                      <p className="text-brown-600 text-sm">New Farm, Brisbane • 4005</p>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="text-2xl font-light text-brown-800">$2,450,000</div>
-                      <div className="flex space-x-4 text-sm text-brown-600">
-                        <span>4 bed</span>
-                        <span>3 bath</span>
-                        <span>2 car</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500">
-                <div className="relative overflow-hidden">
-                  <Image
-                    src="/placeholder.svg?height=300&width=400"
-                    alt="Modern townhouse in Teneriffe with city views"
-                    width={400}
-                    height={300}
-                    className="object-cover w-full h-64 group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-brown-800 text-cream">Open Home Sat</Badge>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
-                      <MapPin className="h-4 w-4 text-brown-700" />
-                    </div>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-light text-brown-800">Contemporary Townhouse</h3>
-                      <p className="text-brown-600 text-sm">Teneriffe, Brisbane • 4005</p>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="text-2xl font-light text-brown-800">$1,650,000</div>
-                      <div className="flex space-x-4 text-sm text-brown-600">
-                        <span>3 bed</span>
-                        <span>2 bath</span>
-                        <span>2 car</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center mt-16">
-              <Link href="/buying/search-properties">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="font-light tracking-wide px-12 py-6 h-auto text-base border-brown-300 text-brown-800 hover:bg-brown-50 bg-transparent"
-                >
-                  View All Properties
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* Featured Properties Section removed per request */}
 
         {/* Proven Results Section */}
         <section className="py-32 bg-brown-900 text-cream">
