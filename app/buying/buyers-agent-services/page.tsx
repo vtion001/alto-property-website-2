@@ -58,7 +58,7 @@ export default function BuyersAgentServicesPage() {
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <ClientImage
-                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1753060413/wonnpo3gatludlru78oh.jpg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1757814157/w6442i2wt5wk70g8cbcv.jpg"
                     alt="Buyer agent consultation"
                     width={600}
                     height={700}

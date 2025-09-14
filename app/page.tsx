@@ -45,11 +45,10 @@ export default function HomePage() {
   <div className="absolute inset-0 z-0">
     <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-150">
       <source
-        src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752811390/ahkwwnqzlasp5ab5xub0.mp4"
+        src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752833883/hero-background-alto.mp4"
         type="video/mp4"
       />
     </video>
-    {/* THIS IS THE LINE TO REMOVE */}
     <div className="absolute inset-0 bg-black/30 sm:bg-gradient-to-r sm:from-brown-900/80 sm:via-brown-800/60 sm:to-brown-900/40" />
   </div>  
 
