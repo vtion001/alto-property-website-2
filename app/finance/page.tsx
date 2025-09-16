@@ -126,8 +126,7 @@ export default function FinancePage() {
             <Badge className="bg-gold-500 text-brown-900 mb-4">No Obligation Consultation</Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Expert Mortgage & Finance Solutions</h1>
             <p className="text-xl mb-8 text-brown-100">
-              Partner with Alto Property Group and our trusted mortgage broker for seamless property financing. Get
-              expert guidance from property search to settlement.
+              Through our trusted referral network, we connect you with experienced mortgage brokers and finance specialists for seamless property financing.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -151,7 +150,7 @@ export default function FinancePage() {
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Left Column - Benefits */}
           <div>
-            <h2 className="text-3xl font-bold text-brown-900 mb-8">Why Choose Our Finance Partnership?</h2>
+            <h2 className="text-3xl font-bold text-brown-900 mb-8">Why Choose Our Finance Referral Network?</h2>
 
             <div className="space-y-6">
               <div className="flex gap-4">
@@ -208,10 +207,9 @@ export default function FinancePage() {
                   <Users className="h-6 w-6 text-brown-700" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-brown-900 mb-2">Seamless Process & Facilitation</h3>
+                  <h3 className="text-xl font-semibold text-brown-900 mb-2">Trusted Referral Network</h3>
                   <p className="text-brown-700">
-                    Coordinated service between property search, finance approval, and settlement for a smoother
-                    experience.
+                    Access our carefully selected network of experienced mortgage brokers and finance specialists who understand the property market inside and out.
                   </p>
                 </div>
               </div>
@@ -235,9 +233,17 @@ export default function FinancePage() {
 
             {/* Additional Services */}
             <div className="mt-8 space-y-4">
-              <h3 className="text-xl font-semibold text-brown-900">What's Included in Your Consultation</h3>
+              <h3 className="text-xl font-semibold text-brown-900">What's Included Through Our Referral Network</h3>
 
               <div className="space-y-3">
+                <div className="flex gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <p className="font-medium text-brown-900">Expert Broker Matching</p>
+                    <p className="text-sm text-brown-700">We'll connect you with the most suitable broker from our network based on your specific needs and circumstances.</p>
+                  </div>
+                </div>
+
                 <div className="flex gap-3">
                   <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
                   <div>
@@ -265,14 +271,6 @@ export default function FinancePage() {
                 <div className="flex gap-3">
                   <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-medium text-brown-900">Investment Tax Strategies</p>
-                    <p className="text-sm text-brown-700">Understand depreciation, negative gearing, and other tax benefits for investors.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-1" />
-                  <div>
                     <p className="font-medium text-brown-900">Pre-Approval Strategy</p>
                     <p className="text-sm text-brown-700">Position yourself as a strong buyer with conditional approval before you start searching.</p>
                   </div>
@@ -288,7 +286,7 @@ export default function FinancePage() {
                 </div>
                 <div>
                   <p className="text-brown-800 italic mb-3">
-                    "The team helped us secure our first investment property with a strategy that saved us $40,000 in the first year alone. Their knowledge of grants and tax benefits was invaluable."
+                    "Through the referral network, we connected with an amazing broker who helped us secure our first investment property with a strategy that saved us $40,000 in the first year alone."
                   </p>
                   <div className="text-sm">
                     <p className="font-semibold text-brown-900">Sarah & Michael Chen</p>
@@ -300,18 +298,10 @@ export default function FinancePage() {
 
             {/* Contact Info */}
             <div className="mt-8 p-4 bg-brown-50 rounded-lg">
-              <h4 className="font-semibold text-brown-900 mb-2">Prefer to Call Directly?</h4>
+              <h4 className="font-semibold text-brown-900 mb-2">Ready to Get Started?</h4>
               <div className="space-y-1 text-sm text-brown-700">
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>Property Specialist: (+61) 467 048 837</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>Mortgage Broker: (+61) 466 623 689</span>
-                </div>
+                <p>Complete the form to connect with a specialist from our trusted referral network. We'll match you with the right expert for your specific needs.</p>
               </div>
-              <p className="text-xs text-brown-600 mt-2">Available Mon-Fri 8:30am-6:00pm</p>
             </div>
           </div>
 
@@ -319,14 +309,14 @@ export default function FinancePage() {
           <div>
             <Card className="shadow-xl border-0 overflow-hidden">
               <CardHeader className="bg-gradient-to-br from-brown-50 to-cream text-center">
-                <div className="bg-brown-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-8 w-8 text-brown-700" />
-                </div>
-                <CardTitle className="text-2xl text-brown-900">Book Your Free Consultation</CardTitle>
-                <CardDescription className="text-brown-600">
-                  No obligation • Expert advice • Personalized solutions
-                </CardDescription>
-              </CardHeader>
+              <div className="bg-brown-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Calendar className="h-8 w-8 text-brown-700" />
+              </div>
+              <CardTitle className="text-2xl text-brown-900">Connect With Our Referral Network</CardTitle>
+              <CardDescription className="text-brown-600">
+                Get matched with trusted finance specialists • No obligation • Expert guidance
+              </CardDescription>
+            </CardHeader>
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Contact Information */}

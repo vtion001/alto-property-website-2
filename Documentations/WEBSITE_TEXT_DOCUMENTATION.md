@@ -279,11 +279,7 @@ This document contains all text content across the website, organized by page an
 - **Email:** joshuakim@altoproperty.com
 - **Phone:** (+61) 467 048 837
 
-#### Amber Hsiao - Mortgage Broker
-- **Role:** Mortgage Broker
-- **Description:** As a dedicated Mortgage Broker, Amber leverages deep market knowledge and sharp negotiation skills to find the perfect home loan for her clients. She is committed to simplifying the complexities of financing, guiding you every step of the way to ensure a smooth and successful path to property ownership.
-- **Email:** amber.h@ausunfinance.com.au
-- **Phone:** (+61) 466 623 689
+
 
 #### Connor Reilly - Property Manager
 - **Role:** Property Manager
