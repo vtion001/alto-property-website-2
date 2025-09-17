@@ -1,7 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { jwtVerify } from 'jose'
 
-export async function GET() {
+export const runtime = 'nodejs'
+
+async function requireAdmin(request: NextRequest) {
+  const token = request.cookies.get('alto_admin')?.value
+  if (!token) return null
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
+    const { payload } = await jwtVerify(token, secret)
+    return payload
+  } catch {
+    return null
+  }
+}
+
+export async function GET(request: NextRequest) {
+  // Enforce admin authentication for reading config
+  const admin = await requireAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
     if (!config) return NextResponse.json({ error: 'No active configuration found' }, { status: 404 })
@@ -23,6 +42,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Enforce admin authentication for updating config (middleware also guards mutating routes)
+  const admin = await requireAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { accountSid, authToken, phoneNumber, isActive } = await request.json()
     

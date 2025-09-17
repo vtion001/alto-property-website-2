@@ -1,7 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { jwtVerify } from 'jose'
 
-export async function GET() {
+export const runtime = 'nodejs'
+
+async function requireAdmin(request: NextRequest) {
+  const token = request.cookies.get('alto_admin')?.value
+  if (!token) return null
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
+    const { payload } = await jwtVerify(token, secret)
+    return payload
+  } catch {
+    return null
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const admin = await requireAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const callLogs = await prisma.callLog.findMany({ orderBy: { createdAt: 'desc' } })
     return NextResponse.json(callLogs)
