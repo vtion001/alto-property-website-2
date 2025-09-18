@@ -184,11 +184,11 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-1 sm:p-4 overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div className="w-full h-full sm:h-auto flex items-start sm:items-center justify-center py-4 sm:py-0">
-        <Card className="w-full max-w-sm sm:max-w-lg mx-auto shadow-2xl border-2 border-brown-200 relative animate-in fade-in-0 zoom-in-95 duration-200 my-auto">
+        <Card className="w-full max-w-[95vw] sm:max-w-lg mx-auto shadow-2xl border-2 border-brown-200 relative animate-in fade-in-0 zoom-in-95 duration-200 my-auto flex flex-col">
         <CardHeader className="text-center pb-1 bg-gradient-to-br from-brown-50 to-cream px-4 sm:px-6 pt-4 sm:pt-6">
           <button
             onClick={onClose}
@@ -211,47 +211,47 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
             Switch to Alto Property Group and secure our best introductory offer
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-3 sm:p-6">
-          <div className="grid gap-2 grid-cols-3 sm:grid-cols-3 mb-4">
-            <div className="text-center p-1.5 sm:p-2 bg-brown-50 rounded-lg sm:rounded-xl">
-              <div className="bg-brown-100 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
-                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-brown-700" />
+        <CardContent className="p-3 sm:p-6 overflow-y-auto flex-1">
+          <div className="grid gap-1 sm:gap-2 grid-cols-3 mb-3 sm:mb-4">
+            <div className="text-center p-1 bg-brown-50 rounded-lg">
+              <div className="bg-brown-100 w-5 h-5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-1">
+                <TrendingUp className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-brown-700" />
               </div>
-              <h3 className="font-medium text-brown-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">
+              <h3 className="font-medium text-brown-800 mb-0.5 text-xs sm:text-sm leading-tight">
                 Beat Your Rate
               </h3>
-              <p className="text-xs text-brown-600 hidden sm:block">
+              <p className="text-[10px] text-brown-600 hidden sm:block">
                 We'll beat your current management fee by 1%*
               </p>
             </div>
 
-            <div className="text-center p-1.5 sm:p-2 bg-brown-50 rounded-lg sm:rounded-xl">
-              <div className="bg-brown-100 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
-                <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-brown-700" />
+            <div className="text-center p-1 bg-brown-50 rounded-lg">
+              <div className="bg-brown-100 w-5 h-5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-1">
+                <Clock className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-brown-700" />
               </div>
-              <h3 className="font-medium text-brown-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">
+              <h3 className="font-medium text-brown-800 mb-0.5 text-xs sm:text-sm leading-tight">
                 Up To 3 Months Free
               </h3>
-              <p className="text-xs text-brown-600 hidden sm:block">
+              <p className="text-[10px] text-brown-600 hidden sm:block">
                 Guaranteed 1 month free. Chance to receive 2–3 months.
               </p>
             </div>
 
-            <div className="text-center p-1.5 sm:p-2 bg-brown-50 rounded-lg sm:rounded-xl">
-              <div className="bg-brown-100 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-2">
-                <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-brown-700" />
+            <div className="text-center p-1 bg-brown-50 rounded-lg">
+              <div className="bg-brown-100 w-5 h-5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-1">
+                <Shield className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-brown-700" />
               </div>
-              <h3 className="font-medium text-brown-800 mb-0.5 sm:mb-1 text-xs sm:text-sm">
+              <h3 className="font-medium text-brown-800 mb-0.5 text-xs sm:text-sm leading-tight">
                 Free Appraisal
               </h3>
-              <p className="text-xs text-brown-600 hidden sm:block">
+              <p className="text-[10px] text-brown-600 hidden sm:block">
                 Complimentary property and rental assessment
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="grid gap-2 sm:grid-cols-2">
+          <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
+            <div className="grid gap-1 sm:gap-2 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-brown-900">
                   First Name *
@@ -261,7 +261,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder="John"
-                  className="border-brown-200 focus:border-brown-400 h-10 sm:h-8 text-sm"
+                  className="border-brown-200 focus:border-brown-400 h-8 sm:h-8 text-xs sm:text-sm"
                   required
                 />
               </div>
@@ -274,13 +274,13 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   placeholder="Smith"
-                  className="border-brown-200 focus:border-brown-400 h-10 sm:h-8 text-sm"
+                  className="border-brown-200 focus:border-brown-400 h-8 sm:h-8 text-xs sm:text-sm"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-1 sm:gap-2 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-brown-900">
                   Email Address *
@@ -291,7 +291,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="john@example.com"
-                  className="border-brown-200 focus:border-brown-400 h-10 sm:h-8 text-sm"
+                  className="border-brown-200 focus:border-brown-400 h-8 sm:h-8 text-xs sm:text-sm"
                   required
                 />
               </div>
@@ -305,7 +305,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="(07) 1234 5678"
-                  className="border-brown-200 focus:border-brown-400 h-10 sm:h-8 text-sm"
+                  className="border-brown-200 focus:border-brown-400 h-8 sm:h-8 text-xs sm:text-sm"
                   required
                 />
               </div>
@@ -320,7 +320,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                 value={formData.propertyAddress}
                 onChange={handleInputChange}
                 placeholder="123 Main Street, Brisbane"
-                className="border-brown-200 focus:border-brown-400 h-10 sm:h-8 text-sm"
+                className="border-brown-200 focus:border-brown-400 h-8 sm:h-8 text-xs sm:text-sm"
               />
             </div>
 
@@ -333,22 +333,22 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                 value={formData.currentManager}
                 onChange={handleInputChange}
                 placeholder="Current management company name"
-                className="border-brown-200 focus:border-brown-400 h-10 sm:h-8 text-sm"
+                className="border-brown-200 focus:border-brown-400 h-8 sm:h-8 text-xs sm:text-sm"
               />
             </div>
 
             {submitError && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-                <p className="text-sm text-red-600">{submitError}</p>
+              <div className="bg-red-50 border border-red-200 p-2 sm:p-3 rounded-lg">
+                <p className="text-xs sm:text-sm text-red-600">{submitError}</p>
               </div>
             )}
 
             {submitSuccess && (
-              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                <div className="flex items-start space-x-3">
+              <div className="bg-green-50 border border-green-200 p-3 sm:p-4 rounded-lg">
+                <div className="flex items-start space-x-2 sm:space-x-3">
                   <div className="bg-green-100 rounded-full p-1 flex-shrink-0">
                     <svg
-                      className="w-4 h-4 text-green-600"
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-green-600"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -360,16 +360,16 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-green-800 mb-1">
+                    <h4 className="text-xs sm:text-sm font-medium text-green-800 mb-1">
                       Request Submitted Successfully!
                     </h4>
-                    <p className="text-sm text-green-700">
+                    <p className="text-xs sm:text-sm text-green-700 leading-tight">
                       Thank you for your interest in our exclusive property
                       management offer. Our team has received your information
                       and will contact you within 24 hours to discuss your
                       personalized proposal.
                     </p>
-                    <p className="text-xs text-green-600 mt-2">
+                    <p className="text-[10px] sm:text-xs text-green-600 mt-1 sm:mt-2">
                       You can close this window now.
                     </p>
                   </div>
@@ -377,11 +377,11 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
               </div>
             )}
 
-            <div className="bg-brown-50 p-3 rounded-lg">
-              <h4 className="font-medium text-brown-800 mb-1 text-sm">
+            <div className="bg-brown-50 p-2 sm:p-3 rounded-lg">
+              <h4 className="font-medium text-brown-800 mb-1 text-xs sm:text-sm">
                 What You'll Get:
               </h4>
-              <ul className="text-xs text-brown-700 space-y-0.5">
+              <ul className="text-[10px] sm:text-xs text-brown-700 space-y-0.5 leading-tight">
                 <li>✓ Comprehensive property and rental market analysis</li>
                 <li>✓ Personalized management fee comparison</li>
                 <li>
@@ -395,7 +395,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-brown-900 hover:bg-brown-800 text-cream py-3 sm:py-2 h-auto font-medium tracking-wide text-sm sm:text-base disabled:opacity-50"
+                className="w-full bg-brown-900 hover:bg-brown-800 text-cream py-2 sm:py-3 h-auto font-medium tracking-wide text-xs sm:text-sm disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Claim Your Exclusive Offer"}
               </Button>
@@ -403,13 +403,13 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
               <Button
                 type="button"
                 onClick={onClose}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 sm:py-2 h-auto font-medium tracking-wide text-sm sm:text-base"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 sm:py-3 h-auto font-medium tracking-wide text-xs sm:text-sm"
               >
                 Close Window
               </Button>
             )}
 
-            <p className="text-xs text-brown-500 text-center leading-tight px-2 sm:px-0">
+            <p className="text-[10px] sm:text-xs text-brown-500 text-center leading-tight px-1 sm:px-0">
               * New clients only. Minimum 12-month agreement. 1 month free
               guaranteed; eligible clients may receive 2–3 months. If not
               applicable, we'll beat your current rate by 1%.

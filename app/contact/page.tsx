@@ -319,7 +319,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <Card className="border border-brown-100 shadow-xl">
+              <Card id="contact-form" className="border border-brown-100 shadow-xl">
                 <CardHeader className="pb-6">
                   <CardTitle className="text-2xl text-brown-900 font-light">Send us a message</CardTitle>
                   <CardDescription className="text-brown-700 font-light">

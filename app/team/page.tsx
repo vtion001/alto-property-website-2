@@ -68,7 +68,7 @@ export default function TeamPage() {
                 className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
                 asChild
               >
-                <Link href="/contact">Contact Our Team</Link>
+                <Link href="/contact#contact-form">Contact Our Team</Link>
               </Button>
             </div>
           </div>
