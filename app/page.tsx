@@ -314,9 +314,11 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+            <div className="flex flex-wrap justify-center gap-8">
               {getHomePageTeamMembers().map((member) => (
-                <TeamMemberCard key={member.id} member={member} variant="compact" />
+                <div key={member.id} className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-md">
+                  <TeamMemberCard member={member} variant="compact" />
+                </div>
               ))}
             </div>
 

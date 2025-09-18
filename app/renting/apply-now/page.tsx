@@ -1,3 +1,5 @@
+"use client"
+
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,8 +10,120 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileText, Upload, CheckCircle } from "lucide-react"
 import Image from "next/image"
+import { useState } from "react"
 
 export default function ApplyNowPage() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+    occupation: '',
+    currentAddress: '',
+    rentAmount: '',
+    tenancyLength: '',
+    employer: '',
+    position: '',
+    income: '',
+    employmentLength: '',
+    preferredProperty: '',
+    moveInDate: '',
+    leaseLength: '',
+    pets: '',
+    landlordName: '',
+    landlordPhone: '',
+    referenceName: '',
+    referencePhone: '',
+    additionalInfo: '',
+    terms: false,
+    marketing: false
+  })
+
+  const [errors, setErrors] = useState<{[key: string]: string}>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {}
+
+    // Required fields validation
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required'
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required'
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number'
+    }
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required'
+    if (!formData.occupation.trim()) newErrors.occupation = 'Occupation is required'
+    if (!formData.currentAddress.trim()) newErrors.currentAddress = 'Current address is required'
+    if (!formData.employer.trim()) newErrors.employer = 'Employer is required'
+    if (!formData.position.trim()) newErrors.position = 'Position is required'
+    if (!formData.income.trim()) newErrors.income = 'Annual income is required'
+    if (!formData.moveInDate) newErrors.moveInDate = 'Preferred move-in date is required'
+    if (!formData.terms) newErrors.terms = 'You must agree to the terms and conditions'
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear error for this field when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    
+    // Simulate form submission
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error('Form submission error:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center bg-white">
+          <div className="text-center space-y-8 max-w-2xl mx-auto p-8">
+            <CheckCircle className="h-20 w-20 text-green-500 mx-auto" />
+            <h1 className="text-4xl font-light text-brown-800">Application Submitted Successfully!</h1>
+            <p className="text-xl text-brown-700 font-light">
+              Thank you for your rental application. We will review your application and contact you within 48 hours.
+            </p>
+            <Button 
+              onClick={() => setIsSubmitted(false)} 
+              className="bg-brown-800 hover:bg-brown-900 text-cream"
+            >
+              Submit Another Application
+            </Button>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
@@ -38,7 +152,7 @@ export default function ApplyNowPage() {
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="/placeholder.svg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg?height=700&width=600"
                     alt="Online rental application"
                     width={600}
                     height={700}
@@ -63,7 +177,7 @@ export default function ApplyNowPage() {
 
               <Card className="border border-brown-100">
                 <CardContent className="p-12">
-                  <form className="space-y-12">
+                  <form className="space-y-12" onSubmit={handleSubmit} noValidate>
                     {/* Personal Information */}
                     <div className="space-y-6">
                       <h3 className="text-2xl font-light text-brown-800 border-b border-brown-100 pb-4">
@@ -73,33 +187,76 @@ export default function ApplyNowPage() {
                       <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="firstName">First Name *</Label>
-                          <Input id="firstName" placeholder="Enter your first name" required />
+                          <Input 
+                            id="firstName" 
+                            placeholder="Enter your first name" 
+                            value={formData.firstName}
+                            onChange={(e) => handleInputChange('firstName', e.target.value)}
+                            className={errors.firstName ? 'border-red-500' : ''}
+                          />
+                          {errors.firstName && <p className="text-sm text-red-500 mt-1">{errors.firstName}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="lastName">Last Name *</Label>
-                          <Input id="lastName" placeholder="Enter your last name" required />
+                          <Input 
+                            id="lastName" 
+                            placeholder="Enter your last name" 
+                            value={formData.lastName}
+                            onChange={(e) => handleInputChange('lastName', e.target.value)}
+                            className={errors.lastName ? 'border-red-500' : ''}
+                          />
+                          {errors.lastName && <p className="text-sm text-red-500 mt-1">{errors.lastName}</p>}
                         </div>
                       </div>
 
                       <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="email">Email *</Label>
-                          <Input id="email" type="email" placeholder="Enter your email" required />
+                          <Input 
+                            id="email" 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            value={formData.email}
+                            onChange={(e) => handleInputChange('email', e.target.value)}
+                            className={errors.email ? 'border-red-500' : ''}
+                          />
+                          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="phone">Phone *</Label>
-                          <Input id="phone" placeholder="Enter your phone number" required />
+                          <Input 
+                            id="phone" 
+                            placeholder="Enter your phone number" 
+                            value={formData.phone}
+                            onChange={(e) => handleInputChange('phone', e.target.value)}
+                            className={errors.phone ? 'border-red-500' : ''}
+                          />
+                          {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                         </div>
                       </div>
 
                       <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                          <Input id="dateOfBirth" type="date" required />
+                          <Input 
+                            id="dateOfBirth" 
+                            type="date" 
+                            value={formData.dateOfBirth}
+                            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                            className={errors.dateOfBirth ? 'border-red-500' : ''}
+                          />
+                          {errors.dateOfBirth && <p className="text-sm text-red-500 mt-1">{errors.dateOfBirth}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="occupation">Occupation *</Label>
-                          <Input id="occupation" placeholder="Enter your occupation" required />
+                          <Input 
+                            id="occupation" 
+                            placeholder="Enter your occupation" 
+                            value={formData.occupation}
+                            onChange={(e) => handleInputChange('occupation', e.target.value)}
+                            className={errors.occupation ? 'border-red-500' : ''}
+                          />
+                          {errors.occupation && <p className="text-sm text-red-500 mt-1">{errors.occupation}</p>}
                         </div>
                       </div>
                     </div>
@@ -112,17 +269,34 @@ export default function ApplyNowPage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="currentAddress">Current Address *</Label>
-                        <Input id="currentAddress" placeholder="Enter your current address" required />
+                        <Input 
+                          id="currentAddress" 
+                          placeholder="Enter your current address" 
+                          value={formData.currentAddress}
+                          onChange={(e) => handleInputChange('currentAddress', e.target.value)}
+                          className={errors.currentAddress ? 'border-red-500' : ''}
+                        />
+                        {errors.currentAddress && <p className="text-sm text-red-500 mt-1">{errors.currentAddress}</p>}
                       </div>
 
                       <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="rentAmount">Current Rent (per week)</Label>
-                          <Input id="rentAmount" placeholder="$500" />
+                          <Input 
+                            id="rentAmount" 
+                            placeholder="$500" 
+                            value={formData.rentAmount}
+                            onChange={(e) => handleInputChange('rentAmount', e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="tenancyLength">Length of Tenancy</Label>
-                          <Input id="tenancyLength" placeholder="2 years" />
+                          <Input 
+                            id="tenancyLength" 
+                            placeholder="2 years" 
+                            value={formData.tenancyLength}
+                            onChange={(e) => handleInputChange('tenancyLength', e.target.value)}
+                          />
                         </div>
                       </div>
                     </div>
@@ -136,22 +310,48 @@ export default function ApplyNowPage() {
                       <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="employer">Employer *</Label>
-                          <Input id="employer" placeholder="Enter employer name" required />
+                          <Input 
+                            id="employer" 
+                            placeholder="Enter employer name" 
+                            value={formData.employer}
+                            onChange={(e) => handleInputChange('employer', e.target.value)}
+                            className={errors.employer ? 'border-red-500' : ''}
+                          />
+                          {errors.employer && <p className="text-sm text-red-500 mt-1">{errors.employer}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="position">Position *</Label>
-                          <Input id="position" placeholder="Enter your position" required />
+                          <Input 
+                            id="position" 
+                            placeholder="Enter your position" 
+                            value={formData.position}
+                            onChange={(e) => handleInputChange('position', e.target.value)}
+                            className={errors.position ? 'border-red-500' : ''}
+                          />
+                          {errors.position && <p className="text-sm text-red-500 mt-1">{errors.position}</p>}
                         </div>
                       </div>
 
                       <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="income">Annual Income *</Label>
-                          <Input id="income" placeholder="$75,000" required />
+                          <Input 
+                            id="income" 
+                            placeholder="$75,000" 
+                            value={formData.income}
+                            onChange={(e) => handleInputChange('income', e.target.value)}
+                            className={errors.income ? 'border-red-500' : ''}
+                          />
+                          {errors.income && <p className="text-sm text-red-500 mt-1">{errors.income}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="employmentLength">Length of Employment</Label>
-                          <Input id="employmentLength" placeholder="3 years" />
+                          <Input 
+                            id="employmentLength" 
+                            placeholder="3 years" 
+                            value={formData.employmentLength}
+                            onChange={(e) => handleInputChange('employmentLength', e.target.value)}
+                          />
                         </div>
                       </div>
                     </div>
@@ -167,17 +367,29 @@ export default function ApplyNowPage() {
                         <Input
                           id="preferredProperty"
                           placeholder="Enter property address if applying for a specific property"
+                          value={formData.preferredProperty}
+                          onChange={(e) => handleInputChange('preferredProperty', e.target.value)}
                         />
                       </div>
 
                       <div className="grid gap-6 md:grid-cols-3">
                         <div className="space-y-2">
                           <Label htmlFor="moveInDate">Preferred Move-in Date *</Label>
-                          <Input id="moveInDate" type="date" required />
+                          <Input 
+                            id="moveInDate" 
+                            type="date" 
+                            value={formData.moveInDate}
+                            onChange={(e) => handleInputChange('moveInDate', e.target.value)}
+                            className={errors.moveInDate ? 'border-red-500' : ''}
+                          />
+                          {errors.moveInDate && <p className="text-sm text-red-500 mt-1">{errors.moveInDate}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="leaseLength">Preferred Lease Length</Label>
-                          <Select>
+                          <Select 
+                            value={formData.leaseLength}
+                            onValueChange={(value) => handleInputChange('leaseLength', value)}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Select length" />
                             </SelectTrigger>
@@ -191,7 +403,10 @@ export default function ApplyNowPage() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="pets">Do you have pets?</Label>
-                          <Select>
+                          <Select 
+                            value={formData.pets}
+                            onValueChange={(value) => handleInputChange('pets', value)}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Select option" />
                             </SelectTrigger>
@@ -213,11 +428,21 @@ export default function ApplyNowPage() {
                           <h4 className="text-lg font-light text-brown-800">Previous Landlord/Agent</h4>
                           <div className="space-y-2">
                             <Label htmlFor="landlordName">Name</Label>
-                            <Input id="landlordName" placeholder="Enter name" />
+                            <Input 
+                              id="landlordName" 
+                              placeholder="Enter name" 
+                              value={formData.landlordName}
+                              onChange={(e) => handleInputChange('landlordName', e.target.value)}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="landlordPhone">Phone</Label>
-                            <Input id="landlordPhone" placeholder="Enter phone number" />
+                            <Input 
+                              id="landlordPhone" 
+                              placeholder="Enter phone number" 
+                              value={formData.landlordPhone}
+                              onChange={(e) => handleInputChange('landlordPhone', e.target.value)}
+                            />
                           </div>
                         </div>
 
@@ -225,11 +450,21 @@ export default function ApplyNowPage() {
                           <h4 className="text-lg font-light text-brown-800">Character Reference</h4>
                           <div className="space-y-2">
                             <Label htmlFor="referenceName">Name</Label>
-                            <Input id="referenceName" placeholder="Enter name" />
+                            <Input 
+                              id="referenceName" 
+                              placeholder="Enter name" 
+                              value={formData.referenceName}
+                              onChange={(e) => handleInputChange('referenceName', e.target.value)}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="referencePhone">Phone</Label>
-                            <Input id="referencePhone" placeholder="Enter phone number" />
+                            <Input 
+                              id="referencePhone" 
+                              placeholder="Enter phone number" 
+                              value={formData.referencePhone}
+                              onChange={(e) => handleInputChange('referencePhone', e.target.value)}
+                            />
                           </div>
                         </div>
                       </div>
@@ -247,6 +482,8 @@ export default function ApplyNowPage() {
                           id="additionalInfo"
                           placeholder="Any additional information you'd like to provide..."
                           rows={4}
+                          value={formData.additionalInfo}
+                          onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
                         />
                       </div>
                     </div>
@@ -254,13 +491,22 @@ export default function ApplyNowPage() {
                     {/* Terms and Conditions */}
                     <div className="space-y-4">
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" />
+                        <Checkbox 
+                          id="terms" 
+                          checked={formData.terms}
+                          onCheckedChange={(checked) => handleInputChange('terms', checked)}
+                        />
                         <Label htmlFor="terms" className="text-sm">
                           I agree to the terms and conditions and privacy policy *
                         </Label>
                       </div>
+                      {errors.terms && <p className="text-sm text-red-500">{errors.terms}</p>}
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="marketing" />
+                        <Checkbox 
+                          id="marketing" 
+                          checked={formData.marketing}
+                          onCheckedChange={(checked) => handleInputChange('marketing', checked)}
+                        />
                         <Label htmlFor="marketing" className="text-sm">
                           I would like to receive marketing communications from Alto Property Group
                         </Label>
@@ -271,8 +517,9 @@ export default function ApplyNowPage() {
                       type="submit"
                       size="lg"
                       className="w-full bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide py-6 h-auto text-base"
+                      disabled={isSubmitting}
                     >
-                      Submit Application
+                      {isSubmitting ? 'Submitting...' : 'Submit Application'}
                     </Button>
                   </form>
                 </CardContent>

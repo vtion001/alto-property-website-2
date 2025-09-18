@@ -44,9 +44,11 @@ export default function TeamPage() {
               - Behind-the-scenes shots
               This will enhance the authentic, personal connection with potential clients.
             */}
-            <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3 justify-items-center max-w-6xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-12 max-w-6xl mx-auto">
               {teamMembers.map((member) => (
-                <TeamMemberCard key={member.id} member={member} />
+                <div key={member.id} className="w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-lg">
+                  <TeamMemberCard member={member} />
+                </div>
               ))}
             </div>
           </div>

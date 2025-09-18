@@ -11,6 +11,7 @@ import { Phone, Mail, MapPin, Clock, CheckCircle } from "lucide-react"
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,25 +21,151 @@ export default function ContactPage() {
     message: ""
   })
 
+  const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors }
+    
+    switch (name) {
+      case 'firstName':
+        if (!value.trim()) {
+          newErrors.firstName = 'First name is required'
+        } else if (value.trim().length < 2) {
+          newErrors.firstName = 'First name must be at least 2 characters'
+        } else {
+          delete newErrors.firstName
+        }
+        break
+      case 'lastName':
+        if (!value.trim()) {
+          newErrors.lastName = 'Last name is required'
+        } else if (value.trim().length < 2) {
+          newErrors.lastName = 'Last name must be at least 2 characters'
+        } else {
+          delete newErrors.lastName
+        }
+        break
+      case 'email':
+        if (!value.trim()) {
+          newErrors.email = 'Email is required'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Please enter a valid email address'
+        } else {
+          delete newErrors.email
+        }
+        break
+      case 'phone':
+        if (!value.trim()) {
+          newErrors.phone = 'Phone number is required'
+        } else if (!/^[\d\s\(\)\+\-\.]{8,}$/.test(value)) {
+          newErrors.phone = 'Please enter a valid phone number'
+        } else {
+          delete newErrors.phone
+        }
+        break
+      case 'message':
+        if (!value.trim()) {
+          newErrors.message = 'Message is required'
+        } else if (value.trim().length < 10) {
+          newErrors.message = 'Message must be at least 10 characters'
+        } else {
+          delete newErrors.message
+        }
+        break
+    }
+    
+    setErrors(newErrors)
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: value
     }))
+    validateField(name, value)
   }
 
   const handleCheckboxChange = (value: string, checked: boolean) => {
+    const newHelpWith = checked 
+      ? [...formData.helpWith, value]
+      : formData.helpWith.filter(item => item !== value)
+    
     setFormData(prev => ({
       ...prev,
-      helpWith: checked 
-        ? [...prev.helpWith, value]
-        : prev.helpWith.filter(item => item !== value)
+      helpWith: newHelpWith
     }))
+    
+    // Validate that at least one checkbox is selected
+    const newErrors = { ...errors }
+    if (newHelpWith.length === 0) {
+      newErrors.helpWith = 'Please select at least one option'
+    } else {
+      delete newErrors.helpWith
+    }
+    setErrors(newErrors)
+  }
+
+  const isFormValid = () => {
+    return (
+      formData.firstName.trim().length >= 2 &&
+      formData.lastName.trim().length >= 2 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      /^[\d\s\(\)\+\-\.]{8,}$/.test(formData.phone) &&
+      formData.helpWith.length > 0 &&
+      formData.message.trim().length >= 10 &&
+      Object.keys(errors).length === 0
+    )
+  }
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+    
+    // Validate all required fields
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required'
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters'
+    }
+    
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required'
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters'
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+    
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+    } else if (!/^[\d\s\(\)\+\-\.]{8,}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number'
+    }
+    
+    if (formData.helpWith.length === 0) {
+      newErrors.helpWith = 'Please select at least one option'
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required'
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      return
+    }
+    
     setIsSubmitting(true)
 
     try {
@@ -203,51 +330,70 @@ export default function ContactPage() {
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid gap-6 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-brown-900">First Name</label>
+                        <label className="text-sm font-medium text-brown-900">First Name *</label>
                         <Input 
                           name="firstName"
                           value={formData.firstName}
                           onChange={handleInputChange}
                           placeholder="John" 
-                          className="border-brown-200 focus:border-brown-400" 
+                          className={`${errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                          required
                         />
+                        {errors.firstName && (
+                          <p className="text-sm text-red-600 mt-1">{errors.firstName}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-brown-900">Last Name</label>
+                        <label className="text-sm font-medium text-brown-900">Last Name *</label>
                         <Input 
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleInputChange}
                           placeholder="Doe" 
-                          className="border-brown-200 focus:border-brown-400" 
+                          className={`${errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                          required
                         />
+                        {errors.lastName && (
+                          <p className="text-sm text-red-600 mt-1">{errors.lastName}</p>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-brown-900">Email</label>
+                      <label className="text-sm font-medium text-brown-900">Email *</label>
                       <Input
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         type="email"
                         placeholder="john@example.com"
-                        className="border-brown-200 focus:border-brown-400"
+                        className={`${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                        required
                       />
+                      {errors.email && (
+                        <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-brown-900">Phone</label>
+                      <label className="text-sm font-medium text-brown-900">Phone *</label>
                       <Input
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
                         type="tel"
                         placeholder="(07) 1234 5678"
-                        className="border-brown-200 focus:border-brown-400"
+                        className={`${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                        required
                       />
+                      {errors.phone && (
+                        <p className="text-sm text-red-600 mt-1">{errors.phone}</p>
+                      )}
                     </div>
                     
                     <div className="space-y-3">
                       <label className="text-sm font-medium text-brown-900">What can we help you with? *</label>
+                      {errors.helpWith && (
+                        <p className="text-sm text-red-600">{errors.helpWith}</p>
+                      )}
                       <div className="grid gap-3 sm:grid-cols-2">
                         <label className="flex items-center space-x-3 cursor-pointer">
                           <input
@@ -301,20 +447,24 @@ export default function ContactPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-brown-900">Message</label>
+                      <label className="text-sm font-medium text-brown-900">Message *</label>
                       <textarea
                         name="message"
                         value={formData.message}
                         onChange={handleInputChange}
-                        className="flex min-h-[100px] w-full rounded-md border border-brown-200 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brown-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className={`flex min-h-[100px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.message ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:ring-brown-400'}`}
                         placeholder="Tell us about your property needs..."
                         rows={4}
+                        required
                       />
+                      {errors.message && (
+                        <p className="text-sm text-red-600 mt-1">{errors.message}</p>
+                      )}
                     </div>
                     <Button 
                       type="submit" 
-                      disabled={isSubmitting}
-                      className="w-full bg-brown-900 hover:bg-brown-800 text-cream py-3 h-auto font-light tracking-wide"
+                      disabled={isSubmitting || !isFormValid()}
+                      className="w-full bg-brown-900 hover:bg-brown-800 text-cream py-3 h-auto font-light tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? 'Sending...' : 'Send Message'}
                     </Button>

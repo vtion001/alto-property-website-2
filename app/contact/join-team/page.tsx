@@ -1,11 +1,181 @@
+"use client"
+
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Users, TrendingUp, Award, Heart } from "lucide-react"
+import { useState } from "react"
 
 export default function JoinTeamPage() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    position: '',
+    coverLetter: ''
+  })
+  
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showThankYou, setShowThankYou] = useState(false)
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    
+    // Validate field on change
+    if (value.trim() !== '') {
+      validateField(name, value)
+    } else {
+      setErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  const validateField = (fieldName: string, value: string) => {
+    const newErrors = { ...errors }
+    
+    switch (fieldName) {
+      case 'firstName':
+        if (value.trim().length < 2) {
+          newErrors.firstName = 'First name must be at least 2 characters'
+        } else {
+          delete newErrors.firstName
+        }
+        break
+      case 'lastName':
+        if (value.trim().length < 2) {
+          newErrors.lastName = 'Last name must be at least 2 characters'
+        } else {
+          delete newErrors.lastName
+        }
+        break
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(value)) {
+          newErrors.email = 'Please enter a valid email address'
+        } else {
+          delete newErrors.email
+        }
+        break
+      case 'phone':
+        const phoneRegex = /^(\+?61|0)[2-9][0-9]{8}$|^(\([0-9]{2,3}\)\s?[0-9]{3,4}\s?[0-9]{3,4})$/
+        if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+          newErrors.phone = 'Please enter a valid Australian phone number'
+        } else {
+          delete newErrors.phone
+        }
+        break
+      case 'position':
+        if (value === '' || value === 'Select a position') {
+          newErrors.position = 'Please select a position'
+        } else {
+          delete newErrors.position
+        }
+        break
+      case 'coverLetter':
+        if (value.trim().length < 50) {
+          newErrors.coverLetter = 'Cover letter must be at least 50 characters'
+        } else {
+          delete newErrors.coverLetter
+        }
+        break
+    }
+    
+    setErrors(newErrors)
+  }
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+    
+    // First Name validation
+    if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters'
+    }
+    
+    // Last Name validation
+    if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters'
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+    
+    // Phone validation
+    const phoneRegex = /^(\+?61|0)[2-9][0-9]{8}$|^(\([0-9]{2,3}\)\s?[0-9]{3,4}\s?[0-9]{3,4})$/
+    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Please enter a valid Australian phone number'
+    }
+    
+    // Position validation
+    if (formData.position === '' || formData.position === 'Select a position') {
+      newErrors.position = 'Please select a position'
+    }
+    
+    // Cover Letter validation
+    if (formData.coverLetter.trim().length < 50) {
+      newErrors.coverLetter = 'Cover letter must be at least 50 characters'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const isFormValid = () => {
+    return (
+      formData.firstName.trim().length >= 2 &&
+      formData.lastName.trim().length >= 2 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      /^(\+?61|0)[2-9][0-9]{8}$|^(\([0-9]{2,3}\)\s?[0-9]{3,4}\s?[0-9]{3,4})$/.test(formData.phone.replace(/\s/g, '')) &&
+      formData.position !== '' &&
+      formData.position !== 'Select a position' &&
+      formData.coverLetter.trim().length >= 50 &&
+      Object.keys(errors).length === 0
+    )
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+    
+    setIsSubmitting(true)
+    
+    try {
+      // Here you would typically send the data to your API
+      console.log('Form submitted:', formData)
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Show thank you message
+      setShowThankYou(true)
+      
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        position: '',
+        coverLetter: ''
+      })
+      setErrors({})
+      
+    } catch (error) {
+      console.error('Submission error:', error)
+      alert('There was an error submitting your application. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   const benefits = [
     {
       icon: TrendingUp,
@@ -172,47 +342,130 @@ export default function JoinTeamPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-brown-900">First Name</label>
-                      <Input placeholder="John" className="border-brown-200 focus:border-brown-400" />
+                  {showThankYou ? (
+                    <div className="text-center space-y-6 py-8">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                        <div className="flex justify-center mb-4">
+                          <div className="bg-green-100 rounded-full p-3">
+                            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-light text-green-800 mb-2">Thank You for Your Application!</h3>
+                        <p className="text-green-700 font-light leading-relaxed mb-4">
+                          We've received your application and will be in touch within 48 hours. We're excited to learn more about you and your interest in joining the Alto team.
+                        </p>
+                        <Button 
+                          onClick={() => setShowThankYou(false)}
+                          className="bg-brown-900 hover:bg-brown-800 text-cream font-light"
+                        >
+                          Submit Another Application
+                        </Button>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-brown-900">Last Name</label>
-                      <Input placeholder="Doe" className="border-brown-200 focus:border-brown-400" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-brown-900">Email</label>
-                    <Input
-                      type="email"
-                      placeholder="john@example.com"
-                      className="border-brown-200 focus:border-brown-400"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-brown-900">Phone</label>
-                    <Input placeholder="(07) 1234 5678" className="border-brown-200 focus:border-brown-400" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-brown-900">Position of Interest</label>
-                    <select className="flex h-10 w-full rounded-md border border-brown-200 bg-background px-3 py-2 text-sm">
-                      <option>Select a position</option>
-                      <option>Mortgage Broker</option>
-                      <option>Sales Associate</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-brown-900">Cover Letter</label>
-                    <textarea
-                      className="flex min-h-[100px] w-full rounded-md border border-brown-200 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brown-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      placeholder="Tell us why you'd like to join the Alto team..."
-                      rows={4}
-                    />
-                  </div>
-                  <Button className="w-full bg-brown-900 hover:bg-brown-800 text-cream py-3 h-auto font-light tracking-wide">
-                    Submit Application
-                  </Button>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-brown-900">First Name *</label>
+                          <Input 
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            placeholder="John" 
+                            className={`${errors.firstName ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                            required
+                          />
+                          {errors.firstName && (
+                            <p className="text-sm text-red-600 mt-1">{errors.firstName}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-brown-900">Last Name *</label>
+                          <Input 
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            placeholder="Doe" 
+                            className={`${errors.lastName ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                            required
+                          />
+                          {errors.lastName && (
+                            <p className="text-sm text-red-600 mt-1">{errors.lastName}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-brown-900">Email *</label>
+                        <Input
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          type="email"
+                          placeholder="john@example.com"
+                          className={`${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                          required
+                        />
+                        {errors.email && (
+                          <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-brown-900">Phone *</label>
+                        <Input 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="(07) 1234 5678" 
+                          className={`${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:border-brown-400'}`}
+                          required
+                        />
+                        {errors.phone && (
+                          <p className="text-sm text-red-600 mt-1">{errors.phone}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-brown-900">Position of Interest *</label>
+                        {errors.position && (
+                          <p className="text-sm text-red-600 mb-1">{errors.position}</p>
+                        )}
+                        <select 
+                          name="position"
+                          value={formData.position}
+                          onChange={handleInputChange}
+                          className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ${errors.position ? 'border-red-500 focus:ring-red-500' : 'border-brown-200'}`}
+                          required
+                        >
+                          <option value="">Select a position</option>
+                          <option value="Mortgage Broker">Mortgage Broker</option>
+                          <option value="Sales Associate">Sales Associate</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-brown-900">Cover Letter *</label>
+                        <textarea
+                          name="coverLetter"
+                          value={formData.coverLetter}
+                          onChange={handleInputChange}
+                          className={`flex min-h-[100px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.coverLetter ? 'border-red-500 focus:ring-red-500' : 'border-brown-200 focus:ring-brown-400'}`}
+                          placeholder="Tell us why you'd like to join the Alto team..."
+                          rows={4}
+                          required
+                        />
+                        {errors.coverLetter && (
+                          <p className="text-sm text-red-600 mt-1">{errors.coverLetter}</p>
+                        )}
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-brown-900 hover:bg-brown-800 text-cream py-3 h-auto font-light tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting || !isFormValid()}
+                      >
+                        {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                      </Button>
+                    </form>
+                  )}
                 </CardContent>
               </Card>
             </div>
