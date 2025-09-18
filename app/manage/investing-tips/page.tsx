@@ -37,7 +37,7 @@ export default function InvestingTipsPage() {
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-3xl mx-auto leading-relaxed">
                 Expert insights and proven strategies to help you build a successful property investment portfolio in
-                Brisbane.
+                South East Queensland.
               </p>
             </div>
           </div>
@@ -66,8 +66,8 @@ export default function InvestingTipsPage() {
                       <h3 className="text-2xl font-light text-brown-800">Location is Everything</h3>
                       <p className="text-brown-700 font-light leading-relaxed">
                         Choose properties in areas with strong infrastructure, good transport links, schools, and
-                        amenities. Brisbane's inner suburbs like New Farm, Paddington, and South Bank consistently
-                        outperform due to their proximity to the CBD and lifestyle offerings.
+                        amenities. South East Queensland's key areas like Brisbane's inner suburbs, Gold Coast, and Sunshine Coast consistently
+                        outperform due to their proximity to major centers and lifestyle offerings.
                       </p>
                       <div className="flex items-center space-x-2 text-brown-600">
                         <Target className="h-5 w-5" />
@@ -89,7 +89,7 @@ export default function InvestingTipsPage() {
                       <h3 className="text-2xl font-light text-brown-800">Understand Your Numbers</h3>
                       <p className="text-brown-700 font-light leading-relaxed">
                         Calculate rental yield, cash flow, and potential capital growth before purchasing. Aim for
-                        properties with a rental yield of at least 4-5% in Brisbane's current market. Factor in all
+                        properties with a rental yield of at least 4-5% in South East Queensland's current market. Factor in all
                         costs including management fees, maintenance, and vacancy periods.
                       </p>
                       <div className="flex items-center space-x-2 text-brown-600">
@@ -160,7 +160,7 @@ export default function InvestingTipsPage() {
                       <h3 className="text-2xl font-light text-brown-800">Diversify Your Portfolio</h3>
                       <p className="text-brown-700 font-light leading-relaxed">
                         Don't put all your eggs in one basket. Consider different property types (apartments, houses,
-                        townhouses) and locations within Brisbane. This spreads risk and can provide more stable returns
+                        townhouses) and locations within South East Queensland. This spreads risk and can provide more stable returns
                         across different market cycles.
                       </p>
                       <div className="flex items-center space-x-2 text-brown-600">
@@ -298,7 +298,7 @@ export default function InvestingTipsPage() {
                 <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Market Data</div>
                 <div className="w-16 h-px bg-brown-300 mx-auto"></div>
               </div>
-              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">Brisbane Investment Insights</h2>
+              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">South East Queensland Investment Insights</h2>
             </div>
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -307,7 +307,7 @@ export default function InvestingTipsPage() {
                   <TrendingUp className="h-12 w-12 text-brown-700 mx-auto mb-4" />
                   <div className="text-3xl font-extralight text-brown-800 mb-2">12.5%</div>
                   <div className="text-brown-600 font-light">Annual Growth</div>
-                  <div className="text-brown-500 text-sm mt-2">Brisbane median house price</div>
+                  <div className="text-brown-500 text-sm mt-2">South East Queensland median house price</div>
                 </CardContent>
               </Card>
 
@@ -375,7 +375,7 @@ export default function InvestingTipsPage() {
                   <BookOpen className="h-12 w-12 text-brown-700 mb-6" />
                   <h3 className="text-xl font-light text-brown-800 mb-4">Investment Guide</h3>
                   <p className="text-brown-700 font-light leading-relaxed mb-6">
-                    Download our comprehensive guide to property investment in Brisbane.
+                    Download our comprehensive guide to property investment in South East Queensland.
                   </p>
                   <Button
                     variant="outline"
@@ -413,22 +413,24 @@ export default function InvestingTipsPage() {
             <div className="space-y-10 max-w-4xl mx-auto">
               <h2 className="text-4xl font-light sm:text-5xl">Ready to Start Your Investment Journey?</h2>
               <p className="text-xl text-brown-100 leading-relaxed">
-                Let our experts help you build a successful property investment portfolio in Brisbane.
+                Let our experts help you build a successful property investment portfolio in South East Queensland.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
-                >
-                  Get Investment Advice
-                </Button>
+                <Link href="/manage/speak-specialist#contact-form">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
+                  >
+                    Get Investment Advice
+                  </Button>
+                </Link>
                 <Button
                   size="lg"
                   variant="outline"
                   className="text-lg px-10 py-4 h-auto border-cream text-cream hover:bg-cream hover:text-brown-900 bg-transparent"
                 >
-                  Call (07) 3000 0000
+                  Call (61) 437 139 314
                 </Button>
               </div>
             </div>
@@ -449,7 +451,7 @@ export default function InvestingTipsPage() {
                 </div>
               </div>
               <p className="text-brown-200 leading-relaxed">
-                Brisbane's premier property management company, delivering exceptional results through genuine care.
+                South East Queensland's premier all-in-one real estate agency, consistently building lifelong relationships through delivering outstanding results and service.
               </p>
               <div className="text-sm text-brown-300 italic">"Exceptional Results. Genuine Care."</div>
             </div>
@@ -509,8 +511,8 @@ export default function InvestingTipsPage() {
             <div className="space-y-6">
               <h3 className="font-medium text-lg">Contact Info</h3>
               <ul className="space-y-3 text-brown-200">
-                <li>(07) 3000 0000</li>
-                <li>info@altopropertygroup.com.au</li>
+                <li>(61) 437 139 314</li>
+                <li>connor.reilly@altoproperty.com.au</li>
                 <li>Office address coming soon</li>
               </ul>
             </div>

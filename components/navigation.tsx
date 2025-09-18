@@ -65,7 +65,7 @@ export function Navigation() {
             sizes="(max-width: 768px) 48px, 120px"
           />
           <div className="hidden sm:block">
-            <div className="font-bold text-brown-800 text-base md:text-xl">ALTO Property</div>
+            <div className="font-bold text-brown-800 text-base md:text-xl"></div>
             <div className="text-brown-600 text-xs md:text-sm tracking-wider">SEQ's Premier Agency</div>
           </div>
         </Link>

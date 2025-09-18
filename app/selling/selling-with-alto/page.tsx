@@ -40,7 +40,7 @@ export default function SellingWithAltoPage() {
                   <p className="text-brown-700 font-light">
                     Discover your property's true market value with our comprehensive analysis of recent sales and market trends.
                   </p>
-                  <Link href="/selling/property-report">
+                  <Link href="/selling/property-report#report-form">
                     <Button
                       size="lg"
                       className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide px-8 py-4 h-auto text-base"
@@ -567,7 +567,7 @@ export default function SellingWithAltoPage() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Link href="/selling/property-report">
+                <Link href="/selling/property-report#report-form">
                   <Button
                     size="lg"
                     variant="secondary"

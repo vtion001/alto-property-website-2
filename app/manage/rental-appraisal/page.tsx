@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +13,111 @@ import { Calculator, TrendingUp, Clock, CheckCircle, DollarSign, FileText } from
 import Image from "next/image"
 
 export default function RentalAppraisalPage() {
+  const [formData, setFormData] = useState({
+    address: '',
+    phone: '',
+    terms: false
+  });
+  const [errors, setErrors] = useState({
+    address: '',
+    phone: '',
+    terms: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {
+      address: '',
+      phone: '',
+      terms: ''
+    };
+
+    if (!formData.address.trim()) {
+      newErrors.address = 'Property address is required';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    if (!formData.terms) {
+      newErrors.terms = 'You must agree to receive communications';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setErrors({
+        address: 'Submission failed. Please try again.',
+        phone: '',
+        terms: ''
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isFormValid = formData.address.trim() && formData.phone.trim() && formData.terms;
+
+  if (isSubmitted) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navigation />
+        <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-cream via-white to-brown-50">
+          <div className="container">
+            <div className="max-w-2xl mx-auto text-center space-y-8 p-8">
+              <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="h-10 w-10 text-green-600" />
+              </div>
+              <h1 className="text-4xl font-light text-brown-800">Thank You!</h1>
+              <p className="text-xl text-brown-700 leading-relaxed">
+                Your rental appraisal request has been submitted successfully. Our team will contact you within 24 hours with your comprehensive rental market analysis.
+              </p>
+              <Button
+                onClick={() => setIsSubmitted(false)}
+                className="bg-brown-800 hover:bg-brown-900 text-cream font-light px-8 py-3"
+              >
+                Submit Another Request
+              </Button>
+            </div>
+          </div>
+        </main>
+        <footer className="bg-brown-900 text-cream py-16">
+          <div className="container">
+            <div className="text-center">
+              <p className="text-brown-200">© {new Date().getFullYear()} Alto Property Group. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
@@ -39,6 +147,9 @@ export default function RentalAppraisalPage() {
                   <Button
                     size="lg"
                     className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide px-12 py-6 h-auto text-base"
+                    onClick={() => {
+                      document.getElementById('appraisal-form')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
                   >
                     Get Free Rental Appraisal
                   </Button>
@@ -54,10 +165,10 @@ export default function RentalAppraisalPage() {
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="/placeholder.svg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1758098419/wwffwu6cjckz0btcqni0.jpg?height=500&width=400"
                     alt="Professional rental appraisal and market analysis"
-                    width={600}
-                    height={700}
+                    width={400}
+                    height={500}
                     className="object-cover w-full h-auto"
                   />
                 </div>
@@ -67,7 +178,7 @@ export default function RentalAppraisalPage() {
         </section>
 
         {/* Appraisal Form */}
-        <section className="py-32 bg-white">
+        <section id="appraisal-form" className="py-32 bg-white">
           <div className="container">
             <div className="max-w-4xl mx-auto">
               <div className="text-center space-y-8 mb-16">
@@ -86,16 +197,21 @@ export default function RentalAppraisalPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                  <form className="space-y-8">
+                  <form onSubmit={handleSubmit} noValidate className="space-y-8">
                     {/* Property Information */}
                     <div className="space-y-6">
                       <div className="space-y-2">
                         <Label htmlFor="address">Property Address *</Label>
                         <Input
                           id="address"
+                          value={formData.address}
+                          onChange={(e) => handleInputChange('address', e.target.value)}
                           placeholder="Enter the complete property address"
-                          className="border-brown-200 focus:border-brown-400"
+                          className={`border-brown-200 focus:border-brown-400 ${errors.address ? 'border-red-500' : ''}`}
                         />
+                        {errors.address && (
+                          <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -103,28 +219,45 @@ export default function RentalAppraisalPage() {
                         <Input
                           id="phone"
                           type="tel"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
                           placeholder="Enter your phone number"
-                          className="border-brown-200 focus:border-brown-400"
+                          className={`border-brown-200 focus:border-brown-400 ${errors.phone ? 'border-red-500' : ''}`}
                         />
+                        {errors.phone && (
+                          <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                        )}
                       </div>
                     </div>
 
                     {/* Terms and Submit */}
                     <div className="space-y-6">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" />
+                      <div className="flex items-start space-x-2">
+                        <Checkbox 
+                          id="terms" 
+                          checked={formData.terms}
+                          onCheckedChange={(checked) => handleInputChange('terms', checked)}
+                        />
                         <Label htmlFor="terms" className="text-sm">
                           I agree to receive my rental appraisal report and marketing communications from Alto Property
                           Group *
                         </Label>
                       </div>
+                      {errors.terms && (
+                        <p className="text-red-500 text-sm">{errors.terms}</p>
+                      )}
 
                       <Button
                         type="submit"
                         size="lg"
-                        className="w-full bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide py-6 h-auto text-base"
+                        disabled={!isFormValid || isSubmitting}
+                        className={`w-full font-light tracking-wide py-6 h-auto text-base ${
+                          !isFormValid || isSubmitting
+                            ? 'bg-gray-400 cursor-not-allowed text-gray-600'
+                            : 'bg-brown-800 hover:bg-brown-900 text-cream'
+                        }`}
                       >
-                        Get My Free Rental Appraisal
+                        {isSubmitting ? 'Submitting...' : 'Get My Free Rental Appraisal'}
                       </Button>
                     </div>
                   </form>
@@ -237,6 +370,12 @@ export default function RentalAppraisalPage() {
                 size="lg"
                 variant="secondary"
                 className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
+                onClick={() => {
+                  document.getElementById('appraisal-form')?.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }}
               >
                 Get Free Rental Appraisal
               </Button>

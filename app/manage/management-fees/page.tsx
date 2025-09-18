@@ -81,7 +81,9 @@ export default function ManagementFeesPage() {
                       <span className="text-brown-800 font-light">Basic maintenance coordination</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-brown-800 hover:bg-brown-900 text-cream">Get in Touch to Discuss Options</Button>
+                  <Link href="/manage/speak-specialist#contact-form" className="w-full">
+                    <Button className="w-full bg-brown-800 hover:bg-brown-900 text-cream">Get in Touch to Discuss Options</Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -126,7 +128,9 @@ export default function ManagementFeesPage() {
                       <span className="text-brown-800 font-light">Annual tax summary</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-brown-800 hover:bg-brown-900 text-cream">Get in Touch to Discuss Options</Button>
+                  <Link href="/manage/speak-specialist#contact-form" className="w-full">
+                    <Button className="w-full bg-brown-800 hover:bg-brown-900 text-cream">Get in Touch to Discuss Options</Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -168,7 +172,9 @@ export default function ManagementFeesPage() {
                       <span className="text-brown-800 font-light">Concierge services</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-brown-800 hover:bg-brown-900 text-cream">Get in Touch to Discuss Options</Button>
+                  <Link href="/manage/speak-specialist#contact-form" className="w-full">
+                    <Button className="w-full bg-brown-800 hover:bg-brown-900 text-cream">Get in Touch to Discuss Options</Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -184,19 +190,21 @@ export default function ManagementFeesPage() {
                 Contact us today for a free consultation and rental appraisal to discuss the best management options for your property.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
-                >
-                  Get Free Appraisal
-                </Button>
+                <Link href="/manage/rental-appraisal#appraisal-form">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
+                  >
+                    Get Free Appraisal
+                  </Button>
+                </Link>
                 <Button
                   size="lg"
                   variant="outline"
                   className="text-lg px-10 py-4 h-auto border-cream text-cream hover:bg-cream hover:text-brown-900 bg-transparent"
                 >
-                  Call (+61) 467 048 837
+                  Call (+61) 437 139 314
                 </Button>
               </div>
             </div>
@@ -277,8 +285,8 @@ export default function ManagementFeesPage() {
             <div className="space-y-6">
               <h3 className="font-medium text-lg">Contact Info</h3>
               <ul className="space-y-3 text-brown-200">
-                <li>(+61) 467 048 837</li>
-                <li>sales@altoproperty.com.au</li>
+                <li>(+61) 437 139 314</li>
+                <li>connor.reilly@altoproperty.com.au</li>
                 <li>Office address coming soon</li>
               </ul>
             </div>

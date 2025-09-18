@@ -52,12 +52,14 @@ export default function SellingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <Button
-                    size="lg"
-                    className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base"
-                  >
-                    Get Free Appraisal
-                  </Button>
+                  <Link href="/selling/property-report#report-form">
+                    <Button
+                      size="lg"
+                      className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    >
+                      Get Free Appraisal
+                    </Button>
+                  </Link>
                   <Button
                     variant="outline"
                     size="lg"
@@ -70,7 +72,7 @@ export default function SellingPage() {
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1752805038/q0sycnd9rvdoltpvbfab.jpg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1758168201/tg0pxnmzsjreop7kuaqt.jpg"
                     alt="Property for sale"
                     width={600}
                     height={700}
@@ -112,10 +114,10 @@ export default function SellingPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Link href="/selling/property-report">
+                  <Link href="/selling/property-report#report-form">
                     <Button
                       variant="outline"
-                      className="w-full border-brown-200 text-brown-800 hover:bg-brown-50 bg-transparent"
+                      className="w-full border-brown-200 text-brown-800 hover:bg-brown-50 bg-transparent transition-all duration-300 hover:scale-105 hover:shadow-lg"
                     >
                       Get Report
                     </Button>
@@ -231,13 +233,16 @@ export default function SellingPage() {
                 Get started with a free property appraisal and discover your
                 property's true market value.
               </p>
-              <Button
-                size="lg"
-                variant="secondary"
-                className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
-              >
-                Get Free Appraisal
-              </Button>
+              <div className="flex justify-center">
+                <Link href="/selling/property-report#report-form">
+                  <Button
+                    size="lg"
+                    className="bg-brand-red hover:bg-brand-red/90 text-white font-light tracking-wide px-12 py-6 h-auto text-base transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    Get Free Appraisal
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

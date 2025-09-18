@@ -1,4 +1,6 @@
 
+"use client"
+
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,10 +10,22 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Users, TrendingUp, CheckCircle, Settings, Shield, Clock, FileText, Phone, Calculator, Home, Camera, Wrench } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { PopupManager, openManagementOfferPopup } from "@/components/popup-manager"
+import { LeadCapturePopup } from "@/components/lead-capture-popup"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
 export default function PropertyManagementPage() {
+  const [showLeadPopup, setShowLeadPopup] = useState(false)
+
+  const handleOpenPopup = () => {
+    setShowLeadPopup(true)
+  }
+
+  const handleClosePopup = () => {
+    setShowLeadPopup(false)
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navigation />
@@ -40,25 +54,20 @@ export default function PropertyManagementPage() {
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <Button
-                    size="lg"
-                    className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide px-12 py-6 h-auto text-base"
-                  >
-                    Get Free Appraisal
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="font-light tracking-wide px-12 py-6 h-auto text-base border-brown-300 text-brown-800 hover:bg-brown-50 bg-transparent"
-                  >
-                    Get in Touch to Discuss Options
-                  </Button>
+                  <Link href="/manage/rental-appraisal#appraisal-form">
+                    <Button
+                      size="lg"
+                      className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide px-12 py-6 h-auto text-base"
+                    >
+                      Get Free Appraisal
+                    </Button>
+                  </Link>
                 </div>
               </div>
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="/placeholder.svg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1758097997/soyhk4tmtn9qprgqjlp5.jpg"
                     alt="Professional property management"
                     width={600}
                     height={700}
@@ -353,10 +362,10 @@ export default function PropertyManagementPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="my-6 h-px bg-brown-200" />
-                  <div className="mb-6">
+                  <div className="mb-6 text-center">
                     <h3 className="text-brown-900 text-lg font-medium">Inclusions:</h3>
                   </div>
-                  <ul className="space-y-4 text-brown-800">
+                  <ul className="space-y-4 text-brown-800 max-w-2xl mx-auto">
                     {[
                       "Rent Collection & Payment",
                       "Maintenance Coordination",
@@ -374,27 +383,18 @@ export default function PropertyManagementPage() {
                       "Online landlord portal",
                     ].map((item) => (
                       <li key={item} className="flex items-start space-x-3">
-                        <CheckCircle className="h-5 w-5 text-brown-600 mt-0.5" />
+                        <CheckCircle className="h-5 w-5 text-brown-600 mt-0.5 flex-shrink-0" />
                         <span className="font-light">{item}</span>
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                    <Link href="#claim-offer">
-                      <Button
-                        size="lg"
-                        className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide w-full"
-                      >
-                        Claim Up To 3 Months Free
-                      </Button>
-                    </Link>
+                  <div className="mt-10 text-center">
                     <Button
-                      variant="outline"
                       size="lg"
-                      className="font-light tracking-wide w-full border-brown-300 text-brown-800 hover:bg-brown-50"
-                      asChild
+                      className="bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide w-full sm:w-auto"
+                      onClick={handleOpenPopup}
                     >
-                      <Link href="#claim-offer">Learn More</Link>
+                      Claim Up To 3 Months Free
                     </Button>
                   </div>
                 </CardContent>
@@ -403,95 +403,7 @@ export default function PropertyManagementPage() {
           </div>
         </section>
 
-        {/* Rental Appraisal Form */}
-        <section className="py-32 bg-brown-50">
-          <div className="container">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center space-y-8 mb-16">
-                <div className="inline-block">
-                  <div className="text-xs tracking-[0.3em] text-brown-600 uppercase mb-2">Free Rental Appraisal</div>
-                  <div className="w-16 h-px bg-brown-300 mx-auto"></div>
-                </div>
-                <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">Get Your Property Valued</h2>
-                <p className="text-xl font-light text-brown-700">
-                  Discover your property's rental potential with our comprehensive market analysis.
-                </p>
-              </div>
 
-              <Card className="border border-brown-100 shadow-xl">
-                <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-3xl text-brown-900 font-light">Rental Appraisal Request</CardTitle>
-                  <CardDescription className="text-brown-700 font-light text-lg">
-                    Provide your details for a comprehensive rental assessment
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-8">
-                  <form className="space-y-8">
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name *</Label>
-                        <Input
-                          id="name"
-                          placeholder="Enter your full name"
-                          className="border-brown-200 focus:border-brown-400"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number *</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="Enter your phone number"
-                          className="border-brown-200 focus:border-brown-400"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email address"
-                        className="border-brown-200 focus:border-brown-400"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="address">Property Address *</Label>
-                      <Input
-                        id="address"
-                        placeholder="Enter the complete property address"
-                        className="border-brown-200 focus:border-brown-400"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-6">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" />
-                        <Label htmlFor="terms" className="text-sm">
-                          I agree to receive my rental appraisal report and marketing communications from Alto Property *
-                        </Label>
-                      </div>
-
-                      <Button
-                        type="submit"
-                        size="lg"
-                        className="w-full bg-brown-800 hover:bg-brown-900 text-cream font-light tracking-wide py-6 h-auto text-base"
-                      >
-                        Get My Free Rental Appraisal
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
 
         {/* CTA Section */}
         <section className="py-24 bg-brown-900 text-cream">
@@ -502,25 +414,23 @@ export default function PropertyManagementPage() {
                 Get in touch to discuss your property management options and discover how we can help you achieve exceptional results.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
-                >
-                  Get Free Appraisal
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-10 py-4 h-auto border-cream text-cream hover:bg-cream hover:text-brown-900 bg-transparent"
-                >
-                  Call (+61) 467 048 837
-                </Button>
+                <Link href="/manage/rental-appraisal#appraisal-form">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
+                  >
+                    Get Free Appraisal
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
       </main>
+
+      {/* Lead Capture Popup */}
+      {showLeadPopup && <LeadCapturePopup onClose={handleClosePopup} />}
 
       {/* Footer */}
       <footer className="bg-brown-900 text-cream py-16">

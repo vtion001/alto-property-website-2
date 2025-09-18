@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,7 @@ import Image from "next/image"
 export default function PropertyReportPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const formSectionRef = useRef<HTMLElement>(null)
   const [formData, setFormData] = useState({
     reportType: "market-analysis",
     streetAddress: "",
@@ -27,6 +28,13 @@ export default function PropertyReportPage() {
     phone: "",
     agreeToTerms: false
   })
+
+  // Handle scroll to form on navigation with hash
+  useEffect(() => {
+    if (window.location.hash === '#report-form') {
+      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -218,7 +226,7 @@ export default function PropertyReportPage() {
               <div className="relative">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1752793055/gvifuovtglvhj44mqfh4.jpg?height=700&width=600"
+                    src="https://res.cloudinary.com/dbviya1rj/image/upload/v1758168347/jtq5vygiy1bsjw1jvcg9.jpg"
                     alt="Professional property analysis and market report"
                     width={500}
                     height={600}
@@ -232,7 +240,7 @@ export default function PropertyReportPage() {
         </section>
 
         {/* Report Request Form */}
-        <section id="report-form" className="py-32 bg-white">
+        <section id="report-form" ref={formSectionRef} className="py-32 bg-white">
           <div className="container">
             <div className="max-w-4xl mx-auto">
               <div className="text-center space-y-8 mb-16">

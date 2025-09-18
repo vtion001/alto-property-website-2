@@ -40,19 +40,14 @@ export default function BuyersAgentServicesPage() {
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <Button
-                    size="lg"
-                    className="bg-brown-900 hover:bg-brown-800 text-cream font-light tracking-wide px-12 py-6 h-auto text-base"
-                  >
-                    Book a Free Consultation
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="font-light tracking-wide px-12 py-6 h-auto text-base border-brown-300 text-brown-800 hover:bg-brown-50 bg-transparent"
-                  >
-                    How It Works
-                  </Button>
+                  <Link href="/buying/buying-with-alto#buyer-form">
+                    <Button
+                      size="lg"
+                      className="bg-brown-900 hover:bg-brown-800 text-cream font-light tracking-wide px-12 py-6 h-auto text-base"
+                    >
+                      Book a Free Consultation
+                    </Button>
+                  </Link>
                 </div>
               </div>
               <div className="relative">
@@ -72,7 +67,7 @@ export default function BuyersAgentServicesPage() {
         </section>
 
         {/* The Smoothest Path to Settlement */}
-        <section className="py-32 bg-white">
+        <section id="services-section" className="py-32 bg-white">
           <div className="container">
             <div className="text-center space-y-8 mb-24">
               <div className="inline-block">
@@ -136,9 +131,11 @@ export default function BuyersAgentServicesPage() {
                 </p>
               </div>
               <div className="text-center">
-                <Button size="lg" className="bg-brown-900 hover:bg-brown-800 text-cream font-light px-10 py-6 h-auto">
-                  Engage Negotiation Only
-                </Button>
+                <Link href="/buying/buying-with-alto#buyer-form">
+                  <Button size="lg" className="bg-brown-900 hover:bg-brown-800 text-cream font-light px-10 py-6 h-auto">
+                    Engage Negotiation Only
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -203,19 +200,23 @@ export default function BuyersAgentServicesPage() {
               <h2 className="text-4xl font-light sm:text-5xl">Ready to Secure Your Dream Property?</h2>
               <p className="text-xl text-cream/90 leading-relaxed">Our buyer’s agents work exclusively for you—focused on results, not listings.</p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button
-                  size="lg"
-                  className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
-                >
-                  Book a Free Consultation
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-10 py-4 h-auto border-cream text-cream hover:bg-cream hover:text-brown-900 bg-transparent"
-                >
-                  Learn About Our Services
-                </Button>
+                <Link href="/buying/buying-with-alto#buyer-form">
+                  <Button
+                    size="lg"
+                    className="text-lg px-10 py-4 h-auto bg-cream text-brown-900 hover:bg-brown-50"
+                  >
+                    Book a Free Consultation
+                  </Button>
+                </Link>
+                <Link href="#services-section" className="inline-block">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="text-lg px-10 py-4 h-auto border-cream text-cream hover:bg-cream hover:text-brown-900 bg-transparent"
+                  >
+                    Learn About Our Services
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
