@@ -124,92 +124,9 @@ export default function AdminPage() {
     { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
   ]
 
-  // Mock data - replace with actual data fetching
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
-    {
-      id: "1",
-      title: "Brisbane Property Market Outlook 2024",
-      excerpt: "Discover the key trends shaping Brisbane's property market...",
-      author: "Sarah Mitchell",
-      category: "Market Analysis",
-      date: "2024-03-15",
-      status: "published",
-      views: 1250
-    },
-    {
-      id: "2",
-      title: "Top Investment Suburbs in Brisbane",
-      excerpt: "Our expert analysis of Brisbane's most promising suburbs...",
-      author: "David Chen",
-      category: "Investment Tips",
-      date: "2024-03-10",
-      status: "published",
-      views: 890
-    }
-  ])
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
 
-  const [properties, setProperties] = useState<Property[]>([
-    {
-      id: "1",
-      title: "Luxury Riverside Apartment",
-      address: "32 Veronica Avenue",
-      suburb: "South Brisbane",
-      price: "$850,000",
-      beds: 2,
-      baths: 2,
-      parking: 1,
-      landSize: "N/A",
-      status: "available",
-      type: "apartment",
-      listingType: "sale",
-      image: "/placeholder.svg?height=200&width=300",
-      images: ["/placeholder.svg?height=200&width=300", "/placeholder.svg?height=200&width=301", "/placeholder.svg?height=200&width=302"], // Example images
-      dateAdded: "2024-03-15",
-      description: "A stunning apartment with river views.",
-      features: ["Balcony", "Gym", "Pool"],
-      commissionRate: 2.5
-    },
-    {
-      id: "2",
-      title: "Heritage Family Home",
-      address: "15 Oxford Street",
-      suburb: "New Farm",
-      price: "$1,250,000",
-      beds: 4,
-      baths: 3,
-      parking: 2,
-      landSize: "607m²",
-      status: "pending",
-      type: "house",
-      listingType: "sale",
-      image: "/placeholder.svg?height=200&width=300",
-      images: ["/placeholder.svg?height=200&width=303", "/placeholder.svg?height=200&width=304"],
-      dateAdded: "2024-03-12",
-      description: "A beautifully renovated heritage home.",
-      features: ["Large Garden", "Fireplace", "Original Features"],
-      commissionRate: 2.5
-    },
-    {
-      id: "3",
-      title: "Modern Townhouse",
-      address: "8 River Terrace",
-      suburb: "Teneriffe",
-      price: "$650/week",
-      beds: 3,
-      baths: 2,
-      parking: 2,
-      landSize: "N/A",
-      status: "available",
-      type: "townhouse",
-      listingType: "rent",
-      image: "/placeholder.svg?height=200&width=300",
-      images: ["/placeholder.svg?height=200&width=305"],
-      dateAdded: "2024-03-10",
-      description: "Contemporary townhouse living.",
-      features: ["Balcony", "Modern Kitchen"],
-      commissionRate: 10 // Assuming weekly rent for commission calc
-    }
-  ])
+  const [properties, setProperties] = useState<Property[]>([])
 
   // Load properties from API (falls back to localStorage on failure)
   useEffect(() => {
@@ -298,38 +215,7 @@ export default function AdminPage() {
     } catch {}
   }, [blogPosts])
 
-  const [rentalApplications, setRentalApplications] = useState<RentalApplication[]>([
-    {
-      id: "1",
-      applicantName: "Emma Johnson",
-      property: "Modern Townhouse, Teneriffe",
-      applicationDate: "2024-03-16",
-      status: "pending",
-      income: "$75,000",
-      email: "emma.j@email.com",
-      phone: "0412 345 678"
-    },
-    {
-      id: "2",
-      applicantName: "Michael Zhang",
-      property: "City Apartment, Spring Hill",
-      applicationDate: "2024-03-15",
-      status: "approved",
-      income: "$85,000",
-      email: "m.zhang@email.com",
-      phone: "0423 456 789"
-    },
-    {
-      id: "3",
-      applicantName: "Sophie Williams",
-      property: "Garden Cottage, Paddington",
-      applicationDate: "2024-03-14",
-      status: "processing",
-      income: "$68,000",
-      email: "sophie.w@email.com",
-      phone: "0434 567 890"
-    }
-  ])
+  const [rentalApplications, setRentalApplications] = useState<RentalApplication[]>([])
 
   const [newBlogPost, setNewBlogPost] = useState({
     title: "",

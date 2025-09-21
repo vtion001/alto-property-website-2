@@ -28,31 +28,23 @@ export async function POST(request: NextRequest) {
     const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
     if (!config) return NextResponse.json({ error: 'Twilio not configured' }, { status: 400 })
 
-    // Mock mode: enabled if TWILIO_MOCK=true or placeholder credentials are detected
-    const useMock = process.env.TWILIO_MOCK === 'true'
-      || config.accountSid.startsWith('ACxxxx')
-      || config.authToken === 'your_auth_token_here'
-
-    if (useMock) {
-      const fakeSid = 'CA' + randomBytes(16).toString('hex')
-      await prisma.callLog.create({
-        data: {
-          callSid: fakeSid,
-          fromNumber: from,
-          toNumber: to,
-          status: 'queued',
-          startedAt: new Date(),
-        },
-      })
-      return NextResponse.json({ sid: fakeSid, status: 'queued', mocked: true })
+    // Check for placeholder credentials and reject the call
+    if (config.accountSid.startsWith('ACxxxx') || config.authToken === 'your_auth_token_here') {
+      return NextResponse.json({ error: 'Invalid Twilio configuration. Please update your credentials.' }, { status: 400 })
     }
 
     const client = twilio(config.accountSid, config.authToken)
 
+    // Get the base URL for webhooks
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
     const call = await client.calls.create({
       to,
       from,
-      twiml: '<Response><Say>Hello from the dialing system. This is a test call.</Say></Response>',
+      twiml: '<Response><Say>Hello from the dialing system. Please wait while we connect your call.</Say><Pause length="1"/><Say>You are now connected. You should be able to hear the other party.</Say><Gather input="speech dtmf" timeout="3600" finishOnKey="#" action="/api/twilio/voice/gather" method="POST">Speak or press any key to continue. Press pound to end.</Gather></Response>',
+      statusCallback: `${baseUrl}/api/twilio/voice`,
+      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+      statusCallbackMethod: 'POST',
     })
 
     await prisma.callLog.create({

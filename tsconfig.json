@@ -1,4 +1,10 @@
 {
+  "types": ["node", "bcrypt"],
+  "types": ["node", "react-dom"],
+  "types": ["node"],
+
+
+
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

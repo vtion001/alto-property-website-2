@@ -20,6 +20,7 @@ export async function middleware(req: NextRequest) {
   if (
     pathname.startsWith('/api') &&
     !pathname.startsWith('/api/admin/auth') &&
+    !pathname.startsWith('/api/twilio') && // Allow Twilio webhook access
     ['POST','PUT','DELETE'].includes(req.method)
   ) {
     const token = req.cookies.get('alto_admin')?.value
