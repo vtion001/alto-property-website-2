@@ -108,7 +108,7 @@ export default function AdminPage() {
   const [isBlogEditOpen, setIsBlogEditOpen] = useState(false)
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null)
   const [editedBlogPost, setEditedBlogPost] = useState<BlogPost | null>(null)
-  const [isDialerOpen, setIsDialerOpen] = useState(false)
+  const [isDialerOpen, setIsDialerOpen] = useState(true) // Temporarily open for debugging
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   const adminNavItems = [

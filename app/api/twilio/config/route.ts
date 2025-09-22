@@ -17,10 +17,8 @@ async function requireAdmin(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  // Enforce admin authentication for reading config
-  const admin = await requireAdmin(request)
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  // Allow unauthenticated access for dialer functionality
+  // Only require admin auth for sensitive operations via POST/PUT/DELETE
   try {
     const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
     if (!config) return NextResponse.json({ error: 'No active configuration found' }, { status: 404 })

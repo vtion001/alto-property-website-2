@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Device, Call } from '@twilio/voice-sdk'
+import TwilioDeviceManager from '@/lib/twilio-device-manager'
 
 declare global {
   interface Window {
@@ -73,6 +75,7 @@ const dtmfFrequencies: Record<string, [number, number]> = {
 }
 
 export default function Dialer() {
+  console.log('🎬 Dialer component mounted')
   const [isCalling, setIsCalling] = useState(false)
   const [callStatus, setCallStatus] = useState<'idle' | 'dialing' | 'ringing' | 'connected' | 'ended' | 'busy'>('idle')
   const [twilioConfig, setTwilioConfig] = useState<any>(null)
@@ -90,6 +93,25 @@ export default function Dialer() {
   const [deviceStatus, setDeviceStatus] = useState<'initializing' | 'connecting' | 'ready' | 'error' | 'retrying' | 'failed' | 'disconnected'>('initializing')
   const [deviceError, setDeviceError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  
+  // Get device manager instance
+  const deviceManager = TwilioDeviceManager.getInstance()
+  
+  // Subscribe to device manager state
+  useEffect(() => {
+    const unsubscribe = deviceManager.subscribe((state) => {
+      setDevice(state.device)
+      setIsDeviceReady(state.isReady)
+      setDeviceStatus(state.status)
+      setDeviceError(state.error)
+      setRetryCount(state.retryCount)
+      
+      // Sync deviceRef with the device manager's device
+      deviceRef.current = state.device
+    })
+    
+    return unsubscribe
+  }, [deviceManager])
   
   // Toast hook
   const { toast } = useToast()
@@ -347,8 +369,9 @@ export default function Dialer() {
         if (response.ok) setContacts(await response.json())
       } catch {}
     }
+    console.log('🚀 Initial data fetch useEffect triggered')
     fetchConfig(); fetchCallLogs(); fetchContacts(); generateTwilioToken()
-  }, [configForm])
+  }, []) // Empty dependency array to run only on mount
 
   // Enhanced error logging utility
   const logDetailedError = (context: string, error: any) => {
@@ -410,262 +433,18 @@ export default function Dialer() {
     }
   }
 
-  // Initialize Twilio Device when token is available
+  // Initialize device manager when token is available
   useEffect(() => {
-    const maxRetries = 3
-    const retryDelay = 2000 // 2 seconds
-
-    const initializeTwilioDevice = async () => {
-      if (twilioToken && !deviceRef.current) {
-        try {
-          console.log('🔄 Initializing Twilio Device...')
-          setDeviceStatus('connecting')
-          setDeviceError(null)
-          
-          // Validate token before initialization
-          if (!twilioToken || twilioToken === 'mock_access_token_for_development') {
-            if (twilioToken === 'mock_access_token_for_development') {
-              console.log('🧪 Mock mode detected - simulating device ready state')
-              setIsDeviceReady(true)
-              setDeviceStatus('ready')
-              return
-            } else {
-              throw new Error('Invalid or missing access token')
-            }
-          }
-          
-          // Load Twilio Client SDK
-          const Twilio = await loadTwilioClient() as any
-          
-          // Create and setup Twilio Device with enhanced configuration
-          const device = new Twilio.Device(twilioToken, {
-            codecPreferences: ['opus', 'pcmu'],
-            fakeLocalDTMF: true,
-            enableRingingState: true,
-            allowIncomingWhileBusy: false,
-            closeProtection: false,
-            // Enhanced audio configuration
-            sounds: {
-              incoming: false,
-              outgoing: false,
-              disconnect: false
-            },
-            // Add connection options for better reliability
-            edge: 'sydney', // Use closest edge location
-            debug: true, // Enable debug logging
-            logLevel: 'debug'
-          })
-
-          // Monitor WebSocket connection
-          setTimeout(() => monitorWebSocketState(device), 1000)
-
-          // Setup device event handlers with enhanced error handling
-          device.on('ready', () => {
-              console.log('✅ Twilio Device ready for calls')
-              console.log('📊 Device capabilities:', {
-                canMakeOutgoingCalls: device.canMakeOutgoingCalls,
-                canReceiveIncomingCalls: device.canReceiveIncomingCalls,
-                identity: device.identity,
-                edge: device.edge
-              })
-              setIsDeviceReady(true)
-              setDeviceStatus('ready')
-              setDeviceError(null)
-              setRetryCount(0) // Reset retry count on success
-            toast({
-              title: 'Device Ready',
-              description: 'Twilio device is ready for calls',
-              variant: 'default',
-            })
-          })
-
-          device.on('error', (error: any) => {
-            logDetailedError('Twilio Device Error', error)
-            setIsDeviceReady(false)
-            setDeviceStatus('error')
-            
-            // Enhanced error handling with specific error codes and detailed analysis
-            let errorMessage = 'Unknown device error'
-            let errorCategory = 'unknown'
-            
-            if (error && typeof error === 'object') {
-              // Handle different error structures
-              const errorCode = error.code || error.errorCode || error.status
-              const errorMsg = error.message || error.description || error.error
-              
-              if (errorCode) {
-                errorCategory = 'coded_error'
-                switch (errorCode) {
-                  case 31205:
-                    errorMessage = 'TwiML application configuration error. Please check your webhook URLs in the Twilio Console.'
-                    break
-                  case 31206:
-                    errorMessage = 'Invalid access token. The token may be expired or malformed.'
-                    break
-                  case 31208:
-                    errorMessage = 'WebSocket connection failed. Check your network connection and firewall settings.'
-                    break
-                  case 31209:
-                    errorMessage = 'Signaling connection error. Verify your TwiML application setup and webhook accessibility.'
-                    break
-                  case 31301:
-                    errorMessage = 'Microphone access denied. Please allow microphone permissions.'
-                    break
-                  case 31400:
-                    errorMessage = 'Bad request. Check your Twilio configuration and credentials.'
-                    break
-                  case 31401:
-                    errorMessage = 'Unauthorized. Verify your Twilio Account SID and API credentials.'
-                    break
-                  case 31403:
-                    errorMessage = 'Forbidden. Check your Twilio account permissions and TwiML app configuration.'
-                    break
-                  case 31404:
-                    errorMessage = 'TwiML application not found. Verify your TWILIO_TWIML_APP_SID.'
-                    break
-                  case 31500:
-                    errorMessage = 'Internal server error. This may be a temporary Twilio service issue.'
-                    break
-                  default:
-                    errorMessage = `Device error (${errorCode}): ${errorMsg || 'Unknown error'}`
-                }
-              } else if (errorMsg) {
-                errorCategory = 'message_error'
-                errorMessage = errorMsg
-              } else if (Object.keys(error).length === 0) {
-                errorCategory = 'empty_error'
-                errorMessage = 'Empty error object received. This often indicates a WebSocket/signaling connection issue. Check your TwiML application webhook configuration.'
-              } else {
-                errorCategory = 'complex_error'
-                errorMessage = `Complex error: ${JSON.stringify(error)}`
-              }
-            } else if (typeof error === 'string') {
-              errorCategory = 'string_error'
-              errorMessage = error
-            }
-            
-            console.log(`🏷️ Error category: ${errorCategory}`)
-            setDeviceError(errorMessage)
-
-            toast({
-              title: 'Device Error',
-              description: errorMessage,
-              variant: 'destructive',
-            })
-
-            // Retry logic with exponential backoff (only for certain error types)
-            const retryableErrors = ['empty_error', 'WebSocket', 'signaling', 'network']
-            const shouldRetry = retryableErrors.some(type => 
-              errorCategory.includes(type) || errorMessage.toLowerCase().includes(type)
-            )
-            
-            if (shouldRetry && retryCount < maxRetries) {
-              setRetryCount(prev => prev + 1)
-              setDeviceStatus('retrying')
-              const delay = Math.pow(2, retryCount) * 1000 // 1s, 2s, 4s
-              console.log(`🔄 Retrying device initialization in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})...`)
-              setTimeout(() => {
-                if (deviceRef.current) {
-                  deviceRef.current.destroy()
-                  deviceRef.current = null
-                  setDevice(null)
-                }
-                initializeTwilioDevice()
-              }, delay)
-            } else {
-              console.error('❌ Max retry attempts reached or non-retryable error. Device initialization failed.')
-              setDeviceStatus('failed')
-            }
-          })
-
-          device.on('disconnect', (connection: any) => {
-            console.log('📞 Call disconnected')
-            if (connection) {
-              logDetailedError('Disconnect Event', connection)
-            }
-            setCallStatus('ended')
-            setIsCalling(false)
-            stopRingingTone()
-            cleanupAudioStreams()
-          })
-
-          device.on('incoming', (connection: any) => {
-            console.log('📞 Incoming call received')
-            console.log('📊 Incoming call details:', {
-              callSid: connection.parameters.CallSid,
-              from: connection.parameters.From,
-              to: connection.parameters.To,
-              direction: connection.parameters.Direction
-            })
-            // Handle incoming calls if needed
-            toast({
-              title: 'Incoming Call',
-              description: `Call from ${connection.parameters.From}`,
-              variant: 'default',
-            })
-          })
-
-          // Additional event listeners for comprehensive monitoring
-          device.on('connect', (connection: any) => {
-            console.log('🔗 Call connected:', connection.parameters)
-          })
-          
-          device.on('cancel', () => {
-            console.log('❌ Call cancelled')
-          })
-          
-          device.on('presence', (presenceEvent: any) => {
-            console.log('👤 Presence event:', presenceEvent)
-          })
-
-          // Store device reference
-          deviceRef.current = device
-          setDevice(device)
-          console.log('🚀 Twilio Device initialized successfully')
-
-        } catch (error: any) {
-          logDetailedError('Device Initialization Error', error)
-          setIsDeviceReady(false)
-          setDeviceStatus('error')
-          
-          let errorMessage = 'Could not initialize Twilio device for calling'
-          if (error.message?.includes('TwiML')) {
-            errorMessage = 'TwiML application not configured. Please check the setup guide.'
-          } else if (error.message?.includes('token')) {
-            errorMessage = 'Invalid access token. Please check your Twilio credentials.'
-          }
-          
-          setDeviceError(`Initialization failed: ${error.message || 'Unknown error'}`)
-          toast({
-            title: 'Device Initialization Failed',
-            description: errorMessage,
-            variant: 'destructive',
-          })
-
-          // Attempt retry for network-related errors
-          if (retryCount < maxRetries && error.message?.includes('network')) {
-            setRetryCount(prev => prev + 1)
-            console.log(`🔄 Retrying device initialization (${retryCount + 1}/${maxRetries})...`)
-            setTimeout(initializeTwilioDevice, retryDelay * (retryCount + 1))
-          }
-        }
-      }
-    }
-
+    console.log('🔄 Dialer useEffect triggered:', { 
+      twilioToken: twilioToken ? `${twilioToken.substring(0, 20)}...` : 'null',
+      hasDeviceManager: !!deviceManager,
+      hasToast: !!toast
+    })
     if (twilioToken) {
-      initializeTwilioDevice()
+      console.log('🚀 Calling deviceManager.initialize...')
+      deviceManager.initialize(twilioToken, toast)
     }
-
-    // Cleanup function
-    return () => {
-      if (deviceRef.current) {
-        deviceRef.current.destroy()
-        deviceRef.current = null
-        setDevice(null)
-        setIsDeviceReady(false)
-      }
-    }
-  }, [twilioToken, toast])
+  }, [twilioToken, deviceManager, toast])
 
   // JWT token validation utilities
   const decodeJWT = (token: string) => {
@@ -742,6 +521,7 @@ export default function Dialer() {
 
   // Generate Twilio token for WebRTC with enhanced validation
   const generateTwilioToken = async () => {
+    console.log('🎯 generateTwilioToken called')
     try {
       console.log('🔄 Generating Twilio access token...')
       
@@ -819,26 +599,9 @@ export default function Dialer() {
     }
   }
 
-  // Load Twilio Client SDK dynamically
-  const loadTwilioClient = () => {
-    return new Promise((resolve, reject) => {
-      if ((window as any).Twilio) {
-        resolve((window as any).Twilio)
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = 'https://sdk.twilio.com/js/client/v1.15/twilio.min.js'
-      script.onload = () => {
-        if ((window as any).Twilio) {
-          resolve((window as any).Twilio)
-        } else {
-          reject(new Error('Twilio SDK loaded but not available'))
-        }
-      }
-      script.onerror = () => reject(new Error('Failed to load Twilio SDK'))
-      document.head.appendChild(script)
-    })
+  // Twilio Voice SDK is now imported directly from npm package
+  const getTwilioDevice = () => {
+    return Device
   }
 
   // Cleanup on unmount
@@ -979,32 +742,28 @@ export default function Dialer() {
             From: twilioConfig?.phoneNumber || '+1234567890'
           }
           
-          const connection = await deviceRef.current.connect({ params })
-          currentConnectionRef.current = connection
+          const call = await deviceRef.current.connect({ params })
+          currentConnectionRef.current = call
           
-          // Setup connection event handlers
-          connection.on('accept', () => {
+          // Setup call event handlers for Voice SDK v2.x
+          call.on('accept', () => {
             console.log('Twilio call connected')
             setCallStatus('connected')
-            setCurrentCallSid(connection.parameters.CallSid)
+            setCurrentCallSid(call.parameters.CallSid)
             
-            // Setup remote audio stream for Twilio
-            if (remoteAudioRef.current && connection.getRemoteStream) {
-              const remoteStream = connection.getRemoteStream()
-              if (remoteStream) {
-                remoteAudioRef.current.srcObject = remoteStream
-                remoteStreamRef.current = remoteStream
-                console.log('Remote audio stream connected')
-              }
+            // Setup remote audio stream for Twilio Voice SDK v2.x
+            if (remoteAudioRef.current) {
+              // Voice SDK v2.x handles audio automatically
+              console.log('Remote audio stream connected via Voice SDK v2.x')
             }
           })
           
-          connection.on('disconnect', () => {
+          call.on('disconnect', () => {
             console.log('Twilio call disconnected')
             endCall()
           })
           
-          connection.on('error', (error: any) => {
+          call.on('error', (error: any) => {
             console.error('Twilio call error:', error)
             toast({
               title: 'Call Error',
@@ -1014,29 +773,16 @@ export default function Dialer() {
             endCall()
           })
           
-          // Handle audio streams for Twilio connection
-          connection.on('volume', (inputVolume: number, outputVolume: number) => {
+          // Handle audio streams for Twilio call (Voice SDK v2.x)
+          call.on('volume', (inputVolume: number, outputVolume: number) => {
             setAudioLevel(inputVolume)
           })
           
-          // Additional event for audio stream setup
-          connection.on('sample', () => {
-            // This event fires when audio samples are being transmitted
-            if (remoteAudioRef.current && !remoteAudioRef.current.srcObject) {
-              // Try to get the remote stream again
-              const remoteStream = connection.getRemoteStream?.() || connection.mediaStream
-              if (remoteStream) {
-                remoteAudioRef.current.srcObject = remoteStream
-                remoteStreamRef.current = remoteStream
-                console.log('Remote audio stream connected via sample event')
-              }
-            }
-          })
+          // Voice SDK v2.x handles audio automatically, no manual stream setup needed
+          console.log('Audio streams managed automatically by Voice SDK v2.x')
           
-          // Set up audio output device for Twilio
-          if (deviceRef.current && deviceRef.current.audio) {
-            deviceRef.current.audio.speakerDevices.set('default')
-          }
+          // Audio is managed automatically by Voice SDK v2.x
+          console.log('Audio output managed automatically by Voice SDK v2.x')
           
           console.log('Twilio call initiated successfully')
           return // Success, exit function
@@ -1282,6 +1028,20 @@ export default function Dialer() {
 
   return (
     <div className="p-2 sm:p-4 w-full">
+      {/* Debug Status Indicator */}
+       <div className="mb-4 p-3 bg-gray-100 rounded-lg text-sm">
+          <div className="font-semibold text-gray-700 mb-2">Debug Status:</div>
+          <div>Token: {twilioToken ? '✅ Available' : '❌ Missing'}</div>
+          <div>Device Ready: {isDeviceReady ? '✅ Ready' : '❌ Not Ready'}</div>
+          <div>Device Status: {device ? '✅ Connected' : '❌ Disconnected'}</div>
+          <div>Manager Status: {deviceStatus}</div>
+          <div>Retry Count: {retryCount}</div>
+          {deviceError && <div className="text-red-600">Error: {deviceError}</div>}
+          <div className="text-xs text-gray-500 mt-2">
+            Token Preview: {twilioToken ? twilioToken.substring(0, 30) + '...' : 'None'}
+          </div>
+        </div>
+      
       <h2 className="text-xl font-semibold mb-4">Twilio Dialing System</h2>
       <Tabs defaultValue="dialer" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
