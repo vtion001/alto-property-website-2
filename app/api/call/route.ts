@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import twilio from 'twilio'
 import { jwtVerify } from 'jose'
-import { randomBytes } from 'crypto'
 
 export const runtime = 'nodejs'
 
@@ -25,18 +23,24 @@ export async function POST(request: NextRequest) {
     const { to, from } = await request.json()
     if (!to || !from) return NextResponse.json({ error: 'Missing to/from' }, { status: 400 })
 
-    const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
-    if (!config) return NextResponse.json({ error: 'Twilio not configured' }, { status: 400 })
+    // Use credentials from .env.local
+    const accountSid = process.env.TWILIO_ACCOUNT_SID
+    const authToken = process.env.TWILIO_AUTH_TOKEN
+    const twilioNumber = process.env.TWILIO_PHONE_NUMBER
+
+    if (!accountSid || !authToken || !twilioNumber) {
+      return NextResponse.json({ error: 'Twilio credentials not set in environment' }, { status: 500 })
+    }
 
     // Check for placeholder credentials and reject the call
-    if (config.accountSid.startsWith('ACxxxx') || config.authToken === 'your_auth_token_here') {
+    if (accountSid.startsWith('ACxxxx') || authToken === 'your_auth_token_here') {
       return NextResponse.json({ error: 'Invalid Twilio configuration. Please update your credentials.' }, { status: 400 })
     }
 
-    const client = twilio(config.accountSid, config.authToken)
+    const client = twilio(accountSid, authToken)
 
     // Get the base URL for webhooks
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'
 
     const call = await client.calls.create({
       to,
@@ -47,21 +51,10 @@ export async function POST(request: NextRequest) {
       statusCallbackMethod: 'POST',
     })
 
-    await prisma.callLog.create({
-      data: {
-        callSid: call.sid,
-        fromNumber: from,
-        toNumber: to,
-        status: call.status ?? 'queued',
-        startedAt: new Date(),
-      },
-    })
-
+    // No DB logging
     return NextResponse.json({ sid: call.sid, status: call.status, dateCreated: call.dateCreated })
   } catch (error) {
     console.error('Call POST error', error)
     return NextResponse.json({ error: 'Failed to make call' }, { status: 500 })
   }
 }
-
-

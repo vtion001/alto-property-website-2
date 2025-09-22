@@ -93,10 +93,10 @@ export default function Dialer() {
   const [deviceStatus, setDeviceStatus] = useState<'initializing' | 'connecting' | 'ready' | 'error' | 'retrying' | 'failed' | 'disconnected'>('initializing')
   const [deviceError, setDeviceError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
-  
+
   // Get device manager instance
   const deviceManager = TwilioDeviceManager.getInstance()
-  
+
   // Subscribe to device manager state
   useEffect(() => {
     const unsubscribe = deviceManager.subscribe((state) => {
@@ -105,22 +105,22 @@ export default function Dialer() {
       setDeviceStatus(state.status)
       setDeviceError(state.error)
       setRetryCount(state.retryCount)
-      
+
       // Sync deviceRef with the device manager's device
       deviceRef.current = state.device
     })
-    
+
     return unsubscribe
   }, [deviceManager])
-  
+
   // Toast hook
   const { toast } = useToast()
-  
+
   // Utility function to generate unique call IDs
   const generateCallId = () => {
     return `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
-  
+
   // Audio context and references
   const audioContextRef = useRef<AudioContext | null>(null)
   const ringingIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -156,7 +156,7 @@ export default function Dialer() {
         const context = new AudioContext()
         audioContextRef.current = context
         console.log('Audio context initialized:', context)
-        
+
         // Resume context if suspended (required by some browsers)
         if (context.state === 'suspended') {
           await context.resume()
@@ -177,24 +177,24 @@ export default function Dialer() {
   // Generate DTMF tone
   const playDTMFTone = (digit: string) => {
     if (!audioContextRef.current) return
-    
+
     const context = audioContextRef.current
     const [freq1, freq2] = dtmfFrequencies[digit] || [697, 1209]
-    
+
     const oscillator1 = context.createOscillator()
     const oscillator2 = context.createOscillator()
     const gainNode = context.createGain()
-    
+
     oscillator1.connect(gainNode)
     oscillator2.connect(gainNode)
     gainNode.connect(context.destination)
-    
+
     oscillator1.frequency.setValueAtTime(freq1, context.currentTime)
     oscillator2.frequency.setValueAtTime(freq2, context.currentTime)
-    
+
     gainNode.gain.setValueAtTime(0.1, context.currentTime)
     gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.1)
-    
+
     oscillator1.start(context.currentTime)
     oscillator2.start(context.currentTime)
     oscillator1.stop(context.currentTime + 0.1)
@@ -207,26 +207,26 @@ export default function Dialer() {
       await initAudioContext()
       if (!audioContextRef.current) return
     }
-    
+
     const context = audioContextRef.current
-    
+
     // Ensure context is running
     if (context.state === 'suspended') {
       await context.resume()
     }
-    
+
     // Stop any existing ringing tone
     stopRingingTone()
-    
+
     const playRing = () => {
       try {
         // Create new oscillator and gain node for each ring
         const oscillator = context.createOscillator()
         const gainNode = context.createGain()
-        
+
         oscillator.connect(gainNode)
         gainNode.connect(context.destination)
-        
+
         if (toneType === 'ringing') {
           // Standard ringing tone: 440Hz A4 note, 2 seconds on, 4 seconds off
           oscillator.frequency.setValueAtTime(440, context.currentTime)
@@ -248,16 +248,16 @@ export default function Dialer() {
           const osc1 = context.createOscillator()
           const osc2 = context.createOscillator()
           const gain = context.createGain()
-          
+
           osc1.connect(gain)
           osc2.connect(gain)
           gain.connect(context.destination)
-          
+
           osc1.frequency.setValueAtTime(480, context.currentTime)
           osc2.frequency.setValueAtTime(620, context.currentTime)
           gain.gain.setValueAtTime(0.3, context.currentTime)
           gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.5)
-          
+
           osc1.start(context.currentTime)
           osc2.start(context.currentTime)
           osc1.stop(context.currentTime + 0.5)
@@ -267,10 +267,10 @@ export default function Dialer() {
         console.warn('Error playing ringing tone:', error)
       }
     }
-    
+
     // Play immediately, then set up interval based on tone type
     playRing()
-    
+
     if (toneType === 'ringing') {
       // Standard ringing pattern: 2s on, 4s off
       ringingIntervalRef.current = setInterval(playRing, 6000)
@@ -296,9 +296,9 @@ export default function Dialer() {
       if (response.ok) {
         const statusData = await response.json()
         const status = statusData.status
-        
+
         console.log('Call status check:', statusData)
-        
+
         if (status === 'completed' || status === 'failed' || status === 'busy' || status === 'no-answer') {
           setCallStatus('ended')
           if (status === 'busy') {
@@ -346,96 +346,73 @@ export default function Dialer() {
     }
   }
 
+  // useEffect(() => {
+  //   const fetchConfig = async () => {
+  //     try {
+  //       const response = await fetch('/api/twilio/config')
+  //       if (response.ok) {
+  //         const config = await response.json()
+  //         setTwilioConfig(config)
+  //         configForm.reset({ accountSid: config.accountSid, authToken: '', phoneNumber: config.phoneNumber })
+  //       }
+  //     } catch {}
+  //   }
+  //   const fetchCallLogs = async () => {
+  //     try {
+  //       const response = await fetch('/api/call-logs')
+  //       if (response.ok) setCallLogs(await response.json())
+  //     } catch {}
+  //   }
+  //   const fetchContacts = async () => {
+  //     try {
+  //       const response = await fetch('/api/contacts')
+  //       if (response.ok) setContacts(await response.json())
+  //     } catch {}
+  //   }
+  //   console.log('🚀 Initial data fetch useEffect triggered')
+  //   fetchConfig(); fetchCallLogs(); fetchContacts(); generateTwilioToken()
+  // }, []) // Empty dependency array to run only on mount
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('/api/twilio/config')
-        if (response.ok) {
-          const config = await response.json()
-          setTwilioConfig(config)
-          configForm.reset({ accountSid: config.accountSid, authToken: '', phoneNumber: config.phoneNumber })
+        // Use your existing Twilio credentials from .env
+        const twilioCredentials = {
+          accountSid: 'AC9320550d6ead598f05d7967d7e9582f5',
+          phoneNumber: '+61483913513',
+          isActive: true,
         }
-      } catch {}
-    }
-    const fetchCallLogs = async () => {
-      try {
-        const response = await fetch('/api/call-logs')
-        if (response.ok) setCallLogs(await response.json())
-      } catch {}
-    }
-    const fetchContacts = async () => {
-      try {
-        const response = await fetch('/api/contacts')
-        if (response.ok) setContacts(await response.json())
-      } catch {}
-    }
-    console.log('🚀 Initial data fetch useEffect triggered')
-    fetchConfig(); fetchCallLogs(); fetchContacts(); generateTwilioToken()
-  }, []) // Empty dependency array to run only on mount
 
-  // Enhanced error logging utility
-  const logDetailedError = (context: string, error: Error | unknown) => {
-    console.group(`❌ ${context}`)
-    console.error('Error object:', error)
-    console.error('Error type:', typeof error)
-    console.error('Error constructor:', error?.constructor?.name)
-    console.error('Error code:', error?.code)
-    console.error('Error message:', error?.message)
-    console.error('Error stack:', error?.stack)
-    
-    // Log all enumerable properties
-    if (error && typeof error === 'object') {
-      console.error('All error properties:', Object.getOwnPropertyNames(error))
-      for (const key in error) {
-        if (error.hasOwnProperty(key)) {
-          console.error(`  ${key}:`, error[key])
-        }
+        setTwilioConfig(twilioCredentials)
+        configForm.reset({
+          accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+          authToken: '', // We don't expose the auth token to the client
+          phoneNumber: process.env.TWILIO_PHONE_NUMBER || ''
+        })
+      } catch (error) {
+        console.error('Error loading Twilio config:', error)
       }
     }
-    
-    // Check for nested error information
-    if (error?.details) console.error('Error details:', error.details)
-    if (error?.cause) console.error('Error cause:', error.cause)
-    if (error?.info) console.error('Error info:', error.info)
-    
-    console.groupEnd()
-  }
 
-  // WebSocket connection state monitoring
-  const monitorWebSocketState = (device: Device) => {
-    if (device && device._stream && device._stream._transport) {
-      const transport = device._stream._transport
-      console.log('🔍 WebSocket state:', {
-        readyState: transport.readyState,
-        url: transport.url,
-        protocol: transport.protocol,
-        extensions: transport.extensions
-      })
-      
-      // Monitor WebSocket events
-      if (transport.addEventListener) {
-        transport.addEventListener('open', () => {
-          console.log('🟢 WebSocket connection opened')
-        })
-        
-        transport.addEventListener('close', (event: CloseEvent) => {
-          console.log('🔴 WebSocket connection closed:', {
-            code: event.code,
-            reason: event.reason,
-            wasClean: event.wasClean
-          })
-        })
-        
-        transport.addEventListener('error', (event: Event) => {
-          logDetailedError('WebSocket Error', event)
-        })
+    // Initialize device manager with environment credentials
+    const initializeDeviceManager = async () => {
+      try {
+        const token = await generateTwilioToken()
+        if (token) {
+          deviceManager.initialize(token, toast)
+        }
+      } catch (error) {
+        console.error('Failed to initialize device manager:', error)
       }
     }
-  }
+
+    fetchConfig()
+    initializeDeviceManager()
+  }, [])
 
   // Initialize device manager when token is available
   useEffect(() => {
-    console.log('🔄 Dialer useEffect triggered:', { 
+    console.log('🔄 Dialer useEffect triggered:', {
       twilioToken: twilioToken ? `${twilioToken.substring(0, 20)}...` : 'null',
       hasDeviceManager: !!deviceManager,
       hasToast: !!toast
@@ -453,7 +430,7 @@ export default function Dialer() {
       if (parts.length !== 3) {
         throw new Error('Invalid JWT format')
       }
-      
+
       const payload = JSON.parse(atob(parts[1]))
       return payload
     } catch (error) {
@@ -498,9 +475,9 @@ export default function Dialer() {
     // Check if token expires within 5 minutes (300 seconds)
     const expiresWithin5Min = exp && (exp - now) < 300
 
-    return { 
-      valid: true, 
-      payload, 
+    return {
+      valid: true,
+      payload,
       expiresWithin5Min,
       timeToExpiry: exp - now
     }
@@ -509,93 +486,59 @@ export default function Dialer() {
   // Token refresh mechanism
   const refreshTokenIfNeeded = async (currentToken: string) => {
     const validation = validateToken(currentToken)
-    
+
     if (!validation.valid || validation.expiresWithin5Min) {
       console.log('🔄 Token needs refresh:', validation.error || 'Expires soon')
       await generateTwilioToken()
       return true
     }
-    
+
     return false
   }
 
   // Generate Twilio token for WebRTC with enhanced validation
   const generateTwilioToken = async () => {
-    console.log('🎯 generateTwilioToken called')
     try {
-      console.log('🔄 Generating Twilio access token...')
-      
       const response = await fetch('/api/twilio/access-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identity: `user_${Date.now()}` })
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        
-        // Check if we're in mock mode
-        if (data.mock) {
-          console.log('🧪 Twilio mock mode enabled - device will simulate ready state')
-          setTwilioToken(data.accessToken)
-          setIsDeviceReady(true) // Simulate device ready in mock mode
-          setDeviceStatus('ready')
-          setDeviceError(null)
-          toast({
-            title: 'Mock Mode Active',
-            description: 'Twilio is running in mock mode for development',
-            variant: 'default',
-          })
-          return
-        }
-
-        // Validate the received token
-        const validation = validateToken(data.accessToken)
-        if (!validation.valid) {
-          throw new Error(`Invalid token received: ${validation.error}`)
-        }
-
-        console.log('✅ Twilio access token generated and validated successfully')
-         if (validation.timeToExpiry) {
-           console.log(`⏰ Token expires in ${Math.floor(validation.timeToExpiry / 60)} minutes`)
-         }
-         
-         setTwilioToken(data.accessToken)
-         
-         // Set up automatic token refresh
-         if (validation.timeToExpiry && validation.timeToExpiry > 300) { // If more than 5 minutes left
-           const refreshTime = (validation.timeToExpiry - 300) * 1000 // Refresh 5 minutes before expiry
-           console.log(`⏰ Scheduling token refresh in ${Math.floor(refreshTime / 60000)} minutes`)
-           
-           setTimeout(async () => {
-             console.log('🔄 Auto-refreshing token...')
-             await generateTwilioToken()
-           }, refreshTime)
-         }
-        
-      } else {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('❌ Failed to generate Twilio access token:', errorData.error)
-        
-        // Provide helpful error messages
-        let description = errorData.error || 'Failed to generate Twilio access token'
-        if (errorData.error?.includes('Missing Twilio configuration')) {
-          description = 'Please check your .env.local file for Twilio credentials'
-        }
-        
-        toast({
-          title: 'Token Generation Failed',
-          description,
-          variant: 'destructive',
+        body: JSON.stringify({
+          identity: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to generate token')
       }
-    } catch (error: unknown) {
-      console.error('❌ Error generating Twilio access token:', error)
+
+      const data = await response.json()
+
+      // Handle mock mode
+      if (data.mock) {
+        console.log('🧪 Running in mock mode')
+        setDeviceStatus('ready')
+        return data.accessToken
+      }
+
+      // Log token metadata
+      console.log('🎫 Token generated:', {
+        identity: data.identity,
+        expires: data.expiresAt,
+        capabilities: data.capabilities
+      })
+
+      return data.accessToken
+    } catch (error) {
+      console.error('Failed to generate token:', error)
       toast({
-        title: 'Network Error',
-        description: (error instanceof Error ? error.message : 'Unknown error') || 'Could not connect to token service. Please check if the server is running.',
+        title: 'Token Generation Failed',
+        description: error instanceof Error ? error.message : 'Could not initialize voice calling',
         variant: 'destructive',
       })
+      setDeviceStatus('error')
+      setDeviceError(error instanceof Error ? error.message : 'Token generation failed')
+      return null
     }
   }
 
@@ -617,63 +560,63 @@ export default function Dialer() {
   }, [])
 
   // Audio stream management functions
-  const setupAudioStreams = async () => {
-    try {
-      // Get user media for microphone
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }, 
-        video: false 
-      })
-      
-      localStreamRef.current = stream
-      
-      // Create audio elements for local and remote audio
-      if (localAudioRef.current) {
-        localAudioRef.current.srcObject = stream
-        localAudioRef.current.muted = true // Local audio should be muted to prevent feedback
-      }
-      
-      // Setup audio level monitoring
-      setupAudioLevelMonitoring(stream)
-      
-      console.log('Audio streams setup successfully')
-    } catch (error) {
-      console.error('Failed to setup audio streams:', error)
-      throw new Error('Could not access microphone. Please check permissions.')
-    }
-  }
+  // const setupAudioStreams = async () => {
+  //   try {
+  //     // Get user media for microphone
+  //     const stream = await navigator.mediaDevices.getUserMedia({
+  //       audio: {
+  //         echoCancellation: true,
+  //         noiseSuppression: true,
+  //         autoGainControl: true
+  //       },
+  //       video: false
+  //     })
+
+  //     localStreamRef.current = stream
+
+  //     // Create audio elements for local and remote audio
+  //     if (localAudioRef.current) {
+  //       localAudioRef.current.srcObject = stream
+  //       localAudioRef.current.muted = true // Local audio should be muted to prevent feedback
+  //     }
+
+  //     // Setup audio level monitoring
+  //     setupAudioLevelMonitoring(stream)
+
+  //     console.log('Audio streams setup successfully')
+  //   } catch (error) {
+  //     console.error('Failed to setup audio streams:', error)
+  //     throw new Error('Could not access microphone. Please check permissions.')
+  //   }
+  // }
 
   const setupAudioLevelMonitoring = (stream: MediaStream) => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     }
-    
+
     const source = audioContextRef.current.createMediaStreamSource(stream)
     const analyser = audioContextRef.current.createAnalyser()
     analyser.fftSize = 256
-    
+
     source.connect(analyser)
     analyserRef.current = analyser
-    
+
     // Monitor audio levels
     const monitorAudio = () => {
       if (!analyserRef.current) return
-      
+
       const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
       analyserRef.current.getByteFrequencyData(dataArray)
-      
+
       const average = dataArray.reduce((a, b) => a + b) / dataArray.length
       setAudioLevel(average / 255) // Normalize to 0-1
-      
+
       if (callStatus === 'connected') {
         requestAnimationFrame(monitorAudio)
       }
     }
-    
+
     monitorAudio()
   }
 
@@ -682,22 +625,22 @@ export default function Dialer() {
       localStreamRef.current.getTracks().forEach(track => track.stop())
       localStreamRef.current = null
     }
-    
+
     if (remoteStreamRef.current) {
       remoteStreamRef.current.getTracks().forEach(track => track.stop())
       remoteStreamRef.current = null
     }
-    
+
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close()
       peerConnectionRef.current = null
     }
-    
+
     if (dataChannelRef.current) {
       dataChannelRef.current.close()
       dataChannelRef.current = null
     }
-    
+
     setAudioLevel(0)
   }
 
@@ -725,44 +668,44 @@ export default function Dialer() {
       if (!phoneNumber || !/^\+?[\d\s\-\(\)]+$/.test(phoneNumber)) {
         throw new Error('Invalid phone number format')
       }
-      
+
       setCallStatus('dialing')
       setCurrentPhone(phoneNumber)
-      
+
       // Setup audio streams first
-      await setupAudioStreams()
-      
+      // await setupAudioStreams()
+
       // Try Twilio WebRTC first if we have a token and device is ready
       if (twilioToken && deviceRef.current && isDeviceReady) {
         try {
           console.log('Attempting Twilio WebRTC call...')
-          
+
           const params = {
             To: phoneNumber,
-            From: twilioConfig?.phoneNumber || '+1234567890'
+            From: '+61483913513'
           }
-          
+
           const call = await deviceRef.current.connect({ params })
           currentConnectionRef.current = call
-          
+
           // Setup call event handlers for Voice SDK v2.x
           call.on('accept', () => {
             console.log('Twilio call connected')
             setCallStatus('connected')
             setCurrentCallSid(call.parameters.CallSid)
-            
+
             // Setup remote audio stream for Twilio Voice SDK v2.x
             if (remoteAudioRef.current) {
               // Voice SDK v2.x handles audio automatically
               console.log('Remote audio stream connected via Voice SDK v2.x')
             }
           })
-          
+
           call.on('disconnect', () => {
             console.log('Twilio call disconnected')
             endCall()
           })
-          
+
           call.on('error', (error: Error | unknown) => {
             console.error('Twilio call error:', error)
             toast({
@@ -772,21 +715,21 @@ export default function Dialer() {
             })
             endCall()
           })
-          
+
           // Handle audio streams for Twilio call (Voice SDK v2.x)
           call.on('volume', (inputVolume: number, outputVolume: number) => {
             setAudioLevel(inputVolume)
           })
-          
+
           // Voice SDK v2.x handles audio automatically, no manual stream setup needed
           console.log('Audio streams managed automatically by Voice SDK v2.x')
-          
+
           // Audio is managed automatically by Voice SDK v2.x
           console.log('Audio output managed automatically by Voice SDK v2.x')
-          
+
           console.log('Twilio call initiated successfully')
           return // Success, exit function
-          
+
         } catch (twilioError: unknown) {
           console.error('Twilio WebRTC failed, falling back to standard WebRTC:', twilioError)
           toast({
@@ -797,11 +740,11 @@ export default function Dialer() {
           // Continue to fallback WebRTC
         }
       }
-      
+
       // Fallback to standard WebRTC
       console.log('Falling back to standard WebRTC...')
       await makeCallWebRTC(phoneNumber)
-      
+
     } catch (error: unknown) {
       console.error('Call failed:', error)
       toast({
@@ -812,50 +755,52 @@ export default function Dialer() {
       endCall()
     }
   }
-  
+
   // Traditional Twilio call implementation
   const makeCallWebRTC = async (phoneNumber: string) => {
     try {
-      
-      // Send call request to backend
       const response = await fetch('/api/call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           to: phoneNumber,
-          from: twilioConfig?.phoneNumber
+          from: '+61483913513'
         })
       })
-      
+
       if (!response.ok) {
-        throw new Error('Failed to initiate call')
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to initiate call')
       }
-      
+
       const data = await response.json()
-      
-      // Handle traditional Twilio response
+
+      // Update UI state
       setIsInCall(true)
       setIsConnecting(false)
       setCallStatus('connected')
       setCurrentCallSid(data.sid)
-      
-      // Add call to call logs
+
+      // Start status checking
+      startCallStatusChecking(data.sid)
+
+      // Add to call logs
       const newCallLog: CallLog = {
         id: Date.now(),
         callSid: data.sid,
-        fromNumber: twilioConfig?.phoneNumber || '',
+        fromNumber: process.env.TWILIO_PHONE_NUMBER || twilioConfig?.phoneNumber || '',
         toNumber: phoneNumber,
         status: 'connected',
         startedAt: new Date(),
         createdAt: new Date()
       }
       setCallLogs(prev => [newCallLog, ...prev])
-      
-    } catch (error: unknown) {
+
+    } catch (error) {
       console.error('Call failed:', error)
       toast({
         title: 'Call Failed',
-        description: (error instanceof Error ? error.message : 'Could not initiate call'),
+        description: error instanceof Error ? error.message : 'Could not initiate call',
         variant: 'destructive',
       })
       setCallStatus('ended')
@@ -872,26 +817,26 @@ export default function Dialer() {
       })
       return
     }
-    
+
     // Initialize audio context on first dial (async)
     await initAudioContext()
-    
+
     setIsCalling(true)
     setCallStatus('dialing')
-    
+
     console.log('Starting call to:', values.phoneNumber)
     console.log('Using Twilio config:', twilioConfig)
-    
+
     try {
       // Setup audio streams for two-way communication
-      await setupAudioStreams()
-      
+      // await setupAudioStreams()
+
       // Use the new makeCall function
       await makeCall(values.phoneNumber)
-      
+
       // Start ringing tone and status checking
       await playRingingTone('ringing')
-      
+
       console.log('Audio streams ready for two-way communication')
     } catch (e) {
       console.error('Dial error:', e)
@@ -939,19 +884,19 @@ export default function Dialer() {
         currentConnectionRef.current.disconnect()
         currentConnectionRef.current = null
       }
-      
+
       // Stop audio streams
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach(track => track.stop())
         localStreamRef.current = null
       }
-      
+
       // Clean up remote audio
       if (remoteStreamRef.current) {
         remoteStreamRef.current.getTracks().forEach(track => track.stop())
         remoteStreamRef.current = null
       }
-      
+
       // Clear audio element sources
       if (localAudioRef.current) {
         localAudioRef.current.srcObject = null
@@ -959,16 +904,16 @@ export default function Dialer() {
       if (remoteAudioRef.current) {
         remoteAudioRef.current.srcObject = null
       }
-      
+
       // Close peer connection
       if (peerConnectionRef.current) {
         peerConnectionRef.current.close()
         peerConnectionRef.current = null
       }
-      
+
       // Stop ringing tone
       stopRingingTone()
-      
+
       // Update call status if we have a call SID
       if (currentCallSid) {
         try {
@@ -981,19 +926,19 @@ export default function Dialer() {
           // Don't throw - we still want to clean up the UI state
         }
       }
-      
+
       // Reset state
       setCallStatus('ended')
       setCurrentCallSid(null)
       setIsMuted(false)
       setIsSpeakerOn(true)
       setAudioLevel(0)
-      
+
       // Clean up remote audio
       if (remoteAudioRef.current) {
         remoteAudioRef.current.srcObject = null
       }
-      
+
     } catch (error) {
       console.error('Error ending call:', error)
       setCallStatus('ended')
@@ -1010,7 +955,7 @@ export default function Dialer() {
   const appendChar = async (ch: string) => {
     await initAudioContext() // Initialize audio context on first interaction
     playDTMFTone(ch) // Play DTMF tone for the pressed key
-    
+
     const current = dialForm.getValues('phoneNumber') || ''
     if (ch === '+') {
       if (!current.startsWith('+')) dialForm.setValue('phoneNumber', `+${current}`)
@@ -1029,19 +974,19 @@ export default function Dialer() {
   return (
     <div className="p-2 sm:p-4 w-full">
       {/* Debug Status Indicator */}
-       <div className="mb-4 p-3 bg-gray-100 rounded-lg text-sm">
-          <div className="font-semibold text-gray-700 mb-2">Debug Status:</div>
-          <div>Token: {twilioToken ? '✅ Available' : '❌ Missing'}</div>
-          <div>Device Ready: {isDeviceReady ? '✅ Ready' : '❌ Not Ready'}</div>
-          <div>Device Status: {device ? '✅ Connected' : '❌ Disconnected'}</div>
-          <div>Manager Status: {deviceStatus}</div>
-          <div>Retry Count: {retryCount}</div>
-          {deviceError && <div className="text-red-600">Error: {deviceError}</div>}
-          <div className="text-xs text-gray-500 mt-2">
-            Token Preview: {twilioToken ? twilioToken.substring(0, 30) + '...' : 'None'}
-          </div>
+      <div className="mb-4 p-3 bg-gray-100 rounded-lg text-sm">
+        <div className="font-semibold text-gray-700 mb-2">Debug Status:</div>
+        <div>Token: {twilioToken ? '✅ Available' : '❌ Missing'}</div>
+        <div>Device Ready: {isDeviceReady ? '✅ Ready' : '❌ Not Ready'}</div>
+        <div>Device Status: {device ? '✅ Connected' : '❌ Disconnected'}</div>
+        <div>Manager Status: {deviceStatus}</div>
+        <div>Retry Count: {retryCount}</div>
+        {deviceError && <div className="text-red-600">Error: {deviceError}</div>}
+        <div className="text-xs text-gray-500 mt-2">
+          Token Preview: {twilioToken ? twilioToken.substring(0, 30) + '...' : 'None'}
         </div>
-      
+      </div>
+
       <h2 className="text-xl font-semibold mb-4">Twilio Dialing System</h2>
       <Tabs defaultValue="dialer" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -1055,23 +1000,21 @@ export default function Dialer() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Dial a Number
-                <div className={`flex items-center gap-2 text-sm ${
-                  deviceStatus === 'ready' ? 'text-green-600' : 
-                  deviceStatus === 'error' ? 'text-red-600' : 
-                  deviceStatus === 'retrying' ? 'text-yellow-600' : 
-                  'text-orange-600'
-                }`}>
-                  <div className={`w-2 h-2 rounded-full ${
-                    deviceStatus === 'ready' ? 'bg-green-500 animate-pulse' : 
-                    deviceStatus === 'error' ? 'bg-red-500' : 
-                    deviceStatus === 'retrying' ? 'bg-yellow-500 animate-spin' : 
-                    'bg-orange-500 animate-pulse'
-                  }`}></div>
-                  {deviceStatus === 'ready' ? 'Device Ready' : 
-                   deviceStatus === 'error' ? `Error: ${deviceError}` : 
-                   deviceStatus === 'retrying' ? `Retrying... (${retryCount}/3)` : 
-                   deviceStatus === 'connecting' ? 'Connecting...' : 
-                   'Initializing...'}
+                <div className={`flex items-center gap-2 text-sm ${deviceStatus === 'ready' ? 'text-green-600' :
+                  deviceStatus === 'error' ? 'text-red-600' :
+                    deviceStatus === 'retrying' ? 'text-yellow-600' :
+                      'text-orange-600'
+                  }`}>
+                  <div className={`w-2 h-2 rounded-full ${deviceStatus === 'ready' ? 'bg-green-500 animate-pulse' :
+                    deviceStatus === 'error' ? 'bg-red-500' :
+                      deviceStatus === 'retrying' ? 'bg-yellow-500 animate-spin' :
+                        'bg-orange-500 animate-pulse'
+                    }`}></div>
+                  {deviceStatus === 'ready' ? 'Device Ready' :
+                    deviceStatus === 'error' ? `Error: ${deviceError}` :
+                      deviceStatus === 'retrying' ? `Retrying... (${retryCount}/3)` :
+                        deviceStatus === 'connecting' ? 'Connecting...' :
+                          'Initializing...'}
                 </div>
               </CardTitle>
               <CardDescription>Enter a phone number to make a call</CardDescription>
@@ -1094,15 +1037,15 @@ export default function Dialer() {
                     )}
                   />
                   <div className="grid grid-cols-3 gap-3 max-w-sm">
-                    {['1','2','3','4','5','6','7','8','9','*','0','#'].map((d) => (
+                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((d) => (
                       <Button key={d} type="button" variant="outline" className="h-14 text-lg rounded-full" onClick={async () => await appendChar(d)}>
                         {d}
                       </Button>
                     ))}
                     <Button type="button" variant="outline" className="h-14 text-lg rounded-full" onClick={async () => await appendChar('+')}>+</Button>
-                    <Button 
-                      type="submit" 
-                      disabled={isCalling || callStatus === 'connected' || !isDeviceReady} 
+                    <Button
+                      type="submit"
+                      disabled={isCalling || callStatus === 'connected' || !isDeviceReady}
                       className="h-14 text-lg rounded-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
                       title={!isDeviceReady ? 'Device is initializing...' : 'Make a call'}
                     >
@@ -1115,10 +1058,10 @@ export default function Dialer() {
                   </div>
                   {(callStatus === 'dialing' || callStatus === 'connected') && (
                     <div className="flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="destructive" 
-                        onClick={endCall} 
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={endCall}
                         className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 text-lg"
                       >
                         <PhoneMissed className="h-5 w-5" />
@@ -1127,13 +1070,12 @@ export default function Dialer() {
                     </div>
                   )}
                   {callStatus !== 'idle' && (
-                    <div className={`mt-4 p-4 rounded-lg border-2 ${
-                      callStatus === 'connected' ? 'bg-green-50 border-green-200 text-green-800' :
+                    <div className={`mt-4 p-4 rounded-lg border-2 ${callStatus === 'connected' ? 'bg-green-50 border-green-200 text-green-800' :
                       callStatus === 'dialing' ? 'bg-blue-50 border-blue-200 text-blue-800' :
-                      callStatus === 'ended' ? 'bg-gray-50 border-gray-200 text-gray-800' :
-                      callStatus === 'busy' ? 'bg-red-50 border-red-200 text-red-800' :
-                      'bg-yellow-50 border-yellow-200 text-yellow-800'
-                    }`}>
+                        callStatus === 'ended' ? 'bg-gray-50 border-gray-200 text-gray-800' :
+                          callStatus === 'busy' ? 'bg-red-50 border-red-200 text-red-800' :
+                            'bg-yellow-50 border-yellow-200 text-yellow-800'
+                      }`}>
                       <div className="flex items-center gap-2">
                         {callStatus === 'dialing' && <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>}
                         {callStatus === 'connected' && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>}
@@ -1144,24 +1086,24 @@ export default function Dialer() {
                       {callStatus === 'dialing' && (<p className="text-sm mt-1">📞 Ringing... waiting for the other party to answer</p>)}
                       {callStatus === 'busy' && (<p className="text-sm mt-1">❌ Line is busy - the other party may be on another call</p>)}
                       {callStatus === 'ended' && (<p className="text-sm mt-1">📴 Call has ended</p>)}
-                      
+
                       {/* Audio Controls - Only show when connected */}
                       {callStatus === 'connected' && (
                         <div className="mt-4 flex items-center gap-2 flex-wrap">
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={toggleMute}
                             className={`${isMuted ? 'bg-red-100 border-red-300 text-red-800' : 'bg-white'}`}
                           >
                             {isMuted ? <MicOff className="h-4 w-4 mr-1" /> : <Mic className="h-4 w-4 mr-1" />}
                             {isMuted ? 'Unmute' : 'Mute'}
                           </Button>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={toggleSpeaker}
                             className={`${!isSpeakerOn ? 'bg-red-100 border-red-300 text-red-800' : 'bg-white'}`}
                           >
@@ -1302,17 +1244,17 @@ export default function Dialer() {
           </Card>
         </TabsContent>
       </Tabs>
-      
+
       {/* Hidden audio elements for WebRTC */}
-      <audio 
-        ref={localAudioRef} 
-        autoPlay 
-        muted 
+      <audio
+        ref={localAudioRef}
+        autoPlay
+        muted
         style={{ display: 'none' }}
       />
-      <audio 
-        ref={remoteAudioRef} 
-        autoPlay 
+      <audio
+        ref={remoteAudioRef}
+        autoPlay
         style={{ display: 'none' }}
       />
     </div>

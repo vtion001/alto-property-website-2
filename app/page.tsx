@@ -41,19 +41,19 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero Section with Video Background */}
         <section className="relative overflow-hidden min-h-[100svh] sm:min-h-screen flex items-center">
-  {/* Video Background */}
-  <div className="absolute inset-0 z-0">
-    <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-150">
-      <source
-        src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752833883/hero-background-alto.mp4"
-        type="video/mp4"
-      />
-    </video>
-    <div className="absolute inset-0 bg-black/30 sm:bg-gradient-to-r sm:from-brown-900/80 sm:via-brown-800/60 sm:to-brown-900/40" />
-  </div>  
+          {/* Video Background */}
+          <div className="absolute inset-0 z-0">
+            <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-150">
+              <source
+                src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752833883/hero-background-alto.mp4"
+                type="video/mp4"
+              />
+            </video>
+            <div className="absolute inset-0 bg-black/30 sm:bg-gradient-to-r sm:from-brown-900/80 sm:via-brown-800/60 sm:to-brown-900/40" />
+          </div>
 
           {/* Content Container */}
-          <div className="relative z-10 w-full py-20 sm:py-28 lg:py-40">
+          <div className="relative z-10 w-full py-20 sm:py-28">
             <div className="container">
               <div className="grid gap-10 sm:gap-14 lg:gap-20 lg:grid-cols-2 items-center">
                 <div className="space-y-12">
@@ -69,7 +69,7 @@ export default function HomePage() {
                       <span className="block font-light text-cream/90 mt-2">PROPERTY</span>
                     </h1>
                     <p className="text-base sm:text-lg md:text-xl font-light text-cream/90 max-w-2xl leading-relaxed">
-                      South East Queensland's premier all-in-one real estate agency, consistently building lifelong 
+                      South East Queensland's premier all-in-one real estate agency, consistently building lifelong
                       relationships through delivering outstanding results and service.
                     </p>
                   </div>
@@ -157,7 +157,7 @@ export default function HomePage() {
                 Comprehensive real estate solutions tailored to your unique needs, backed by 10+ years of combined experience and proven results.
               </p>
             </div>
-     
+
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {/* Sell */}
               <Card className="group hover:shadow-xl transition-all duration-500 border border-brown-100 hover:border-brown-200 h-full">
@@ -351,7 +351,7 @@ export default function HomePage() {
               </p>
             </div>
 
-                        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* Testimonial 1 */}
               <Card className="bg-white border border-brown-100 hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-8">
@@ -629,7 +629,7 @@ export default function HomePage() {
             <div className="space-y-10 max-w-4xl mx-auto">
               <h2 className="text-4xl font-light sm:text-5xl text-brown-800">Ready to Experience the ALTO Difference?</h2>
               <p className="text-xl text-brown-700 leading-relaxed">
-                Join thousands of satisfied clients who've achieved exceptional results with South East Queensland's 
+                Join thousands of satisfied clients who've achieved exceptional results with South East Queensland's
                 premier property specialists.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
