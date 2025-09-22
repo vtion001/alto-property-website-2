@@ -21,7 +21,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Phone, MapPin, Mail } from "lucide-react"
+import { Menu, X, Phone, Mail } from "lucide-react"
 
 const ListItem = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRef<"a">>(
   ({ className, title, children, ...props }, ref) => {
@@ -66,7 +66,7 @@ export function Navigation() {
           />
           <div className="hidden sm:block">
             <div className="font-bold text-brown-800 text-base md:text-xl"></div>
-            <div className="text-brown-600 text-xs md:text-sm tracking-wider">SEQ's Premier Agency</div>
+            <div className="text-brown-600 text-xs md:text-sm tracking-wider">SEQ&apos;s Premier Agency</div>
           </div>
         </Link>
 
@@ -108,7 +108,7 @@ export function Navigation() {
               <NavigationMenuContent>
                 <div className="grid gap-3 p-4 md:p-6 w-[300px] md:w-[400px] lg:w-[600px] md:grid-cols-2">
                   <ListItem href="/buying/search-properties" title="Search Properties">
-                    Find your perfect property in South East Queensland's best locations.
+                    Find your perfect property in South East Queensland&apos;s best locations.
                   </ListItem>
                   <ListItem href="/buying/buying-with-alto" title="Buying with Alto">
                     Expert guidance through your property purchase.
@@ -228,21 +228,21 @@ export function Navigation() {
             </SheetHeader>
             <nav className="flex flex-col">
               <div className="flex flex-col space-y-1">
-                <MobileNavSection title="Selling" closeSheet={closeSheet}>
+                <MobileNavSection title="Selling">
                   <MobileNavLink href="/selling" onClick={closeSheet}>Selling Your Property</MobileNavLink>
                   <MobileNavLink href="/selling/property-report" onClick={closeSheet}>Property Report</MobileNavLink>
                   <MobileNavLink href="/selling/selling-with-alto" onClick={closeSheet}>Selling with Alto</MobileNavLink>
                   <MobileNavLink href="/selling/recently-sold" onClick={closeSheet}>Recently Sold</MobileNavLink>
                 </MobileNavSection>
 
-                <MobileNavSection title="Buying" closeSheet={closeSheet}>
+                <MobileNavSection title="Buying">
                   <MobileNavLink href="/buying/search-properties" onClick={closeSheet}>Search Properties</MobileNavLink>
                   <MobileNavLink href="/buying/buying-with-alto" onClick={closeSheet}>Buying with Alto</MobileNavLink>
                   <MobileNavLink href="/buying/buyers-agent-services" onClick={closeSheet}>Buyers Agent Services</MobileNavLink>
                   <MobileNavLink href="/buying/off-market" onClick={closeSheet}>Off Market</MobileNavLink>
                 </MobileNavSection>
 
-                <MobileNavSection title="Manage" closeSheet={closeSheet}>
+                <MobileNavSection title="Manage">
                   <MobileNavLink href="/manage/property-management" onClick={closeSheet}>Property Management</MobileNavLink>
                   <MobileNavLink href="/manage/rental-appraisal" onClick={closeSheet}>Rental Appraisal</MobileNavLink>
                   <MobileNavLink href="/manage/management-fees" onClick={closeSheet}>Management Fees</MobileNavLink>
@@ -250,7 +250,7 @@ export function Navigation() {
                   <MobileNavLink href="/manage/investing-tips" onClick={closeSheet}>Investing Tips</MobileNavLink>
                 </MobileNavSection>
 
-                <MobileNavSection title="Renting" closeSheet={closeSheet}>
+                <MobileNavSection title="Renting">
                   <MobileNavLink href="/renting/search-rentals" onClick={closeSheet}>Search Rentals</MobileNavLink>
                   <MobileNavLink href="/renting/apply-now" onClick={closeSheet}>Apply Now</MobileNavLink>
                   <MobileNavLink href="/renting/connect" onClick={closeSheet}>Connect</MobileNavLink>
@@ -284,12 +284,10 @@ export function Navigation() {
 
 function MobileNavSection({ 
   title, 
-  children, 
-  closeSheet 
+  children 
 }: { 
   title: string; 
-  children: React.ReactNode; 
-  closeSheet: () => void 
+  children: React.ReactNode 
 }) {
   const [isOpen, setIsOpen] = React.useState(false)
 

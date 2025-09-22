@@ -3,7 +3,7 @@
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Award, Users, TrendingUp, Zap, BarChart3, Globe, MessageSquare, Heart, Target, Clock, Shield, Star, Smartphone, Camera, Monitor, Phone, Mail, FileText } from "lucide-react"
+import { CheckCircle, Award, Zap, BarChart3, Globe, MessageSquare, Heart, Target, Smartphone, Camera, Monitor, Phone, Mail, FileText } from "lucide-react"
 import Link from "next/link"
 
 export default function SellingWithAltoPage() {

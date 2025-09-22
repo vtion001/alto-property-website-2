@@ -6,7 +6,7 @@ import TwilioDeviceManager from '@/lib/twilio-device-manager'
 
 declare global {
   interface Window {
-    Twilio: any
+    Twilio: typeof import('@twilio/voice-sdk') | undefined
   }
 }
 
@@ -374,7 +374,7 @@ export default function Dialer() {
   }, []) // Empty dependency array to run only on mount
 
   // Enhanced error logging utility
-  const logDetailedError = (context: string, error: any) => {
+  const logDetailedError = (context: string, error: Error | unknown) => {
     console.group(`❌ ${context}`)
     console.error('Error object:', error)
     console.error('Error type:', typeof error)
@@ -402,7 +402,7 @@ export default function Dialer() {
   }
 
   // WebSocket connection state monitoring
-  const monitorWebSocketState = (device: any) => {
+  const monitorWebSocketState = (device: Device) => {
     if (device && device._stream && device._stream._transport) {
       const transport = device._stream._transport
       console.log('🔍 WebSocket state:', {
@@ -418,7 +418,7 @@ export default function Dialer() {
           console.log('🟢 WebSocket connection opened')
         })
         
-        transport.addEventListener('close', (event: any) => {
+        transport.addEventListener('close', (event: CloseEvent) => {
           console.log('🔴 WebSocket connection closed:', {
             code: event.code,
             reason: event.reason,
@@ -426,7 +426,7 @@ export default function Dialer() {
           })
         })
         
-        transport.addEventListener('error', (event: any) => {
+        transport.addEventListener('error', (event: Event) => {
           logDetailedError('WebSocket Error', event)
         })
       }
@@ -589,11 +589,11 @@ export default function Dialer() {
           variant: 'destructive',
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Error generating Twilio access token:', error)
       toast({
         title: 'Network Error',
-        description: error.message || 'Could not connect to token service. Please check if the server is running.',
+        description: (error instanceof Error ? error.message : 'Unknown error') || 'Could not connect to token service. Please check if the server is running.',
         variant: 'destructive',
       })
     }
@@ -763,11 +763,11 @@ export default function Dialer() {
             endCall()
           })
           
-          call.on('error', (error: any) => {
+          call.on('error', (error: Error | unknown) => {
             console.error('Twilio call error:', error)
             toast({
               title: 'Call Error',
-              description: error.message || 'Call failed',
+              description: (error instanceof Error ? error.message : 'Unknown error') || 'Call failed',
               variant: 'destructive',
             })
             endCall()
@@ -787,7 +787,7 @@ export default function Dialer() {
           console.log('Twilio call initiated successfully')
           return // Success, exit function
           
-        } catch (twilioError: any) {
+        } catch (twilioError: unknown) {
           console.error('Twilio WebRTC failed, falling back to standard WebRTC:', twilioError)
           toast({
             title: 'Twilio Connection Failed',
@@ -802,11 +802,11 @@ export default function Dialer() {
       console.log('Falling back to standard WebRTC...')
       await makeCallWebRTC(phoneNumber)
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Call failed:', error)
       toast({
         title: 'Call Failed',
-        description: error.message || 'Could not initiate call',
+        description: (error instanceof Error ? error.message : 'Unknown error') || 'Could not initiate call',
         variant: 'destructive',
       })
       endCall()
@@ -851,11 +851,11 @@ export default function Dialer() {
       }
       setCallLogs(prev => [newCallLog, ...prev])
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Call failed:', error)
       toast({
         title: 'Call Failed',
-        description: error.message || 'Could not initiate call',
+        description: (error instanceof Error ? error.message : 'Could not initiate call'),
         variant: 'destructive',
       })
       setCallStatus('ended')
@@ -923,7 +923,7 @@ export default function Dialer() {
           description: 'Twilio configuration saved successfully!',
         })
       } else throw new Error('Failed to save configuration')
-    } catch (e) {
+    } catch (_e) {
       toast({
         title: 'Configuration Error',
         description: 'Failed to save configuration. Please try again.',

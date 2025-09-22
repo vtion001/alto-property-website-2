@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
     if (!config) return NextResponse.json({ error: 'No active configuration found' }, { status: 404 })
     return NextResponse.json({
-      id: config.id,
+      id: config.id.toString(), // Convert BigInt to string
       accountSid: config.accountSid,
       phoneNumber: config.phoneNumber,
       isActive: config.isActive,

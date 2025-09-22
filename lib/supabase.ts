@@ -36,7 +36,7 @@ export const supabaseClient = createClient(
 // Helper function to check database connection
 export async function testDatabaseConnection() {
   try {
-    const { data, error } = await supabase
+    const { data: _data, error } = await supabase
       .from('properties')
       .select('count')
       .limit(1)

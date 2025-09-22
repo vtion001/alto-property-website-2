@@ -8,8 +8,7 @@ interface FooterProps {
 }
 
 export default function Footer({ 
-  companyName = "Alto Property Group",
-  className = "text-brown-200"
+  companyName = "Alto Property Group"
 }: FooterProps) {
   const year = useCurrentYear();
 
@@ -26,7 +25,7 @@ export default function Footer({
               </div>
             </div>
             <p className="text-brown-200 leading-relaxed">
-              South East Queensland's premier all-in-one real estate agency, consistently building lifelong 
+              South East Queensland&apos;s premier all-in-one real estate agency, consistently building lifelong 
               relationships through delivering outstanding results and service.
             </p>
           </div>

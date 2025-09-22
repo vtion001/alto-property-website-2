@@ -20,7 +20,12 @@ export async function GET(request: NextRequest) {
   // Allow unauthenticated access for dialer functionality
   try {
     const callLogs = await prisma.callLog.findMany({ orderBy: { createdAt: 'desc' } })
-    return NextResponse.json(callLogs)
+    // Convert BigInt values to strings for JSON serialization
+    const serializedCallLogs = callLogs.map(log => ({
+      ...log,
+      id: log.id.toString()
+    }))
+    return NextResponse.json(serializedCallLogs)
   } catch (error) {
     console.error('Call logs GET error', error)
     return NextResponse.json({ error: 'Failed to fetch call logs' }, { status: 500 })

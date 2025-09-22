@@ -9,7 +9,7 @@ datasource db {
 }
 
 model TwilioConfig {
-  id          Int      @id @default(autoincrement())
+  id          BigInt   @id @default(autoincrement())
   accountSid  String   @unique @map("account_sid")
   authToken   String   @map("auth_token")
   phoneNumber String   @map("phone_number")
@@ -21,7 +21,7 @@ model TwilioConfig {
 }
 
 model CallLog {
-  id         Int       @id @default(autoincrement())
+  id         BigInt    @id @default(autoincrement())
   callSid    String    @map("call_sid")
   fromNumber String    @map("from_number")
   toNumber   String    @map("to_number")
@@ -31,14 +31,91 @@ model CallLog {
   endedAt    DateTime? @map("ended_at")
   createdAt  DateTime  @default(now()) @map("created_at")
 
+  // Relations
+  recording     CallRecording?
+  transcription CallTranscription?
+  analysis      CallAnalysis?
+
   @@map("call_logs")
 }
 
+model CallRecording {
+  id              BigInt   @id @default(autoincrement())
+  callLogId       BigInt   @unique @map("call_log_id")
+  recordingUrl    String   @map("recording_url")
+  recordingSid    String?  @map("recording_sid")
+  duration        Int?
+  fileSize        Int?     @map("file_size")
+  format          String   @default("mp3")
+  consentGiven    Boolean  @default(false) @map("consent_given")
+  consentTimestamp DateTime? @map("consent_timestamp")
+  storageLocation String?  @map("storage_location")
+  isProcessed     Boolean  @default(false) @map("is_processed")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  callLog CallLog @relation(fields: [callLogId], references: [id], onDelete: Cascade)
+
+  @@map("call_recordings")
+}
+
+model CallTranscription {
+  id            BigInt   @id @default(autoincrement())
+  callLogId     BigInt   @unique @map("call_log_id")
+  transcriptText String  @map("transcript_text")
+  confidence    Float?
+  language      String   @default("en-US")
+  service       String   @default("openai") // openai, google, azure, etc.
+  processingTime Int?    @map("processing_time") // in milliseconds
+  wordCount     Int?     @map("word_count")
+  isProcessed   Boolean  @default(false) @map("is_processed")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  callLog CallLog @relation(fields: [callLogId], references: [id], onDelete: Cascade)
+
+  @@map("call_transcriptions")
+}
+
+model CallAnalysis {
+  id                    BigInt   @id @default(autoincrement())
+  callLogId             BigInt   @unique @map("call_log_id")
+  overallScore          Float?   @map("overall_score") // 0-100
+  sentimentScore        Float?   @map("sentiment_score") // -1 to 1
+  professionalismScore  Float?   @map("professionalism_score") // 0-100
+  clarityScore          Float?   @map("clarity_score") // 0-100
+  engagementScore       Float?   @map("engagement_score") // 0-100
+  outcomeScore          Float?   @map("outcome_score") // 0-100
+  keyTopics             String[] @map("key_topics")
+  actionItems           String[] @map("action_items")
+  summary               String?
+  recommendations       String[] 
+  callOutcome           String?  @map("call_outcome") // successful, follow_up_needed, no_interest, etc.
+  talkTimeRatio         Float?   @map("talk_time_ratio") // agent vs customer talk time
+  interruptionCount     Int?     @map("interruption_count")
+  pauseAnalysis         Json?    @map("pause_analysis")
+  emotionalTone         String?  @map("emotional_tone")
+  isProcessed           Boolean  @default(false) @map("is_processed")
+  processingTime        Int?     @map("processing_time") // in milliseconds
+  aiModel               String?  @map("ai_model") // gpt-4, claude, etc.
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  callLog CallLog @relation(fields: [callLogId], references: [id], onDelete: Cascade)
+
+  @@map("call_analysis")
+}
+
 model Contact {
-  id          Int      @id @default(autoincrement())
+  id          BigInt   @id @default(autoincrement())
   name        String
   phoneNumber String   @map("phone_number")
   email       String?
+  company     String?
+  notes       String?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

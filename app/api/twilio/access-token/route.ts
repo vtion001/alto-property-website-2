@@ -4,8 +4,29 @@ import { jwt } from 'twilio'
 const AccessToken = jwt.AccessToken
 const VoiceGrant = AccessToken.VoiceGrant
 
-// Validation utilities
-const validateEnvironmentVariables = () => {
+// Type definitions
+interface TwilioCredentials {
+  accountSid: string
+  apiKey: string
+  apiSecret: string
+  applicationSid: string
+}
+
+interface ValidationSuccess {
+  valid: true
+  credentials: TwilioCredentials
+}
+
+interface ValidationFailure {
+  valid: false
+  error: string
+  missing?: string[]
+}
+
+type ValidationResult = ValidationSuccess | ValidationFailure
+
+// Validation functions
+const validateEnvironmentVariables = (): ValidationResult => {
   const required = {
     accountSid: process.env.TWILIO_ACCOUNT_SID,
     apiKey: process.env.TWILIO_API_KEY,
@@ -38,7 +59,10 @@ const validateEnvironmentVariables = () => {
     return { valid: false, error: 'Invalid TWILIO_TWIML_APP_SID format (should start with AP)' }
   }
 
-  return { valid: true, credentials: required as { accountSid: string; apiKey: string; apiSecret: string; applicationSid: string } }
+  return { 
+    valid: true, 
+    credentials: required as TwilioCredentials 
+  }
 }
 
 const validateIdentity = (identity: string) => {
@@ -86,7 +110,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    const { credentials } = envValidation
+    // TypeScript now knows envValidation.valid is true, so credentials exist
+    const credentials = envValidation.credentials
 
     // Parse and validate request body
     let body
@@ -112,9 +137,9 @@ export async function POST(request: NextRequest) {
     // Create access token with enhanced security
     const tokenTTL = 3600 // 1 hour
     const accessToken = new AccessToken(
-      credentials.accountSid!,
-      credentials.apiKey!,
-      credentials.apiSecret!,
+      credentials.accountSid,
+      credentials.apiKey,
+      credentials.apiSecret,
       { 
         identity,
         ttl: tokenTTL,
@@ -126,7 +151,7 @@ export async function POST(request: NextRequest) {
 
     // Create voice grant with specific permissions
     const voiceGrant = new VoiceGrant({
-      outgoingApplicationSid: credentials.applicationSid!,
+      outgoingApplicationSid: credentials.applicationSid,
       incomingAllow: true,
       // Add push credential SID if available for mobile
       pushCredentialSid: process.env.TWILIO_PUSH_CREDENTIAL_SID

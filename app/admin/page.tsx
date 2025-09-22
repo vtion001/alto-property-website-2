@@ -37,7 +37,13 @@ import {
   Camera, // Import Camera icon
   Phone,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BarChart3,
+  Play,
+  Download,
+  Star,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -92,6 +98,38 @@ interface RentalApplication {
   phone: string
 }
 
+interface CallLog {
+  id: string
+  callSid: string
+  to: string
+  from: string
+  status: 'completed' | 'busy' | 'no-answer' | 'failed' | 'canceled'
+  direction: 'inbound' | 'outbound'
+  duration: number
+  startTime: string
+  endTime: string
+  recordingUrl?: string
+  transcription?: string
+  sentiment?: 'positive' | 'neutral' | 'negative'
+  qualityScore?: number
+  tags?: string[]
+}
+
+interface CallAnalytics {
+  totalCalls: number
+  completedCalls: number
+  averageDuration: number
+  successRate: number
+  sentimentBreakdown: {
+    positive: number
+    neutral: number
+    negative: number
+  }
+  averageQualityScore: number
+  callsByDay: { date: string; count: number }[]
+  topPerformers: { agent: string; calls: number; avgScore: number }[]
+}
+
 export default function AdminPage() {
   const makeSlug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
   const blogPathFor = (post: BlogPost) => `/blog/${(post as any).slug || makeSlug(post.title)}`
@@ -110,6 +148,10 @@ export default function AdminPage() {
   const [editedBlogPost, setEditedBlogPost] = useState<BlogPost | null>(null)
   const [isDialerOpen, setIsDialerOpen] = useState(true) // Temporarily open for debugging
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [callLogs, setCallLogs] = useState<CallLog[]>([])
+  const [callAnalytics, setCallAnalytics] = useState<CallAnalytics | null>(null)
+  const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null)
+  const [isCallLogViewOpen, setIsCallLogViewOpen] = useState(false)
 
   const adminNavItems = [
     { value: 'overview', label: 'Overview', icon: Home },
@@ -120,6 +162,7 @@ export default function AdminPage() {
     { value: 'rentals', label: 'Rentals', icon: Users },
     { value: 'management', label: 'Management', icon: Settings },
     { value: 'dialer', label: 'Dialer', icon: Phone },
+    { value: 'call-analysis', label: 'Call Analysis', icon: BarChart3 },
     { value: 'integrations', label: 'Integrations', icon: Settings },
     { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
   ]
@@ -214,6 +257,112 @@ export default function AdminPage() {
       localStorage.setItem('alto:blogPosts', JSON.stringify(blogPosts))
     } catch {}
   }, [blogPosts])
+
+  // Load call logs and analytics
+  useEffect(() => {
+    const loadCallData = async () => {
+      try {
+        // Try to fetch from API first
+        const [logsRes, analyticsRes] = await Promise.all([
+          fetch('/api/call-logs', { cache: 'no-store' }),
+          fetch('/api/call-analytics', { cache: 'no-store' })
+        ])
+        
+        if (logsRes.ok) {
+          const logs = await logsRes.json()
+          if (Array.isArray(logs)) {
+            setCallLogs(logs)
+          }
+        }
+        
+        if (analyticsRes.ok) {
+          const apiResponse = await analyticsRes.json()
+          // Transform API response to match CallAnalytics interface
+          const analytics: CallAnalytics = {
+            totalCalls: apiResponse.overview?.totalCalls || 0,
+            completedCalls: apiResponse.overview?.successfulCalls || 0,
+            averageDuration: apiResponse.overview?.averageDuration || 0,
+            successRate: apiResponse.overview?.successRate || 0,
+            averageQualityScore: apiResponse.overview?.qualityScore || 0,
+            sentimentBreakdown: {
+              positive: 0,
+              neutral: 0,
+              negative: 0
+            },
+            callsByDay: [],
+            topPerformers: []
+          }
+          setCallAnalytics(analytics)
+        }
+      } catch (error) {
+        // Fallback to mock data for development
+        const mockCallLogs: CallLog[] = [
+          {
+            id: '1',
+            callSid: 'CA1234567890abcdef',
+            to: '+61412345678',
+            from: '+61487654321',
+            status: 'completed',
+            direction: 'outbound',
+            duration: 180,
+            startTime: new Date(Date.now() - 86400000).toISOString(),
+            endTime: new Date(Date.now() - 86400000 + 180000).toISOString(),
+            recordingUrl: 'https://example.com/recording1.mp3',
+            transcription: 'Hello, I\'m calling about the property listing...',
+            sentiment: 'positive',
+            qualityScore: 8.5,
+            tags: ['property-inquiry', 'interested-buyer']
+          },
+          {
+            id: '2',
+            callSid: 'CA0987654321fedcba',
+            to: '+61423456789',
+            from: '+61487654321',
+            status: 'completed',
+            direction: 'outbound',
+            duration: 240,
+            startTime: new Date(Date.now() - 172800000).toISOString(),
+            endTime: new Date(Date.now() - 172800000 + 240000).toISOString(),
+            recordingUrl: 'https://example.com/recording2.mp3',
+            transcription: 'Thank you for your interest in our rental property...',
+            sentiment: 'neutral',
+            qualityScore: 7.2,
+            tags: ['rental-inquiry', 'follow-up']
+          }
+        ]
+        
+        const mockAnalytics: CallAnalytics = {
+          totalCalls: 45,
+          completedCalls: 38,
+          averageDuration: 195,
+          successRate: 84.4,
+          sentimentBreakdown: {
+            positive: 22,
+            neutral: 12,
+            negative: 4
+          },
+          averageQualityScore: 7.8,
+          callsByDay: [
+            { date: '2024-01-15', count: 8 },
+            { date: '2024-01-16', count: 12 },
+            { date: '2024-01-17', count: 6 },
+            { date: '2024-01-18', count: 9 },
+            { date: '2024-01-19', count: 10 }
+          ],
+          topPerformers: [
+            { agent: 'John Smith', calls: 15, avgScore: 8.2 },
+            { agent: 'Sarah Johnson', calls: 12, avgScore: 7.9 },
+            { agent: 'Mike Wilson', calls: 11, avgScore: 7.5 }
+          ]
+        }
+        
+        setCallLogs(mockCallLogs)
+        setCallAnalytics(mockAnalytics)
+      }
+    }
+    
+    loadCallData()
+  }, [])
 
   const [rentalApplications, setRentalApplications] = useState<RentalApplication[]>([])
 
@@ -2208,6 +2357,298 @@ export default function AdminPage() {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="call-analysis" className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-light text-brown-800">Call Analysis Dashboard</h2>
+                  <p className="text-brown-600">Monitor call performance, quality, and analytics</p>
+                </div>
+
+                {/* Analytics Overview Cards */}
+                {callAnalytics && (
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Calls</CardTitle>
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{callAnalytics.totalCalls}</div>
+                        <p className="text-xs text-muted-foreground">
+                          {callAnalytics.completedCalls} completed
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{callAnalytics.successRate}%</div>
+                        <p className="text-xs text-muted-foreground">
+                          Call completion rate
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Avg Duration</CardTitle>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{Math.floor(callAnalytics.averageDuration / 60)}m {callAnalytics.averageDuration % 60}s</div>
+                        <p className="text-xs text-muted-foreground">
+                          Average call length
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Quality Score</CardTitle>
+                        <Star className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{callAnalytics.averageQualityScore}/10</div>
+                        <p className="text-xs text-muted-foreground">
+                          Average call quality
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Sentiment Analysis */}
+                {callAnalytics && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Sentiment Analysis</CardTitle>
+                      <CardDescription>Call sentiment breakdown</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        <div className="flex items-center space-x-2">
+                          <ThumbsUp className="h-4 w-4 text-green-600" />
+                          <div>
+                            <p className="text-sm font-medium">Positive</p>
+                            <p className="text-2xl font-bold text-green-600">{callAnalytics.sentimentBreakdown?.positive || 0}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="h-4 w-4 rounded-full bg-gray-400"></div>
+                          <div>
+                            <p className="text-sm font-medium">Neutral</p>
+                            <p className="text-2xl font-bold text-gray-600">{callAnalytics.sentimentBreakdown?.neutral || 0}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <ThumbsDown className="h-4 w-4 text-red-600" />
+                          <div>
+                            <p className="text-sm font-medium">Negative</p>
+                            <p className="text-2xl font-bold text-red-600">{callAnalytics.sentimentBreakdown?.negative || 0}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Call Logs Table */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">Recent Call Logs</CardTitle>
+                    <CardDescription>Detailed call history and recordings</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date/Time</TableHead>
+                          <TableHead>Contact</TableHead>
+                          <TableHead>Direction</TableHead>
+                          <TableHead>Duration</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Sentiment</TableHead>
+                          <TableHead>Quality</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {callLogs.map((call) => (
+                          <TableRow key={call.id}>
+                            <TableCell>
+                              <div className="text-sm">
+                                {new Date(call.startTime).toLocaleDateString()}
+                                <br />
+                                <span className="text-muted-foreground">
+                                  {new Date(call.startTime).toLocaleTimeString()}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div className="font-medium">{call.to}</div>
+                                <div className="text-muted-foreground">From: {call.from}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={call.direction === 'outbound' ? 'default' : 'secondary'}>
+                                {call.direction}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {Math.floor(call.duration / 60)}m {call.duration % 60}s
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={
+                                  call.status === 'completed' ? 'default' : 
+                                  call.status === 'failed' ? 'destructive' : 
+                                  'secondary'
+                                }
+                              >
+                                {call.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {call.sentiment && (
+                                <Badge 
+                                  variant={
+                                    call.sentiment === 'positive' ? 'default' : 
+                                    call.sentiment === 'negative' ? 'destructive' : 
+                                    'secondary'
+                                  }
+                                >
+                                  {call.sentiment}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {call.qualityScore && (
+                                <div className="flex items-center space-x-1">
+                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-sm">{call.qualityScore}/10</span>
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedCallLog(call)
+                                    setIsCallLogViewOpen(true)
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {call.recordingUrl && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.open(call.recordingUrl, '_blank')}
+                                  >
+                                    <Play className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+
+                {/* Call Detail Dialog */}
+                <Dialog open={isCallLogViewOpen} onOpenChange={setIsCallLogViewOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Call Details</DialogTitle>
+                      <DialogDescription>
+                        Detailed information and transcription for call {selectedCallLog?.callSid}
+                      </DialogDescription>
+                    </DialogHeader>
+                    {selectedCallLog && (
+                      <div className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <Label className="text-sm font-medium">Call Information</Label>
+                            <div className="mt-2 space-y-2 text-sm">
+                              <div><strong>Call SID:</strong> {selectedCallLog.callSid}</div>
+                              <div><strong>To:</strong> {selectedCallLog.to}</div>
+                              <div><strong>From:</strong> {selectedCallLog.from}</div>
+                              <div><strong>Direction:</strong> {selectedCallLog.direction}</div>
+                              <div><strong>Status:</strong> {selectedCallLog.status}</div>
+                              <div><strong>Duration:</strong> {Math.floor(selectedCallLog.duration / 60)}m {selectedCallLog.duration % 60}s</div>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">Analysis</Label>
+                            <div className="mt-2 space-y-2 text-sm">
+                              {selectedCallLog.sentiment && (
+                                <div><strong>Sentiment:</strong> {selectedCallLog.sentiment}</div>
+                              )}
+                              {selectedCallLog.qualityScore && (
+                                <div><strong>Quality Score:</strong> {selectedCallLog.qualityScore}/10</div>
+                              )}
+                              {selectedCallLog.tags && selectedCallLog.tags.length > 0 && (
+                                <div>
+                                  <strong>Tags:</strong>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {selectedCallLog.tags.map((tag, index) => (
+                                      <Badge key={index} variant="outline" className="text-xs">
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {selectedCallLog.transcription && (
+                          <div>
+                            <Label className="text-sm font-medium">Call Transcription</Label>
+                            <div className="mt-2 p-3 bg-gray-50 rounded-md text-sm">
+                              {selectedCallLog.transcription}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {selectedCallLog.recordingUrl && (
+                          <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => window.open(selectedCallLog.recordingUrl, '_blank')}
+                            >
+                              <Play className="h-4 w-4 mr-2" />
+                              Play Recording
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const link = document.createElement('a')
+                                link.href = selectedCallLog.recordingUrl!
+                                link.download = `call-${selectedCallLog.callSid}.mp3`
+                                link.click()
+                              }}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </TabsContent>
             </Tabs>
             </div>

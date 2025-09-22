@@ -1,5 +1,5 @@
 
-import { BlogPost } from './blog.js';
+import { BlogPost } from './blog';
 
 export interface RSSFeed {
   url: string;
@@ -43,17 +43,21 @@ export async function fetchRSSFeed(feedUrl: string): Promise<RSSItem[]> {
           'Accept-Language': 'en-US,en;q=0.9',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
-        }
+        },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       }),
       // Method 2: Try with different User-Agent
       () => fetch(feedUrl, {
         headers: {
           'User-Agent': 'feedparser-js/1.0 (+https://github.com/feedparser/feedparser)',
           'Accept': 'application/rss+xml, application/xml, text/xml'
-        }
+        },
+        signal: AbortSignal.timeout(10000)
       }),
       // Method 3: Simple fetch without special headers
-      () => fetch(feedUrl)
+      () => fetch(feedUrl, {
+        signal: AbortSignal.timeout(10000)
+      })
     ];
 
     let response;
@@ -65,22 +69,57 @@ export async function fetchRSSFeed(feedUrl: string): Promise<RSSItem[]> {
         if (response.ok) {
           break;
         }
-        lastError = new Error(`HTTP error! status: ${response.status}`);
+        
+        // Handle specific HTTP error codes gracefully
+        const status = response.status;
+        if (status === 403) {
+          lastError = new Error(`Access forbidden (403) for RSS feed: ${feedUrl}. The feed may require authentication or have access restrictions.`);
+        } else if (status === 404) {
+          lastError = new Error(`RSS feed not found (404): ${feedUrl}. The feed URL may have changed or been removed.`);
+        } else if (status === 429) {
+          lastError = new Error(`Rate limited (429) for RSS feed: ${feedUrl}. Too many requests.`);
+        } else if (status >= 500) {
+          lastError = new Error(`Server error (${status}) for RSS feed: ${feedUrl}. The feed server is experiencing issues.`);
+        } else {
+          lastError = new Error(`HTTP error ${status} for RSS feed: ${feedUrl}`);
+        }
       } catch (error) {
-        lastError = error;
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            lastError = new Error(`Timeout fetching RSS feed: ${feedUrl}. The request took too long.`);
+          } else if (error.message.includes('fetch')) {
+            lastError = new Error(`Network error fetching RSS feed: ${feedUrl}. ${error.message}`);
+          } else {
+            lastError = error;
+          }
+        } else {
+          lastError = new Error(`Unknown error fetching RSS feed: ${feedUrl}`);
+        }
         continue;
       }
     }
 
     if (!response || !response.ok) {
-      throw lastError || new Error('All fetch methods failed');
+      // Log the specific error but don't throw - return empty array instead
+      const errorMessage = lastError?.message || 'All fetch methods failed';
+      console.warn(`RSS Feed Error [${feedUrl}]: ${errorMessage}`);
+      return [];
     }
     
     const xmlText = await response.text();
+    
+    // Validate that we received XML content
+    if (!xmlText.trim().startsWith('<')) {
+      console.warn(`RSS Feed Error [${feedUrl}]: Response is not valid XML`);
+      return [];
+    }
+    
     const items = parseRSSXML(xmlText);
     return items;
   } catch (error) {
-    console.warn(`Failed to fetch RSS feed ${feedUrl}:`, error instanceof Error ? error.message : 'Unknown error');
+    // Final catch-all error handler - ensure we never throw
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.warn(`RSS Feed Critical Error [${feedUrl}]: ${errorMessage}`);
     return [];
   }
 }
@@ -703,13 +742,16 @@ const MOCK_RSS_ITEMS: RSSItem[] = [
 export async function fetchAndProcessAllFeeds(): Promise<BlogPost[]> {
   const allPosts: BlogPost[] = [];
   let successfulFeeds = 0;
+  let totalFeeds = RSS_FEEDS.length;
+  
+  console.log(`Starting RSS feed processing for ${totalFeeds} feeds...`);
   
   for (const feed of RSS_FEEDS) {
     try {
-      console.log(`Fetching RSS feed: ${feed.name}`);
+      console.log(`Fetching RSS feed: ${feed.name} (${feed.url})`);
       const rssItems = await fetchRSSFeed(feed.url);
       
-      if (rssItems.length > 0) {
+      if (rssItems && rssItems.length > 0) {
         successfulFeeds++;
         
         // Get recent items (last 30 days) and limit by maxPostsPerDay
@@ -718,40 +760,62 @@ export async function fetchAndProcessAllFeeds(): Promise<BlogPost[]> {
         
         const recentItems = rssItems
           .filter(item => {
-            const itemDate = new Date(item.pubDate);
-            return itemDate >= thirtyDaysAgo;
+            try {
+              const itemDate = new Date(item.pubDate);
+              return !isNaN(itemDate.getTime()) && itemDate >= thirtyDaysAgo;
+            } catch {
+              return false; // Skip items with invalid dates
+            }
           })
           .slice(0, feed.maxPostsPerDay);
         
-        // Convert to blog posts
+        // Convert to blog posts with error handling for each item
         for (const item of recentItems) {
-          const blogPost = convertRSSItemToBlogPost(item, feed.name);
-          const postWithId = {
-            ...blogPost,
-            id: `rss-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-          };
-          
-          // Check for duplicates before adding
-          if (!isDuplicatePost(postWithId, allPosts)) {
-            allPosts.push(postWithId);
-          } else {
-            console.log(`Skipping duplicate post: ${postWithId.title.substring(0, 50)}...`);
+          try {
+            const blogPost = convertRSSItemToBlogPost(item, feed.name);
+            const postWithId = {
+              ...blogPost,
+              id: `rss-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+            };
+            
+            // Check for duplicates before adding
+            if (!isDuplicatePost(postWithId, allPosts)) {
+              allPosts.push(postWithId);
+            } else {
+              console.log(`Skipping duplicate post: ${postWithId.title.substring(0, 50)}...`);
+            }
+          } catch (itemError) {
+            console.warn(`Error processing RSS item from ${feed.name}:`, itemError instanceof Error ? itemError.message : 'Unknown error');
+            // Continue processing other items
           }
         }
         
-        console.log(`Added ${recentItems.length} posts from ${feed.name} (after duplicate removal)`);
+        console.log(`✓ Successfully added ${recentItems.length} posts from ${feed.name}`);
+      } else {
+        console.log(`⚠ No items found for ${feed.name}`);
       }
     } catch (error) {
-      console.warn(`Error processing feed ${feed.name}:`, error instanceof Error ? error.message : 'Unknown error');
+      console.warn(`✗ Error processing feed ${feed.name}:`, error instanceof Error ? error.message : 'Unknown error');
+      // Continue processing other feeds
     }
   }
   
   // Remove any remaining duplicates using more sophisticated matching
   const uniquePosts = removeDuplicatesAdvanced(allPosts);
   
+  // Log processing summary
+  const failedFeeds = totalFeeds - successfulFeeds;
+  console.log(`\n📊 RSS Feed Processing Summary:`);
+  console.log(`   ✓ Successful feeds: ${successfulFeeds}/${totalFeeds}`);
+  if (failedFeeds > 0) {
+    console.log(`   ✗ Failed feeds: ${failedFeeds}/${totalFeeds}`);
+  }
+  console.log(`   📝 Total posts collected: ${allPosts.length}`);
+  console.log(`   🔄 Unique posts after deduplication: ${uniquePosts.length}`);
+  
   // If no feeds were successful, add mock content for demonstration
   if (successfulFeeds === 0 && uniquePosts.length === 0) {
-    console.log('No RSS feeds available, using sample market intelligence content');
+    console.log('\n⚠️  No RSS feeds available, using sample market intelligence content');
     
     for (const mockItem of MOCK_RSS_ITEMS.slice(0, 3)) {
       const blogPost = convertRSSItemToBlogPost(mockItem, 'Market Intelligence');
@@ -760,9 +824,10 @@ export async function fetchAndProcessAllFeeds(): Promise<BlogPost[]> {
         id: `mock-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       });
     }
+    console.log(`   📄 Added ${uniquePosts.length} mock posts for demonstration`);
   }
   
-  console.log(`Total RSS/Market Intelligence posts generated: ${uniquePosts.length} (duplicates removed)`);
+  console.log(`\n🎯 Final result: ${uniquePosts.length} posts ready for display\n`);
   return uniquePosts;
 }
 

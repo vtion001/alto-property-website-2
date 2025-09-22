@@ -1,18 +1,57 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Phone, PhoneOutgoing, PhoneMissed, Settings, User, History } from 'lucide-react'
+import { Phone, PhoneOutgoing, PhoneMissed, Settings, User, History, Mic, MicOff, Square, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useToast } from '@/components/ui/use-toast'
+import TwilioDeviceManager, { isRealDevice, type TwilioDevice } from '@/lib/twilio-device-manager'
+
+// Type definitions
+interface CallLog {
+  id: number
+  callSid: string
+  fromNumber: string
+  toNumber: string
+  status: 'queued' | 'ringing' | 'in-progress' | 'completed' | 'busy' | 'failed' | 'no-answer' | 'canceled' | 'connected'
+  duration?: number
+  startedAt?: Date
+  endedAt?: Date
+  createdAt: Date
+}
+
+interface Contact {
+  id: number
+  name: string
+  phoneNumber: string
+  email?: string
+  notes?: string
+  tags?: string[]
+  isFavorite?: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface TwilioConfig {
+  id: number
+  accountSid: string
+  phoneNumber: string
+  isActive: boolean
+  projectUrl?: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 const dialSchema = z.object({
   phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
+  recordingConsent: z.boolean().default(false),
 })
 
 const twilioConfigSchema = z.object({
@@ -23,74 +62,166 @@ const twilioConfigSchema = z.object({
 
 export default function DialerPage() {
   const [isCalling, setIsCalling] = useState(false)
-  const [callStatus, setCallStatus] = useState<'idle' | 'dialing' | 'connected' | 'ended'>('idle')
+  const [callStatus, setCallStatus] = useState<'idle' | 'dialing' | 'ringing' | 'connected' | 'ended'>('idle')
   const [twilioConfig, setTwilioConfig] = useState<any>(null)
-  const [callLogs, setCallLogs] = useState<any[]>([])
-  const [contacts, setContacts] = useState<any[]>([])
+  const [callLogs, setCallLogs] = useState<CallLog[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [deviceState, setDeviceState] = useState<any>(null)
+  const { toast } = useToast()
+
+  // Get device manager instance
+  const deviceManager = TwilioDeviceManager.getInstance()
 
   const dialForm = useForm<z.infer<typeof dialSchema>>({
     resolver: zodResolver(dialSchema),
-    defaultValues: { phoneNumber: '' },
+    defaultValues: {
+      phoneNumber: '',
+      recordingConsent: false,
+    },
   })
 
   const configForm = useForm<z.infer<typeof twilioConfigSchema>>({
     resolver: zodResolver(twilioConfigSchema),
-    defaultValues: { accountSid: '', authToken: '', phoneNumber: '' },
+    defaultValues: {
+      accountSid: '',
+      authToken: '',
+      phoneNumber: '',
+    },
   })
 
+  // Subscribe to device manager state
   useEffect(() => {
-    const fetchConfig = async () => {
+    const unsubscribe = deviceManager.subscribe((state) => {
+      console.log('📱 Device state updated:', state)
+      setDeviceState(state)
+    })
+
+    return unsubscribe
+  }, [deviceManager])
+
+  // Initialize device when component mounts
+  useEffect(() => {
+    const initializeDevice = async () => {
       try {
-        const response = await fetch('/api/twilio/config')
+        // Fetch access token
+        const response = await fetch('/api/twilio/token')
         if (response.ok) {
-          const config = await response.json()
-          setTwilioConfig(config)
-          configForm.reset({ accountSid: config.accountSid, authToken: '', phoneNumber: config.phoneNumber })
+          const { accessToken } = await response.json()
+          console.log('🔑 Got access token, initializing device...')
+          await deviceManager.initialize(accessToken, toast)
+        } else {
+          console.error('❌ Failed to fetch access token')
+          toast({
+            title: 'Device Error',
+            description: 'Failed to get access token for Twilio device',
+            variant: 'destructive',
+          })
         }
-      } catch {}
+      } catch (error) {
+        console.error('❌ Error initializing device:', error)
+        toast({
+          title: 'Device Error',
+          description: 'Failed to initialize Twilio device',
+          variant: 'destructive',
+        })
+      }
     }
-    const fetchCallLogs = async () => {
-      try {
-        const response = await fetch('/api/call-logs')
-        if (response.ok) setCallLogs(await response.json())
-      } catch {}
+
+    initializeDevice()
+  }, [deviceManager, toast])
+
+  // Fetch Twilio config on component mount
+  useEffect(() => {
+    fetchTwilioConfig()
+    fetchCallLogs()
+    fetchContacts()
+  }, [])
+
+  const fetchTwilioConfig = async () => {
+    try {
+      const response = await fetch('/api/twilio/config')
+      if (response.ok) {
+        const config = await response.json()
+        setTwilioConfig(config)
+        if (config) {
+          configForm.reset({
+            accountSid: config.accountSid,
+            authToken: '', // Don't populate auth token for security
+            phoneNumber: config.phoneNumber,
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching Twilio config:', error)
     }
-    const fetchContacts = async () => {
-      try {
-        const response = await fetch('/api/contacts')
-        if (response.ok) setContacts(await response.json())
-      } catch {}
+  }
+
+  const fetchCallLogs = async () => {
+    try {
+      const response = await fetch('/api/call-logs')
+      if (response.ok) {
+        const logs = await response.json()
+        setCallLogs(logs)
+      }
+    } catch (error) {
+      console.error('Error fetching call logs:', error)
     }
-    fetchConfig(); fetchCallLogs(); fetchContacts()
-  }, [configForm])
+  }
+
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch('/api/contacts')
+      if (response.ok) {
+        const contactsData = await response.json()
+        setContacts(contactsData)
+      }
+    } catch (error) {
+      console.error('Error fetching contacts:', error)
+    }
+  }
 
   const onDial = async (values: z.infer<typeof dialSchema>) => {
     if (!twilioConfig) {
-      alert('Please configure Twilio settings first')
+      toast({
+        title: 'Configuration Required',
+        description: 'Please configure your Twilio settings first.',
+        variant: 'destructive',
+      })
       return
     }
+
+    if (!deviceState?.isReady) {
+      toast({
+        title: 'Device Not Ready',
+        description: 'Twilio device is not ready. Please wait for initialization to complete.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsCalling(true)
     setCallStatus('dialing')
+
     try {
-      const response = await fetch('/api/call', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: values.phoneNumber, from: twilioConfig.phoneNumber }),
+      // Use the new makeCall method from device manager
+      await deviceManager.makeCall(values.phoneNumber, values.recordingConsent)
+      
+      // Update call status based on device state
+      setCallStatus('connected')
+      
+      // Refresh call logs after call
+      setTimeout(() => {
+        fetchCallLogs()
+      }, 1000)
+    } catch (error) {
+      console.error('Error making call:', error)
+      toast({
+        title: 'Call Failed',
+        description: 'Failed to initiate the call. Please try again.',
+        variant: 'destructive',
       })
-      if (response.ok) {
-        const callData = await response.json()
-        setCallStatus('connected')
-        setCallLogs([
-          { id: callLogs.length + 1, callSid: callData.sid, fromNumber: twilioConfig.phoneNumber, toNumber: values.phoneNumber, status: 'connected', startedAt: new Date(), createdAt: new Date() },
-          ...callLogs,
-        ])
-      } else throw new Error('Failed to make call')
-    } catch (e) {
       setCallStatus('ended')
-      alert('Failed to make call. Please check your Twilio configuration.')
-    } finally {
       setIsCalling(false)
-      setTimeout(() => setCallStatus('ended'), 10000)
     }
   }
 
@@ -104,20 +235,115 @@ export default function DialerPage() {
       if (response.ok) {
         const config = await response.json()
         setTwilioConfig(config)
-        alert('Twilio configuration saved successfully!')
-      } else throw new Error('Failed to save configuration')
-    } catch (e) {
-      alert('Failed to save configuration. Please try again.')
+        toast({
+          title: 'Configuration Saved',
+          description: 'Twilio configuration saved successfully!',
+        })
+        
+        // Reinitialize device with new config
+        try {
+          const tokenResponse = await fetch('/api/twilio/token')
+          if (tokenResponse.ok) {
+            const { accessToken } = await tokenResponse.json()
+            await deviceManager.initialize(accessToken, toast)
+          }
+        } catch (error) {
+          console.error('Error reinitializing device:', error)
+        }
+      } else {
+        throw new Error('Failed to save configuration')
+      }
+    } catch (error) {
+      console.error('Error saving config:', error)
+      toast({
+        title: 'Configuration Error',
+        description: 'Failed to save configuration. Please try again.',
+        variant: 'destructive',
+      })
     }
   }
 
   const endCall = async () => {
-    if (callStatus === 'connected') setCallStatus('ended')
+    if (callStatus === 'connected') {
+      try {
+        // Stop recording if active
+        if (deviceState?.isRecording) {
+          await deviceManager.stopRecording()
+        }
+        
+        // End the call
+        deviceManager.hangupCall()
+        
+        setCallStatus('ended')
+        setIsCalling(false)
+        
+        // Refresh call logs
+        setTimeout(() => {
+          fetchCallLogs()
+        }, 1000)
+      } catch (error) {
+        console.error('Error ending call:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to end call properly',
+          variant: 'destructive',
+        })
+      }
+    }
+  }
+
+  const handleStartRecording = async () => {
+    try {
+      await deviceManager.startRecording()
+      toast({
+        title: 'Recording Started',
+        description: 'Call recording has been started',
+      })
+    } catch (error) {
+      console.error('Error starting recording:', error)
+      toast({
+        title: 'Recording Error',
+        description: 'Failed to start recording',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleStopRecording = async () => {
+    try {
+      await deviceManager.stopRecording()
+      toast({
+        title: 'Recording Stopped',
+        description: 'Call recording has been stopped',
+      })
+    } catch (error) {
+      console.error('Error stopping recording:', error)
+      toast({
+        title: 'Recording Error',
+        description: 'Failed to stop recording',
+        variant: 'destructive',
+      })
+    }
   }
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Twilio Dialing System</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Twilio Dialing System</h1>
+        
+        {/* Device Status Indicator */}
+        <div className="flex items-center space-x-2">
+          <div className={`w-3 h-3 rounded-full ${
+            deviceState?.status === 'ready' ? 'bg-green-500' :
+            deviceState?.status === 'connecting' || deviceState?.status === 'initializing' ? 'bg-yellow-500' :
+            deviceState?.status === 'error' || deviceState?.status === 'failed' ? 'bg-red-500' :
+            'bg-gray-500'
+          }`} />
+          <span className="text-sm font-medium">
+            Device: {deviceState?.status || 'Unknown'}
+          </span>
+        </div>
+      </div>
 
       <Tabs defaultValue="dialer" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -149,20 +375,77 @@ export default function DialerPage() {
                       </FormItem>
                     )}
                   />
+                  
+                  <FormField
+                    control={dialForm.control}
+                    name="recordingConsent"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Enable call recording
+                          </FormLabel>
+                          <FormDescription>
+                            I consent to recording this call for quality and training purposes
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
                   <div className="flex gap-2">
                     <Button type="submit" disabled={isCalling || callStatus === 'connected'} className="flex items-center gap-2">
                       {isCalling ? (<><div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />Dialing...</>) : (<><PhoneOutgoing className="h-4 w-4" />Call</>)}
                     </Button>
                     {callStatus === 'connected' && (
-                      <Button type="button" variant="destructive" onClick={endCall} className="flex items-center gap-2">
-                        <PhoneMissed className="h-4 w-4" />End Call
-                      </Button>
+                      <>
+                        <Button type="button" variant="destructive" onClick={endCall} className="flex items-center gap-2">
+                          <PhoneMissed className="h-4 w-4" />End Call
+                        </Button>
+                        {deviceState?.recordingConsent && (
+                          <>
+                            {!deviceState?.isRecording ? (
+                              <Button type="button" variant="outline" onClick={handleStartRecording} className="flex items-center gap-2">
+                                <Mic className="h-4 w-4" />Start Recording
+                              </Button>
+                            ) : (
+                              <Button type="button" variant="outline" onClick={handleStopRecording} className="flex items-center gap-2">
+                                <Square className="h-4 w-4 text-red-500" />Stop Recording
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
                   {callStatus !== 'idle' && (
                     <div className="mt-4 p-3 bg-gray-100 rounded-md">
                       <p className="font-medium">Call Status: {callStatus}</p>
-                      {callStatus === 'connected' && (<p className="text-sm text-gray-600">Call in progress...</p>)}
+                      {callStatus === 'connected' && (
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600">Call in progress...</p>
+                          {deviceState?.callStartTime && (
+                            <p className="text-sm text-gray-600">
+                              Duration: {Math.floor((Date.now() - new Date(deviceState.callStartTime).getTime()) / 1000)}s
+                            </p>
+                          )}
+                          {deviceState?.isRecording && (
+                            <div className="flex items-center gap-2 text-red-600">
+                              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                              <span className="text-sm font-medium">Recording in progress</span>
+                            </div>
+                          )}
+                          {deviceState?.callSid && (
+                            <p className="text-xs text-gray-500">Call SID: {deviceState.callSid}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </form>

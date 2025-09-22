@@ -20,7 +20,12 @@ export async function GET(request: NextRequest) {
   // Allow unauthenticated access for dialer functionality
   try {
     const contacts = await prisma.contact.findMany({ orderBy: { name: 'asc' } })
-    return NextResponse.json(contacts)
+    // Convert BigInt values to strings for JSON serialization
+    const serializedContacts = contacts.map(contact => ({
+      ...contact,
+      id: contact.id.toString()
+    }))
+    return NextResponse.json(serializedContacts)
   } catch (error) {
     console.error('Contacts GET error', error)
     return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
