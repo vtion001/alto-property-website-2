@@ -378,8 +378,8 @@ export default function Dialer() {
       try {
         // Use your existing Twilio credentials from .env
         const twilioCredentials = {
-          accountSid: 'AC9320550d6ead598f05d7967d7e9582f5',
-          phoneNumber: '+61483913513',
+          accountSid: process.env.TWILIO_ACCOUNT_SID || 'ACxxxxxx',
+          phoneNumber: process.env.TWILIO_PHONE_NUMBER || '+61483913513',
           isActive: true,
         }
 
