@@ -20,21 +20,62 @@ export async function GET(request: NextRequest) {
   // Allow unauthenticated access for dialer functionality
   // Only require admin auth for sensitive operations via POST/PUT/DELETE
   try {
-    const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
-    if (!config) return NextResponse.json({ error: 'No active configuration found' }, { status: 404 })
+    // First try to get config from database
+    let config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
+    
+    // If no database config found, fall back to environment variables
+    if (!config) {
+      const envAccountSid = process.env.TWILIO_ACCOUNT_SID
+      const envPhoneNumber = process.env.TWILIO_PHONE_NUMBER
+      
+      if (envAccountSid && envPhoneNumber) {
+        console.log('📡 Using Twilio config from environment variables')
+        return NextResponse.json({
+          id: 'env-config',
+          accountSid: envAccountSid,
+          phoneNumber: envPhoneNumber,
+          isActive: true,
+          source: 'environment'
+        })
+      }
+      
+      return NextResponse.json({ 
+        error: 'No active configuration found',
+        hint: 'Either configure via the API Config tab or set TWILIO_ACCOUNT_SID and TWILIO_PHONE_NUMBER in environment variables'
+      }, { status: 404 })
+    }
+    
     return NextResponse.json({
       id: config.id.toString(), // Convert BigInt to string
       accountSid: config.accountSid,
       phoneNumber: config.phoneNumber,
       isActive: config.isActive,
+      source: 'database'
     })
   } catch (error) {
     console.error('Twilio config GET error', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    // If database error, try environment variables as fallback
+    const envAccountSid = process.env.TWILIO_ACCOUNT_SID
+    const envPhoneNumber = process.env.TWILIO_PHONE_NUMBER
+    
+    if (envAccountSid && envPhoneNumber) {
+      console.log('📡 Database error, falling back to environment variables')
+      return NextResponse.json({
+        id: 'env-config',
+        accountSid: envAccountSid,
+        phoneNumber: envPhoneNumber,
+        isActive: true,
+        source: 'environment',
+        warning: 'Using environment config due to database error'
+      })
+    }
+    
     return NextResponse.json({ 
       error: 'Failed to fetch configuration', 
       details: errorMessage,
-      hint: 'Check if DATABASE_URL is set in environment variables'
+      hint: 'Check if DATABASE_URL is set in environment variables or configure TWILIO_ACCOUNT_SID and TWILIO_PHONE_NUMBER'
     }, { status: 500 })
   }
 }
@@ -71,6 +112,7 @@ export async function POST(request: NextRequest) {
       accountSid: config.accountSid,
       phoneNumber: config.phoneNumber,
       isActive: config.isActive,
+      source: 'database',
       message: 'Configuration saved successfully'
     })
   } catch (error) {
@@ -82,7 +124,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Database connection failed',
         details: errorMessage,
-        hint: 'Check if DATABASE_URL is correctly set and Supabase is accessible'
+        hint: 'Check if DATABASE_URL is correctly set and Supabase is accessible. You can still use environment variables (TWILIO_ACCOUNT_SID, TWILIO_PHONE_NUMBER) as fallback.'
       }, { status: 500 })
     }
     
@@ -93,5 +135,3 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
-
-

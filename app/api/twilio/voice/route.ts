@@ -1,57 +1,90 @@
 import { NextRequest, NextResponse } from 'next/server'
+import twilio from 'twilio'
 
-// Simple webhook without authentication for Twilio
+const VoiceResponse = twilio.twiml.VoiceResponse
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
-    const callSid = formData.get('CallSid') as string
-    const callStatus = formData.get('CallStatus') as string
-    const direction = formData.get('Direction') as string
+    const to = formData.get('To') as string
+    const record = formData.get('Record') === 'true'
+    
+    console.log('🎤 TwiML webhook called with:', { to, record })
 
-    console.log(`Twilio Webhook - Call: ${callSid}, Status: ${callStatus}, Direction: ${direction}`)
+    const response = new VoiceResponse()
+    
+    if (!to) {
+      console.log('❌ No "To" parameter provided')
+      response.say('Sorry, no phone number was provided.')
+      return new NextResponse(response.toString(), {
+        headers: { 
+          'Content-Type': 'text/xml',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, ngrok-skip-browser-warning'
+        },
+      })
+    }
 
-    // Return simple TwiML response
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say>Hello from the dialing system. Please wait while we connect your call.</Say>
-  <Pause length="1"/>
-  <Say>You are now connected. You should be able to hear the other party.</Say>
-  <Gather input="speech dtmf" timeout="3600" finishOnKey="#" action="/api/twilio/voice/gather" method="POST">
-    <Say>Speak or press any key to continue. Press pound to end.</Say>
-  </Gather>
-</Response>`
+    // Create dial verb to connect to the phone number
+    const dial = response.dial({
+      callerId: process.env.TWILIO_PHONE_NUMBER || '+1234567890',
+      record: record ? 'record-from-answer' : undefined,
+      timeout: 30
+    })
+    
+    // Add the destination number
+    dial.number(to)
 
-    return new Response(twiml, {
-      headers: {
-        'Content-Type': 'application/xml',
+    console.log('📞 Generated TwiML XML:', response.toString())
+
+    console.log('📞 Generated TwiML for call to:', to)
+    
+    return new NextResponse(response.toString(), {
+      headers: { 
+        'Content-Type': 'text/xml',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, ngrok-skip-browser-warning'
       },
     })
+    
   } catch (error) {
-    console.error('Twilio webhook error:', error)
+    console.error('💥 TwiML webhook error:', error)
     
-    // Return a safe fallback response
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say>Sorry, there was an error processing your call. Please try again.</Say>
-</Response>`
+    const response = new VoiceResponse()
+    response.say('Sorry, there was an error making your call.')
     
-    return new Response(twiml, {
-      headers: {
-        'Content-Type': 'application/xml',
+    return new NextResponse(response.toString(), {
+      headers: { 
+        'Content-Type': 'text/xml',
+        'Access-Control-Allow-Origin': '*'
       },
     })
   }
 }
 
-// Handle GET requests for status callbacks
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const callSid = searchParams.get('CallSid')
-  const callStatus = searchParams.get('CallStatus')
-  const direction = searchParams.get('Direction')
+// Handle GET requests for webhook verification
+export async function GET() {
+  return new NextResponse('Twilio Voice Webhook is working!', {
+    status: 200,
+    headers: { 
+      'Content-Type': 'text/plain',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, ngrok-skip-browser-warning'
+    },
+  })
+}
 
-  console.log(`Twilio Webhook GET - Call: ${callSid}, Status: ${callStatus}, Direction: ${direction}`)
-
-  // For status callbacks, just acknowledge
-  return NextResponse.json({ received: true })
+// Handle OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, ngrok-skip-browser-warning',
+    },
+  })
 }

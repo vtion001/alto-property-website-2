@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getSupabaseServerClient } from '@/lib/supabase-client'
 import { jwtVerify } from 'jose'
 
 export const runtime = 'nodejs'
@@ -19,13 +19,32 @@ async function requireAdmin(request: NextRequest) {
 export async function GET(request: NextRequest) {
   // Allow unauthenticated access for dialer functionality
   try {
-    const contacts = await prisma.contact.findMany({ orderBy: { name: 'asc' } })
-    // Convert BigInt values to strings for JSON serialization
-    const serializedContacts = contacts.map(contact => ({
-      ...contact,
-      id: contact.id.toString()
+    const supabase = getSupabaseServerClient() // Use server client with service role
+
+    const { data: contacts, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .order('name', { ascending: true })
+
+    if (error) {
+      console.error('Supabase GET error:', error)
+      return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
+    }
+
+    // Convert snake_case database columns to camelCase for API response
+    const formattedContacts = (contacts || []).map(contact => ({
+      id: contact.id,
+      name: contact.name,
+      phoneNumber: contact.phone_number || contact.phoneNumber, // Handle both cases
+      email: contact.email,
+      notes: contact.notes,
+      tags: contact.tags,
+      isFavorite: contact.is_favorite || contact.isFavorite, // Handle both cases
+      createdAt: contact.created_at || contact.createdAt, // Handle both cases
+      updatedAt: contact.updated_at || contact.updatedAt // Handle both cases
     }))
-    return NextResponse.json(serializedContacts)
+
+    return NextResponse.json(formattedContacts)
   } catch (error) {
     console.error('Contacts GET error', error)
     return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
@@ -35,16 +54,115 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const admin = await requireAdmin(request)
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const { name, phoneNumber, email } = await request.json()
-    if (!name || !phoneNumber) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+    if (!name || !phoneNumber) {
+      return NextResponse.json({ error: 'Missing required fields: name and phoneNumber' }, { status: 400 })
+    }
 
-    const contact = await prisma.contact.create({ data: { name, phoneNumber, email } })
-    return NextResponse.json(contact)
+    const supabase = getSupabaseServerClient()
+
+    const { data: contact, error } = await supabase
+      .from('contacts')
+      .insert([{
+        name,
+        phone_number: phoneNumber,  // Use snake_case
+        email: email || null,
+        created_at: new Date().toISOString(),  // Explicitly set timestamps
+        updated_at: new Date().toISOString()
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase POST error:', error)
+      return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 })
+    }
+
+    // Convert back to camelCase for response
+    const formattedContact = {
+      id: contact.id,
+      name: contact.name,
+      phoneNumber: contact.phone_number,
+      email: contact.email,
+      notes: contact.notes,
+      tags: contact.tags,
+      isFavorite: contact.is_favorite,
+      createdAt: contact.created_at,
+      updatedAt: contact.updated_at
+    }
+
+    return NextResponse.json(formattedContact)
   } catch (error) {
     console.error('Contacts POST error', error)
     return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 })
   }
 }
 
+export async function PUT(request: NextRequest) {
+  const admin = await requireAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  try {
+    const { id, name, phoneNumber, email } = await request.json()
+    if (!id || !name || !phoneNumber) {
+      return NextResponse.json({ error: 'Missing required fields: id, name, and phoneNumber' }, { status: 400 })
+    }
+
+    const supabase = getSupabaseServerClient()
+
+    const { data: contact, error } = await supabase
+      .from('contacts')
+      .update({
+        name,
+        phoneNumber,
+        email: email || null
+        // updatedAt will be handled by a trigger or manually set updatedAt: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase PUT error:', error)
+      return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 })
+    }
+
+    return NextResponse.json(contact)
+  } catch (error) {
+    console.error('Contacts PUT error', error)
+    return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const admin = await requireAdmin(request)
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Contact ID is required' }, { status: 400 })
+    }
+
+    const supabase = getSupabaseServerClient() // Use server client with service role
+
+    const { error } = await supabase
+      .from('contacts')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Supabase DELETE error:', error)
+      return NextResponse.json({ error: 'Failed to delete contact' }, { status: 500 })
+    }
+
+    return NextResponse.json({ message: 'Contact deleted successfully' })
+  } catch (error) {
+    console.error('Contacts DELETE error', error)
+    return NextResponse.json({ error: 'Failed to delete contact' }, { status: 500 })
+  }
+}

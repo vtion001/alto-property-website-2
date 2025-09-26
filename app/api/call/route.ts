@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
     const client = twilio(accountSid, authToken)
 
     // Get the base URL for webhooks
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'
-
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     const call = await client.calls.create({
       to,
       from,
