@@ -585,7 +585,7 @@ export default function SellingWithAltoPage() {
                 </div>
                 <div className="flex items-center justify-center space-x-3">
                   <Mail className="h-5 w-5 text-brown-200" />
-                  <span className="text-brown-200">info@altopropertygroup.com.au</span>
+                  <span className="text-brown-200">sales@altopropertygroup.com.au</span>
                 </div>
               </div>
             </div>

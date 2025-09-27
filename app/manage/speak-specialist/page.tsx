@@ -370,7 +370,7 @@ export default function SpeakSpecialistPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-light text-brown-800 mb-2">Office</h3>
-                        <p className="text-brown-700">Office address coming soon</p>
+                        <p className="text-brown-700"> Level 2, 8 Clunies Ross Court Eight Mile Plains QLD 4113</p>
                       </div>
                     </div>
 

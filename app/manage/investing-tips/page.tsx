@@ -513,7 +513,7 @@ export default function InvestingTipsPage() {
               <ul className="space-y-3 text-brown-200">
                 <li>(61) 437 139 314</li>
                 <li>connor.reilly@altoproperty.com.au</li>
-                <li>Office address coming soon</li>
+                <li> Level 2, 8 Clunies Ross Court Eight Mile Plains QLD 4113</li>
               </ul>
             </div>
           </div>
