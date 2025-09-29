@@ -80,7 +80,7 @@ export default function TeamPage() {
         <div className="container">
           <div className="text-center">
             <div className="text-center space-y-4">
-              <p className="text-brown-200">Office address coming soon</p>
+              <p className="text-brown-200"> Level 2, 8 Clunies Ross Court Eight Mile Plains QLD 4113</p>
               <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
             </div>
           </div>

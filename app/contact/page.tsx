@@ -300,7 +300,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <div className="font-medium text-brown-900 text-lg">Office</div>
-                      <div className="text-brown-700">Office address coming soon</div>
+                      <div className="text-brown-700"> Level 2, 8 Clunies Ross Court Eight Mile Plains QLD 4113</div>
                     </div>
                   </div>
 

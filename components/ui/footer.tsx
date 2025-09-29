@@ -87,7 +87,7 @@ export default function Footer({
             <ul className="space-y-3 text-brown-200">
               <li>(+61) 467 048 837</li>
               <li>sales@altoproperty.com.au</li>
-              <li>Office address coming soon</li>
+              <li> Level 2, 8 Clunies Ross Court Eight Mile Plains QLD 4113</li>
             </ul>
           </div>
         </div>
