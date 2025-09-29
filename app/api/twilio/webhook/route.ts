@@ -1,85 +1,198 @@
 import { NextRequest, NextResponse } from 'next/server'
-import twilio from 'twilio'
-
-const { VoiceResponse } = twilio.twiml
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 
-// Remove admin authentication for webhook - Twilio needs direct access
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    const callSid = formData.get('CallSid') as string
-    const callStatus = formData.get('CallStatus') as string
-    const to = formData.get('To') as string
-    const from = formData.get('From') as string
-    const direction = formData.get('Direction') as string
+    const body = await request.text()
+    const params = new URLSearchParams(body)
+    
+    const callSid = params.get('CallSid')
+    const callStatus = params.get('CallStatus')
+    const from = params.get('From')
+    const to = params.get('To')
+    const callDuration = params.get('CallDuration')
+    const recordingUrl = params.get('RecordingUrl')
+    const recordingSid = params.get('RecordingSid')
+    const recordingDuration = params.get('RecordingDuration')
 
-    console.log(`Twilio Webhook - Call: ${callSid}, Status: ${callStatus}, Direction: ${direction}`)
+    console.log('Twilio webhook received:', {
+      callSid,
+      callStatus,
+      from,
+      to,
+      callDuration,
+      recordingUrl,
+      recordingSid
+    })
 
-    const twiml = new VoiceResponse()
-
-    // Handle different call statuses and directions
-    if (direction === 'outbound-api') {
-      // This is an outbound call created via REST API
-      if (callStatus === 'ringing' || callStatus === 'in-progress') {
-        // For outbound calls, we want to connect the call and allow two-way audio
-        // The <Say> will play, but we need to keep the call open for audio
-        twiml.say('Hello from the dialing system. Please wait while we connect your call.')
-        
-        // Add a pause to allow for connection
-        twiml.pause({ length: 1 })
-        
-        // The key insight: we need to keep the call open for audio
-        // Since this is a web-based dialer, we'll use a simple approach:
-        // Play a message and then keep the line open
-        twiml.say('You are now connected. You should be able to hear the other party.')
-        
-        // Keep the call alive by adding a long pause or gather
-        twiml.gather({
-          input: ['speech', 'dtmf'],
-          timeout: 3600, // 1 hour timeout
-          finishOnKey: '#',
-          action: '/api/twilio/webhook/gather',
-          method: 'POST'
-        }).say('Speak or press any key to continue. Press pound to end.')
-      }
-    } else {
-      // Handle inbound calls or other scenarios
-      twiml.say('Hello! This is the Alto Property dialing system.')
-      twiml.pause({ length: 1 })
-      twiml.say('How can I help you today?')
+    if (!callSid) {
+      return NextResponse.json({ error: 'Missing CallSid' }, { status: 400 })
     }
 
-    return new NextResponse(twiml.toString(), {
-      headers: {
-        'Content-Type': 'application/xml',
-      },
-    })
+    // Always try to find existing call log first
+    const { data: existingCallLog } = await supabase
+      .from('call_logs')
+      .select('*')
+      .eq('call_sid', callSid)
+      .single()
+
+    let callLog = existingCallLog;
+
+    // Handle call status updates (when we have call details)
+    if (callStatus || from || to) {
+      if (existingCallLog) {
+        // Update existing call log
+        const updateData: any = {}
+        
+        if (callStatus) updateData.status = callStatus.toLowerCase()
+        if (callDuration) updateData.duration = parseInt(callDuration)
+        if (callStatus === 'completed') updateData.ended_at = new Date().toISOString()
+        if (from && !existingCallLog.from_number) updateData.from_number = from
+        if (to && !existingCallLog.to_number) updateData.to_number = to
+
+        const { data: updatedCallLog, error: updateError } = await supabase
+          .from('call_logs')
+          .update(updateData)
+          .eq('call_sid', callSid)
+          .select()
+          .single()
+
+        if (updateError) {
+          console.error('Error updating call log:', updateError)
+        } else {
+          callLog = updatedCallLog
+          console.log('Call log updated successfully')
+        }
+      } else if (from && to) {
+        // Create new call log only if we have minimum required data
+        const { data: newCallLog, error: insertError } = await supabase
+          .from('call_logs')
+          .insert({
+            call_sid: callSid,
+            from_number: from,
+            to_number: to,
+            status: callStatus?.toLowerCase() || 'unknown',
+            duration: callDuration ? parseInt(callDuration) : null,
+            started_at: new Date().toISOString(),
+            ended_at: callStatus === 'completed' ? new Date().toISOString() : null,
+          })
+          .select()
+          .single()
+
+        if (insertError) {
+          console.error('Error creating call log:', insertError)
+        } else {
+          callLog = newCallLog
+          console.log('Call log created successfully')
+        }
+      }
+    }
+
+    // Handle recording (can happen independently of call status)
+    if (recordingUrl && recordingSid) {
+      if (callLog) {
+        // Check if recording already exists
+        const { data: existingRecording } = await supabase
+          .from('call_recordings')
+          .select('id')
+          .eq('call_log_id', callLog.id)
+          .single()
+
+        if (existingRecording) {
+          // Update existing recording
+          const { error: recordingError } = await supabase
+            .from('call_recordings')
+            .update({
+              recording_url: recordingUrl,
+              recording_sid: recordingSid,
+              duration: recordingDuration ? parseInt(recordingDuration) : null,
+              updated_at: new Date().toISOString()
+            })
+            .eq('call_log_id', callLog.id)
+
+          if (recordingError) {
+            console.error('Error updating recording:', recordingError)
+          } else {
+            console.log('Recording updated successfully:', recordingUrl)
+          }
+        } else {
+          // Create new recording
+          const { error: recordingError } = await supabase
+            .from('call_recordings')
+            .insert({
+              call_log_id: callLog.id,
+              recording_url: recordingUrl,
+              recording_sid: recordingSid,
+              duration: recordingDuration ? parseInt(recordingDuration) : null,
+              consent_given: true,
+              consent_timestamp: new Date().toISOString(),
+              format: 'mp3',
+              is_processed: false,
+              updated_at: new Date().toISOString()
+            })
+
+          if (recordingError) {
+            console.error('Error saving recording:', recordingError)
+          } else {
+            console.log('Recording saved successfully:', recordingUrl)
+          }
+        }
+      } else {
+        console.log('Recording received but no call log found for CallSid:', callSid)
+        console.log('This might be a recording-only webhook - trying to find call by SID again...')
+        
+        // Sometimes there's a delay, try one more time to find the call log
+        const { data: retryCallLog } = await supabase
+          .from('call_logs')
+          .select('*')
+          .eq('call_sid', callSid)
+          .single()
+
+        if (retryCallLog) {
+          console.log('Found call log on retry, saving recording...')
+          const { error: recordingError } = await supabase
+            .from('call_recordings')
+            .upsert({
+              call_log_id: retryCallLog.id,
+              recording_url: recordingUrl,
+              recording_sid: recordingSid,
+              duration: recordingDuration ? parseInt(recordingDuration) : null,
+              consent_given: true,
+              consent_timestamp: new Date().toISOString(),
+              format: 'mp3',
+              is_processed: false,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'call_log_id'
+            })
+
+          if (recordingError) {
+            console.error('Error saving recording on retry:', recordingError)
+          } else {
+            console.log('Recording saved successfully on retry:', recordingUrl)
+          }
+        } else {
+          console.log('Still no call log found - this recording will be orphaned')
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Twilio webhook error:', error)
-    
-    // Return a safe fallback response
-    const twiml = new VoiceResponse()
-    twiml.say('Sorry, there was an error processing your call. Please try again.')
-    
-    return new NextResponse(twiml.toString(), {
-      headers: {
-        'Content-Type': 'application/xml',
-      },
-    })
+    console.error('Webhook error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-}
-
-// Handle GET requests (Twilio sometimes sends GET for status callbacks)
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const callSid = searchParams.get('CallSid')
-  const callStatus = searchParams.get('CallStatus')
-  const direction = searchParams.get('Direction')
-
-  console.log(`Twilio Webhook GET - Call: ${callSid}, Status: ${callStatus}, Direction: ${direction}`)
-
-  // For status callbacks, we don't need to return TwiML, just acknowledge
-  return NextResponse.json({ received: true })
 }

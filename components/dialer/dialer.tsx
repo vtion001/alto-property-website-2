@@ -19,15 +19,49 @@ import { Device, Call } from '@twilio/voice-sdk'
 
 // Type definitions
 interface CallLog {
-  id: string
-  call_sid: string      // Database uses snake_case
-  from_number: string   // Database uses snake_case
-  to_number: string     // Database uses snake_case
+  id: number
+  call_sid: string
+  from_number: string
+  to_number: string
   status: 'queued' | 'ringing' | 'in-progress' | 'completed' | 'busy' | 'failed' | 'no-answer' | 'canceled' | 'connected'
   duration?: number
-  started_at?: string   // Database uses snake_case and returns ISO string
-  ended_at?: string     // Database uses snake_case and returns ISO string
+  started_at?: string
+  ended_at?: string
   created_at: string
+}
+
+interface CallRecording {
+  id: number
+  call_log_id: number
+  recording_url: string
+  recording_sid?: string
+  duration?: number
+  file_size?: number
+  format: string
+  consent_given: boolean
+  consent_timestamp?: string
+  storage_location?: string
+  is_processed: boolean
+  created_at: string
+  updated_at: string
+  call_logs?: CallLog
+}
+
+interface CallRecording {
+  id: number
+  call_log_id: number
+  recording_url: string
+  recording_sid?: string
+  duration?: number
+  file_size?: number
+  format: string
+  consent_given: boolean
+  consent_timestamp?: string
+  storage_location?: string
+  is_processed: boolean
+  created_at: string
+  updated_at: string
+  call_logs?: CallLog
 }
 
 interface Contact {
@@ -75,7 +109,7 @@ export default function Dialer() {
   const [callLogs, setCallLogs] = useState<CallLog[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [currentCallSid, setCurrentCallSid] = useState<string | null>(null)
-  const [isRecording, setIsRecording] = useState(false)
+  const [callRecordings, setCallRecordings] = useState<CallRecording[]>([])
   const [recordingConsent, setRecordingConsent] = useState(false)
   const { toast } = useToast()
 
@@ -98,7 +132,7 @@ export default function Dialer() {
     resolver: zodResolver(dialSchema),
     defaultValues: {
       phoneNumber: '',
-      recordingConsent: false,
+      recordingConsent: true,
     },
   })
 
@@ -116,11 +150,23 @@ export default function Dialer() {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
       await audioContext.resume()
-      setAudioContextInitialized(true)
+
+      console.log('✅ Audio context initialized successfully')
+
       toast({
         title: "Audio Enabled",
-        description: "Browser audio permissions granted. You can now make calls.",
+        description: "Browser audio permissions granted. Initializing device...",
       })
+
+      // Set audio context as initialized and immediately initialize device
+      // Don't rely on state update timing - call initializeDevice directly
+      setAudioContextInitialized(true)
+
+      // Call initializeDevice with a flag to bypass the audio check
+      setTimeout(() => {
+        initializeDeviceWithAudio()
+      }, 100) // Very short delay to ensure state update
+
       return true
     } catch (error) {
       console.error('Failed to initialize audio context:', error)
@@ -161,18 +207,8 @@ export default function Dialer() {
   }
 
   // Initialize Twilio Device
-  const initializeDevice = async () => {
-    console.log('🔄 Starting device initialization...')
-    console.log('Audio context initialized:', audioContextInitialized)
-
-    if (!audioContextInitialized) {
-      toast({
-        title: "Audio Required",
-        description: "Please enable audio first by clicking the 'Enable Audio' button.",
-        variant: "destructive"
-      })
-      return
-    }
+  const initializeDeviceWithAudio = async () => {
+    console.log('🔄 Starting device initialization with audio context ready...')
 
     try {
       console.log('📱 Setting device state to initializing...')
@@ -331,6 +367,24 @@ export default function Dialer() {
     }
   }
 
+  // Keep the original initializeDevice for manual retry
+  const initializeDevice = async () => {
+    console.log('🔄 Starting device initialization...')
+    console.log('Audio context initialized:', audioContextInitialized)
+
+    if (!audioContextInitialized) {
+      toast({
+        title: "Audio Required",
+        description: "Please enable audio first by clicking the 'Enable Audio' button.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Call the same function but with audio context check
+    await initializeDeviceWithAudio()
+  }
+
   // Make a call
   const makeCall = async (phoneNumber: string, recordingConsent: boolean) => {
     if (!device || !deviceState.isReady) {
@@ -375,6 +429,13 @@ export default function Dialer() {
         setCurrentCall(null)
         setCurrentCallSid(null)
         setIsCalling(false)
+
+        // Refresh data after call ends (wait a bit for webhooks to process)
+        setTimeout(() => {
+          fetchCallLogs()
+          fetchCallRecordings()
+        }, 3000) // Wait 3 seconds for webhooks to complete
+
         toast({
           title: "Call Ended",
           description: "The call has been disconnected.",
@@ -437,6 +498,7 @@ export default function Dialer() {
     fetchTwilioConfig()
     fetchCallLogs()
     fetchContacts()
+    fetchCallRecordings()
   }, [])
 
   const fetchTwilioConfig = async () => {
@@ -467,6 +529,18 @@ export default function Dialer() {
       }
     } catch (error) {
       console.error('Error fetching call logs:', error)
+    }
+  }
+
+  const fetchCallRecordings = async () => {
+    try {
+      const response = await fetch('/api/call-recordings')
+      if (response.ok) {
+        const recordings = await response.json()
+        setCallRecordings(recordings)
+      }
+    } catch (error) {
+      console.error('Error fetching call recordings:', error)
     }
   }
 
@@ -543,32 +617,69 @@ export default function Dialer() {
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <h3 className="font-semibold text-blue-800 mb-2">🎧 Device Controls</h3>
           <div className="flex gap-2 flex-wrap">
-            {!audioContextInitialized && (
+            {!audioContextInitialized && deviceState.status !== 'initializing' && (
               <Button
                 onClick={initializeAudioContext}
                 variant="default"
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md shadow-md transition"
               >
-                🔊 Enable Audio (Required First)
+                <span role="img" aria-label="Enable Audio">🔊</span>
+                <span>Enable Audio</span>
               </Button>
             )}
 
-            <Button
-              onClick={initializeDevice}
-              variant="outline"
-              size="sm"
-              disabled={!audioContextInitialized || deviceState.status === 'initializing'}
-            >
-              {deviceState.status === 'initializing' ? '⏳ Initializing...' : '🔄 Initialize Device'}
-            </Button>
+            {/* Show manual initialize button only if audio is ready but device failed to initialize */}
+            {audioContextInitialized && deviceState.status === 'error' && (
+              <Button
+                onClick={initializeDevice}
+                variant="outline"
+                size="sm"
+              >
+                🔄 Retry Device Initialization
+              </Button>
+            )}
+
+            {/* Show status when initializing */}
+            {deviceState.status === 'initializing' && (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm text-blue-700 font-medium">Initializing device...</span>
+              </div>
+            )}
+
+            {/* Show offline status */}
+            {deviceState.status === 'offline' && audioContextInitialized && (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Device offline</span>
+                <Button
+                  onClick={initializeDevice}
+                  variant="outline"
+                  size="sm"
+                  className="ml-2"
+                >
+                  🔄 Reconnect
+                </Button>
+              </div>
+            )}
 
             {deviceState.error && (
-              <div className="text-sm text-red-600 mt-2">
-                Error: {deviceState.error}
+              <div className="text-sm text-red-600 mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                <strong>Error:</strong> {deviceState.error}
               </div>
             )}
           </div>
+
+          {/* Progress indicator */}
+          {deviceState.status === 'initializing' && (
+            <div className="mt-3">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+              </div>
+              <p className="text-xs text-blue-600 mt-1">Setting up Twilio connection...</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -681,28 +792,16 @@ export default function Dialer() {
                     </div>
                   </div>
 
-                  <FormField
-                    control={dialForm.control}
-                    name="recordingConsent"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Enable call recording
-                          </FormLabel>
-                          <FormDescription>
-                            I consent to recording this call for quality and training purposes
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  {/* Recording Notice - Always enabled */}
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <p className="text-sm font-medium text-blue-800">Call Recording Enabled</p>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-1">
+                      All calls are automatically recorded for quality and analysis purposes
+                    </p>
+                  </div>
 
                   {callStatus !== 'idle' && (
                     <div className="mt-4 p-3 bg-gray-100 rounded-md">
@@ -977,36 +1076,121 @@ export default function Dialer() {
             <CardContent>
               <div className="space-y-2">
                 {callLogs.length > 0 ? (
-                  callLogs.map((log) => (
-                    <div key={log.id} className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium">{log.to_number}</p>
-                        <p className="text-sm text-gray-600">
-                          {log.created_at ? new Date(log.created_at).toLocaleString() : 'Unknown date'}
-                        </p>
-                        {log.started_at && (
-                          <p className="text-xs text-gray-500">
-                            Started: {new Date(log.started_at).toLocaleString()}
+                  callLogs.map((log) => {
+                    // Find associated recording
+                    const recording = callRecordings.find(r => r.call_log_id === log.id)
+
+                    return (
+                      <div key={log.id} className="flex items-center justify-between p-3 border rounded-md">
+                        <div>
+                          <p className="font-medium">{log.to_number}</p>
+                          <p className="text-sm text-gray-600">
+                            {log.created_at ? new Date(log.created_at).toLocaleString() : 'Unknown date'}
                           </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${log.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          {log.started_at && (
+                            <p className="text-xs text-gray-500">
+                              Started: {new Date(log.started_at).toLocaleString()}
+                            </p>
+                          )}
+                          {recording && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              <span className="text-xs text-green-600">Recording Available</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${log.status === 'completed' ? 'bg-green-100 text-green-800' :
                             log.status === 'failed' ? 'bg-red-100 text-red-800' :
                               log.status === 'no-answer' ? 'bg-yellow-100 text-yellow-800' :
                                 log.status === 'queued' ? 'bg-blue-100 text-blue-800' :
                                   'bg-gray-100 text-gray-800'
-                          }`}>
-                          {log.status}
-                        </span>
-                        {log.duration && (
-                          <span className="text-sm text-gray-600">{log.duration}s</span>
-                        )}
+                            }`}>
+                            {log.status}
+                          </span>
+                          {log.duration && (
+                            <span className="text-sm text-gray-600">{log.duration}s</span>
+                          )}
+                          {recording && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                // Extract recording SID from URL
+                                const recordingSid = recording.recording_sid ||
+                                  recording.recording_url.split('/').pop()?.replace('.mp3', '')
+
+                                if (recordingSid) {
+                                  // Use your proxy endpoint
+                                  window.open(`/api/recordings/${recordingSid}`, '_blank')
+                                } else {
+                                  // Fallback: try to play directly (may require auth)
+                                  window.open(recording.recording_url, '_blank')
+                                }
+                              }}
+                            >
+                              Play
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <p className="text-gray-500">No call history found</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Add new Recordings section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Call Recordings</CardTitle>
+              <CardDescription>Recorded calls with playback options</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {callRecordings.length > 0 ? (
+                  callRecordings.map((recording) => (
+                    <div key={recording.id} className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                      <div>
+                        <p className="font-medium">
+                          {recording.call_logs?.to_number || 'Unknown Number'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {new Date(recording.created_at).toLocaleString()}
+                        </p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                          {recording.duration && (
+                            <span>Duration: {recording.duration}s</span>
+                          )}
+                          <span>Format: {recording.format.toUpperCase()}</span>
+                          {recording.consent_given && (
+                            <span className="text-green-600">✓ Consent Given</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(recording.recording_url, '_blank')}
+                        >
+                          Play
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => navigator.clipboard.writeText(recording.recording_url)}
+                        >
+                          Copy URL
+                        </Button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">No call history found</p>
+                  <p className="text-gray-500">No recordings found</p>
                 )}
               </div>
             </CardContent>

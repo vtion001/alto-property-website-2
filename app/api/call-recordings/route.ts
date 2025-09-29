@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { createClient } from '@supabase/supabase-js'
 
-const prisma = new PrismaClient()
+export const runtime = 'nodejs'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 // GET - Fetch call recordings
 export async function GET(request: NextRequest) {
@@ -11,39 +22,58 @@ export async function GET(request: NextRequest) {
     const includeAnalysis = searchParams.get('includeAnalysis') === 'true'
 
     if (callLogId) {
-      // Get specific recording
-      const recording = await prisma.callRecording.findUnique({
-        where: { callLogId: BigInt(callLogId) },
-        include: {
-          callLog: {
-            include: {
-              transcription: includeAnalysis,
-              analysis: includeAnalysis
-            }
-          }
-        }
-      })
+      // Get specific recording with call log details
+      const { data: recording, error } = await supabase
+        .from('call_recordings')
+        .select(`
+          *,
+          call_logs (
+            id,
+            call_sid,
+            from_number,
+            to_number,
+            status,
+            duration,
+            started_at,
+            ended_at,
+            created_at
+          )
+        `)
+        .eq('call_log_id', callLogId)
+        .single()
 
-      if (!recording) {
+      if (error) {
+        console.error('Error fetching recording:', error)
         return NextResponse.json({ error: 'Recording not found' }, { status: 404 })
       }
 
       return NextResponse.json(recording)
     } else {
-      // Get all recordings
-      const recordings = await prisma.callRecording.findMany({
-        include: {
-          callLog: {
-            include: {
-              transcription: includeAnalysis,
-              analysis: includeAnalysis
-            }
-          }
-        },
-        orderBy: { createdAt: 'desc' }
-      })
+      // Get all recordings with call log details
+      const { data: recordings, error } = await supabase
+        .from('call_recordings')
+        .select(`
+          *,
+          call_logs (
+            id,
+            call_sid,
+            from_number,
+            to_number,
+            status,
+            duration,
+            started_at,
+            ended_at,
+            created_at
+          )
+        `)
+        .order('created_at', { ascending: false })
 
-      return NextResponse.json(recordings)
+      if (error) {
+        console.error('Error fetching recordings:', error)
+        return NextResponse.json({ error: 'Failed to fetch call recordings' }, { status: 500 })
+      }
+
+      return NextResponse.json(recordings || [])
     }
   } catch (error) {
     console.error('Error fetching call recordings:', error)
@@ -59,31 +89,33 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
-      callLogId,
-      recordingUrl,
-      recordingSid,
+      call_log_id,
+      recording_url,
+      recording_sid,
       duration,
-      fileSize,
+      file_size,
       format = 'mp3',
-      consentGiven = false,
-      consentTimestamp,
-      storageLocation
+      consent_given = true,
+      consent_timestamp,
+      storage_location
     } = body
 
     // Validate required fields
-    if (!callLogId || !recordingUrl) {
+    if (!call_log_id || !recording_url) {
       return NextResponse.json(
-        { error: 'callLogId and recordingUrl are required' },
+        { error: 'call_log_id and recording_url are required' },
         { status: 400 }
       )
     }
 
     // Check if call log exists
-    const callLog = await prisma.callLog.findUnique({
-      where: { id: BigInt(callLogId) }
-    })
+    const { data: callLog, error: callLogError } = await supabase
+      .from('call_logs')
+      .select('id')
+      .eq('id', call_log_id)
+      .single()
 
-    if (!callLog) {
+    if (callLogError || !callLog) {
       return NextResponse.json(
         { error: 'Call log not found' },
         { status: 404 }
@@ -91,36 +123,43 @@ export async function POST(request: NextRequest) {
     }
 
     // Create or update recording
-    const recording = await prisma.callRecording.upsert({
-      where: { callLogId: BigInt(callLogId) },
-      update: {
-        recordingUrl,
-        recordingSid,
+    const { data: recording, error } = await supabase
+      .from('call_recordings')
+      .upsert({
+        call_log_id,
+        recording_url,
+        recording_sid,
         duration,
-        fileSize,
+        file_size,
         format,
-        consentGiven,
-        consentTimestamp: consentTimestamp ? new Date(consentTimestamp) : null,
-        storageLocation,
-        isProcessed: false,
-        updatedAt: new Date()
-      },
-      create: {
-        callLogId: BigInt(callLogId),
-        recordingUrl,
-        recordingSid,
-        duration,
-        fileSize,
-        format,
-        consentGiven,
-        consentTimestamp: consentTimestamp ? new Date(consentTimestamp) : null,
-        storageLocation,
-        isProcessed: false
-      },
-      include: {
-        callLog: true
-      }
-    })
+        consent_given,
+        consent_timestamp: consent_timestamp ? new Date(consent_timestamp).toISOString() : null,
+        storage_location,
+        is_processed: false,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'call_log_id'
+      })
+      .select(`
+        *,
+        call_logs (
+          id,
+          call_sid,
+          from_number,
+          to_number,
+          status,
+          created_at
+        )
+      `)
+      .single()
+
+    if (error) {
+      console.error('Error creating/updating recording:', error)
+      return NextResponse.json(
+        { error: 'Failed to create/update call recording' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(recording, { status: 201 })
   } catch (error) {
@@ -136,7 +175,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, consentGiven, consentTimestamp, isProcessed } = body
+    const { id, consent_given, consent_timestamp, is_processed } = body
 
     if (!id) {
       return NextResponse.json(
@@ -145,26 +184,45 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const updateData: any = {}
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    }
     
-    if (typeof consentGiven === 'boolean') {
-      updateData.consentGiven = consentGiven
-      if (consentGiven && consentTimestamp) {
-        updateData.consentTimestamp = new Date(consentTimestamp)
+    if (typeof consent_given === 'boolean') {
+      updateData.consent_given = consent_given
+      if (consent_given && consent_timestamp) {
+        updateData.consent_timestamp = new Date(consent_timestamp).toISOString()
       }
     }
 
-    if (typeof isProcessed === 'boolean') {
-      updateData.isProcessed = isProcessed
+    if (typeof is_processed === 'boolean') {
+      updateData.is_processed = is_processed
     }
 
-    const recording = await prisma.callRecording.update({
-      where: { id: BigInt(id) },
-      data: updateData,
-      include: {
-        callLog: true
-      }
-    })
+    const { data: recording, error } = await supabase
+      .from('call_recordings')
+      .update(updateData)
+      .eq('id', id)
+      .select(`
+        *,
+        call_logs (
+          id,
+          call_sid,
+          from_number,
+          to_number,
+          status,
+          created_at
+        )
+      `)
+      .single()
+
+    if (error) {
+      console.error('Error updating recording:', error)
+      return NextResponse.json(
+        { error: 'Failed to update call recording' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(recording)
   } catch (error) {
@@ -189,9 +247,18 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    await prisma.callRecording.delete({
-      where: { id: BigInt(id) }
-    })
+    const { error } = await supabase
+      .from('call_recordings')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting recording:', error)
+      return NextResponse.json(
+        { error: 'Failed to delete call recording' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ message: 'Recording deleted successfully' })
   } catch (error) {
