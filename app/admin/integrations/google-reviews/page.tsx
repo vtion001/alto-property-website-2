@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Plus, Star } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter } from '@/components/ui/alert-dialog';
+import { Trash2, Plus, Star } from 'lucide-react';
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+
 import { Navigation } from '@/components/navigation'
 import Footer from '@/components/ui/footer'
 
@@ -33,7 +33,7 @@ export default function GoogleReviewsIntegration() {
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const [accounts, setAccounts] = useState<any[]>([])
   const [locations, setLocations] = useState<any[]>([])
-  const [selectedAccount, setSelectedAccount] = useState<string>('')
+  const [_selectedAccount, setSelectedAccount] = useState<string>('')
   const [formData, setFormData] = useState({
     reviewer_name: '',
     rating: 5,

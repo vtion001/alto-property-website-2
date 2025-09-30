@@ -9,7 +9,7 @@ export default function TipsResourcesPage() {
       icon: Home,
       title: "First Impressions Matter",
       description:
-        "Ensure your property's curb appeal is outstanding. A well-maintained exterior creates positive first impressions for potential buyers.",
+        "Ensure your property&apos;s curb appeal is outstanding. A well-maintained exterior creates positive first impressions for potential buyers.",
     },
     {
       icon: Camera,
@@ -27,7 +27,7 @@ export default function TipsResourcesPage() {
       icon: Lightbulb,
       title: "Highlight Unique Features",
       description:
-        "Identify and showcase your property's unique selling points that differentiate it from similar properties in the area.",
+        "Identify and showcase your property&apos;s unique selling points that differentiate it from similar properties in the area.",
     },
   ]
 

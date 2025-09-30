@@ -16,7 +16,7 @@ export interface BlogPost {
 // RSS functionality removed for static deployment
 
 // Static blog posts data for export
-let blogPosts: BlogPost[] = [
+const blogPosts: BlogPost[] = [
   {
     id: "1",
     title: "Brisbane Property Market Outlook 2024",

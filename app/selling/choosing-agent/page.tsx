@@ -44,7 +44,7 @@ export default function ChoosingAgentPage() {
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
                 Selecting the right real estate agent is crucial to achieving the best outcome for your property sale.
-                Here's what to look for.
+                Here&apos;s what to look for.
               </p>
             </div>
           </div>
@@ -73,7 +73,7 @@ export default function ChoosingAgentPage() {
             <div className="space-y-10 max-w-4xl mx-auto">
               <h2 className="text-4xl font-light sm:text-5xl">Ready to Choose Alto?</h2>
               <p className="text-xl text-brown-100 leading-relaxed">
-                Experience the difference with Brisbane's most trusted property specialists.
+                Experience the difference with Brisbane&apos;s most trusted property specialists.
               </p>
               <Button
                 size="lg"

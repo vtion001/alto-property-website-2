@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-export type Database = any
+export type Database = Record<string, unknown>
 
 export function getSupabaseServerClient() {
   // Prefer server-only envs; fall back to public URL and anon key in development to avoid crashes
@@ -37,28 +37,32 @@ export function getSupabaseServerClient() {
 }
 
 // Helper function to handle common Supabase errors
-export function handleSupabaseError(error: any, operation: string) {
+export function handleSupabaseError(error: unknown, operation: string) {
   console.error(`❌ Supabase ${operation} error:`, error)
   
-  if (error?.message?.includes('permission denied')) {
+  const errorMessage = error && typeof error === 'object' && 'message' in error 
+    ? String(error.message) 
+    : String(error)
+  
+  if (errorMessage.includes('permission denied')) {
     return {
       error: 'Database permission error. Please check RLS policies.',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       code: 'PERMISSION_DENIED'
     }
   }
   
-  if (error?.message?.includes('relation') && error?.message?.includes('does not exist')) {
+  if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
     return {
       error: 'Database table not found. Please check schema setup.',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       code: 'TABLE_NOT_FOUND'
     }
   }
   
   return {
     error: 'Database operation failed',
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
     code: 'DATABASE_ERROR'
   }
 }

@@ -56,7 +56,7 @@ export default function RecentlySoldPage() {
                 <span className="block font-extralight text-brown-600 mt-2">Success</span>
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
-                Discover our recent sales successes across Brisbane's premium suburbs. See how we consistently achieve
+                Discover our recent sales successes across Brisbane&apos;s premium suburbs. See how we consistently achieve
                 exceptional results for our clients.
               </p>
             </div>

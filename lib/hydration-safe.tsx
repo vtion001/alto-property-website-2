@@ -13,14 +13,12 @@ export function useHydrationSafe<T>(
   clientValue: T
 ): T {
   const [value, setValue] = useState<T>(defaultValue);
-  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setIsHydrated(true);
     setValue(clientValue);
   }, [clientValue]);
 
-  return isHydrated ? clientValue : defaultValue;
+  return value;
 }
 
 /**
@@ -37,11 +35,8 @@ export function useCurrentYear(): string {
  */
 export function useWindowDimensions() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setIsHydrated(true);
-    
     const updateDimensions = () => {
       setDimensions({
         width: window.innerWidth,
@@ -55,7 +50,7 @@ export function useWindowDimensions() {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  return isHydrated ? dimensions : { width: 0, height: 0 };
+  return dimensions;
 }
 
 /**

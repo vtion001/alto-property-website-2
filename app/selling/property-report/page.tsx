@@ -466,7 +466,7 @@ export default function PropertyReportPage() {
         <section className="py-24 bg-brown-50">
           <div className="container">
             <div className="text-center space-y-8 mb-16">
-              <h2 className="text-4xl font-light sm:text-5xl text-brown-800">What's Included in Your Report</h2>
+              <h2 className="text-4xl font-light sm:text-5xl text-brown-800">What&apos;s Included in Your Report</h2>
               <p className="text-xl font-light text-brown-700 max-w-3xl mx-auto">
                 Our comprehensive market analysis provides everything you need to make informed property decisions.
               </p>
@@ -556,7 +556,7 @@ export default function PropertyReportPage() {
             <div className="space-y-10 max-w-4xl mx-auto">
               <h2 className="text-4xl font-light sm:text-5xl">Ready for Your Property Analysis?</h2>
               <p className="text-xl text-brown-100 leading-relaxed">
-                Get comprehensive market insights and strategic recommendations from Brisbane's property specialists.
+                Get comprehensive market insights and strategic recommendations from Brisbane&apos;s property specialists.
                 Your detailed report will be ready within 24 hours.
               </p>
               <Button

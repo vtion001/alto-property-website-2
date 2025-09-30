@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-export type Database = any
+export type Database = Record<string, unknown>
 
 // Client-side Supabase instance for browser operations
 export function getSupabaseClient() {

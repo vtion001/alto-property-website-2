@@ -59,7 +59,7 @@ export default function SellingGuidePage() {
         <section className="py-32 bg-white">
           <div className="container">
             <div className="text-center space-y-8 mb-24">
-              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">What's Inside</h2>
+              <h2 className="text-5xl font-extralight sm:text-6xl text-brown-800">What&apos;s Inside</h2>
             </div>
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -68,7 +68,7 @@ export default function SellingGuidePage() {
                   <CheckCircle className="h-8 w-8 text-brown-700 mb-4" />
                   <CardTitle className="text-xl text-brown-900 font-light">Preparing Your Property</CardTitle>
                   <CardDescription className="text-brown-700 font-light">
-                    Essential steps to maximize your property's appeal and value.
+                    Essential steps to maximize your property&apos;s appeal and value.
                   </CardDescription>
                 </CardHeader>
               </Card>

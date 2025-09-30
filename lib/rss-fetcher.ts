@@ -354,11 +354,7 @@ function cleanImageUrl(url: string): string {
   return cleanUrl;
 }
 
-function extractXMLAttribute(xml: string, tagName: string, attribute: string): string | null {
-  const regex = new RegExp(`<${tagName}[^>]*${attribute}="([^"]*)"`, 'i');
-  const match = xml.match(regex);
-  return match ? match[1] : null;
-}
+
 
 function cleanHTMLTags(text: string): string {
   return text
@@ -428,7 +424,7 @@ function generatePersonalizedContent(item: RSSItem, feedName: string): string {
     .trim();
 
   // Generate AI-powered insights based on the title and content
-  const aiInsights = generateAIInsights(item.title, cleanDescription, item.category || 'Real Estate');
+  const aiInsights = generateAIInsights(item.title, cleanDescription);
   
   // Create comprehensive sections
   const sections = [
@@ -516,7 +512,7 @@ function generatePersonalizedContent(item: RSSItem, feedName: string): string {
   `;
 }
 
-function generateAIInsights(title: string, content: string, category: string): {
+function generateAIInsights(title: string, content: string): {
   summary: string;
   trends: string;
   altoAnalysis: string;
@@ -544,7 +540,7 @@ function generateAIInsights(title: string, content: string, category: string): {
   };
 }
 
-function generateAISummary(title: string, content: string, themes: any): string {
+function generateAISummary(title: string, content: string, themes: Record<string, unknown>): string {
   const summaries = [
     `This significant market development highlights ${themes.isAboutPrices ? 'evolving price dynamics' : themes.isAboutInterestRates ? 'changing interest rate environments' : themes.isAboutSupply ? 'supply and demand imbalances' : themes.isAboutInvestment ? 'shifting investment patterns' : 'important regulatory changes'} that are reshaping the Australian property landscape. ${content.substring(0, 200)}...`,
     
@@ -556,7 +552,7 @@ function generateAISummary(title: string, content: string, themes: any): string 
   return summaries[Math.floor(Math.random() * summaries.length)];
 }
 
-function generateAITrends(title: string, content: string, themes: any): string {
+function generateAITrends(title: string, content: string, themes: Record<string, unknown>): string {
   if (themes.isAboutPrices) {
     return `Property price movements are showing distinct patterns across different market segments. Premium suburbs are demonstrating resilience while entry-level markets are experiencing increased activity. Our data analysis reveals that properties in the $600,000-$900,000 range are seeing the most competitive bidding, particularly in growth corridors with strong infrastructure development. Regional price variations continue to reflect local employment opportunities and lifestyle preferences.`;
   } else if (themes.isAboutInterestRates) {
@@ -570,7 +566,7 @@ function generateAITrends(title: string, content: string, themes: any): string {
   }
 }
 
-function generateAltoAnalysis(title: string, content: string, themes: any): string {
+function generateAltoAnalysis(title: string, content: string, themes: Record<string, unknown>): string {
   if (themes.isAboutPrices) {
     return `At Alto Property Group, our comprehensive market analysis reveals that Brisbane's price dynamics are following distinct patterns that differ from national trends. Our proprietary data tracking shows that inner-city Brisbane suburbs are demonstrating price stability with selective premium growth, while emerging areas like Springfield Central and Ripley are showing strong value appreciation. We're advising clients to focus on properties with strong fundamentals rather than chasing short-term price movements.`;
   } else if (themes.isAboutInterestRates) {
@@ -584,7 +580,7 @@ function generateAltoAnalysis(title: string, content: string, themes: any): stri
   }
 }
 
-function generateBrisbaneAnalysis(title: string, content: string, themes: any): string {
+function generateBrisbaneAnalysis(title: string, content: string, themes: Record<string, unknown>): string {
   const brisbaneSuburbs = ['New Farm', 'Paddington', 'Kelvin Grove', 'Woolloongabba', 'Fortitude Valley', 'Ascot', 'Hamilton', 'Spring Hill', 'West End', 'South Brisbane'];
   const selectedSuburbs = brisbaneSuburbs.sort(() => 0.5 - Math.random()).slice(0, 3);
   
@@ -597,7 +593,7 @@ function generateBrisbaneAnalysis(title: string, content: string, themes: any): 
   }
 }
 
-function generateRecommendations(title: string, content: string, themes: any): string {
+function generateRecommendations(title: string, content: string, themes: Record<string, unknown>): string {
   if (themes.isAboutPrices) {
     return `For buyers: Focus on properties with strong intrinsic value rather than speculative growth areas. Consider established suburbs with proven track records and infrastructure advantages. For sellers: Ensure your property presentation maximizes appeal in competitive market conditions. Professional styling and strategic pricing remain crucial for optimal outcomes.`;
   } else if (themes.isAboutInterestRates) {
@@ -609,7 +605,7 @@ function generateRecommendations(title: string, content: string, themes: any): s
   }
 }
 
-function generateOutlook(title: string, content: string, themes: any): string {
+function generateOutlook(_title: string, _content: string, _themes: Record<string, unknown>): string {
   return `Looking ahead, Brisbane's property market is positioned for continued growth supported by population increases, infrastructure investment, and economic diversification. The upcoming Olympic Games development, Cross River Rail completion, and ongoing urban renewal projects create a foundation for sustained property performance. We anticipate continued interstate migration to Brisbane, driven by lifestyle factors and relative affordability compared to Sydney and Melbourne. Our recommendation is to focus on properties in established or emerging suburbs with strong fundamentals rather than speculating on short-term market movements.`;
 }
 
@@ -683,27 +679,9 @@ function getFallbackImage(title: string, description: string): string {
   }
 }
 
-function generateBrisbaneImpact(title: string, category: string): string {
-  const impacts = [
-    `In the Brisbane context, this development could influence local property values, particularly in established suburbs where we see strong buyer activity. Areas like New Farm, Paddington, and Ascot may experience varied responses to these broader market conditions.`,
-    `For Brisbane property owners, this trend may create opportunities in emerging suburbs while potentially affecting established areas differently. We're seeing particular interest in growth corridors like Springfield and Ripley, where value propositions remain strong.`,
-    `The Brisbane market has shown resilience in similar situations, with suburbs like Kelvin Grove, Woolloongabba, and Fortitude Valley maintaining steady performance. This latest development adds another layer to consider in your property decisions.`,
-    `Local Brisbane dynamics often differ from national trends, and we expect areas with strong infrastructure investment and lifestyle appeal to continue performing well. The upcoming Olympic Games preparations continue to drive positive sentiment in many Brisbane suburbs.`
-  ];
-  
-  return impacts[Math.floor(Math.random() * impacts.length)];
-}
 
-function generateClientAdvice(title: string, category: string): string {
-  const advice = [
-    `For buyers, this reinforces the importance of working with local experts who understand micro-market conditions. We recommend focusing on properties in well-established areas with strong fundamentals rather than chasing market movements.`,
-    `If you're considering selling, timing and presentation remain crucial factors. Our styling and marketing expertise can help position your property effectively regardless of broader market conditions.`,
-    `Investors should consider this development within the context of their broader portfolio strategy. We're happy to discuss how current market conditions might affect your investment timeline and suburb selection.`,
-    `Whether you're a first-time buyer or experienced investor, staying informed while maintaining focus on your personal property goals is essential. Our team is here to provide guidance tailored to your specific situation.`
-  ];
-  
-  return advice[Math.floor(Math.random() * advice.length)];
-}
+
+
 
 // Mock RSS data for demonstration when feeds are unavailable
 const MOCK_RSS_ITEMS: RSSItem[] = [
@@ -742,7 +720,7 @@ const MOCK_RSS_ITEMS: RSSItem[] = [
 export async function fetchAndProcessAllFeeds(): Promise<BlogPost[]> {
   const allPosts: BlogPost[] = [];
   let successfulFeeds = 0;
-  let totalFeeds = RSS_FEEDS.length;
+  const totalFeeds = RSS_FEEDS.length;
   
   console.log(`Starting RSS feed processing for ${totalFeeds} feeds...`);
   

@@ -50,7 +50,7 @@ export default function SuburbProfilesPage() {
                 <span className="block font-extralight text-brown-600 mt-2">Profiles</span>
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
-                Detailed market insights for Brisbane's premium suburbs, helping you understand local property trends
+                Detailed market insights for Brisbane&apos;s premium suburbs, helping you understand local property trends
                 and opportunities.
               </p>
             </div>

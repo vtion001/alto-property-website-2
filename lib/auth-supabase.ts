@@ -18,14 +18,14 @@ export async function findUserByUsername(username: string): Promise<(AdminUser &
     .select('id, username, email, role, password_hash, created_at')
     .eq('username', username)
     .maybeSingle()
-  if (byUsername.data) return byUsername.data as any
+  if (byUsername.data) return byUsername.data as AdminUser & { password_hash: string }
 
   const byEmail = await supabase
     .from('admin_users')
     .select('id, username, email, role, password_hash, created_at')
     .eq('email', username)
     .maybeSingle()
-  if (byEmail.data) return byEmail.data as any
+  if (byEmail.data) return byEmail.data as AdminUser & { password_hash: string }
 
   return null
 }
@@ -38,7 +38,7 @@ export async function findUserById(id: string): Promise<AdminUser | null> {
     .eq('id', id)
     .single()
   if (error || !data) return null
-  return data as any
+  return data as AdminUser
 }
 
 export async function createUser({ username, password, role }: { username: string; password: string; role: 'admin' | 'super_admin' }) {

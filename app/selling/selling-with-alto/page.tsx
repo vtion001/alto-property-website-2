@@ -26,7 +26,7 @@ export default function SellingWithAltoPage() {
                 <span className="block font-extralight text-brown-600 mt-2">Property</span>
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
-                Experience the difference with South East Queensland's most trusted property specialists. We deliver exceptional
+                Experience the difference with South East Queensland&apos;s most trusted property specialists. We deliver exceptional
                 results through genuine care and unmatched expertise.
               </p>
               
@@ -38,7 +38,7 @@ export default function SellingWithAltoPage() {
                     <h3 className="text-2xl font-light text-brown-900">Get Your Comparative Market Analysis</h3>
                   </div>
                   <p className="text-brown-700 font-light">
-                    Discover your property's true market value with our comprehensive analysis of recent sales and market trends.
+                    Discover your property&apos;s true market value with our comprehensive analysis of recent sales and market trends.
                   </p>
                   <Link href="/selling/property-report#report-form">
                     <Button
@@ -543,7 +543,7 @@ export default function SellingWithAltoPage() {
                 <div className="space-y-4">
                   <h3 className="text-2xl font-light text-brown-900">Case Studies Coming Soon</h3>
                   <p className="text-brown-700 font-light">
-                    We're preparing detailed case studies showcasing our successful property sales and the strategies that delivered exceptional results for our clients.
+                    We&apos;re preparing detailed case studies showcasing our successful property sales and the strategies that delivered exceptional results for our clients.
                   </p>
                   <Button
                     variant="outline"

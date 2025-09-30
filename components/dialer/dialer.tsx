@@ -4,14 +4,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Phone, PhoneOutgoing, PhoneMissed, X, Settings, User, History, Mic, MicOff, Volume2, VolumeX, ChevronDown, Key, Link2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Phone, PhoneMissed, X, Settings, User, History, Key, CheckCircle, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Checkbox } from '@/components/ui/checkbox'
+
 import { useToast } from '@/components/ui/use-toast'
 
 // Import Twilio Voice SDK
@@ -76,7 +76,7 @@ interface Contact {
   updatedAt: Date
 }
 
-interface TwilioConfig {
+interface _TwilioConfig {
   id: number
   accountSid: string
   phoneNumber: string
@@ -105,12 +105,19 @@ type callStatus = 'idle' | 'dialing' | 'ringing' | 'connected' | 'ended'
 export default function Dialer() {
   const [isCalling, setIsCalling] = useState(false)
   const [callStatus, setCallStatus] = useState<callStatus>('idle')
-  const [twilioConfig, setTwilioConfig] = useState<any>(null)
+  const [twilioConfig, setTwilioConfig] = useState<{
+    accountSid: string
+    authToken: string
+    phoneNumber: string
+    apiKeySid: string
+    apiKeySecret: string
+    twimlAppSid: string
+  } | null>(null)
   const [callLogs, setCallLogs] = useState<CallLog[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [currentCallSid, setCurrentCallSid] = useState<string | null>(null)
   const [callRecordings, setCallRecordings] = useState<CallRecording[]>([])
-  const [recordingConsent, setRecordingConsent] = useState(false)
+  const [_recordingConsent, _setRecordingConsent] = useState(false)
   const { toast } = useToast()
 
   // Twilio Device Manager State
@@ -148,7 +155,7 @@ export default function Dialer() {
   // Initialize Audio Context (required for WebRTC)
   const initializeAudioContext = async () => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)()
       await audioContext.resume()
 
       console.log('✅ Audio context initialized successfully')
@@ -168,8 +175,8 @@ export default function Dialer() {
       }, 100) // Very short delay to ensure state update
 
       return true
-    } catch (error) {
-      console.error('Failed to initialize audio context:', error)
+    } catch (_error) {
+      console.error('Failed to initialize audio context:', _error)
       toast({
         title: "Audio Error",
         description: "Failed to enable browser audio. Please check permissions.",
@@ -499,7 +506,7 @@ export default function Dialer() {
     fetchCallLogs()
     fetchContacts()
     fetchCallRecordings()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTwilioConfig = async () => {
     try {
@@ -576,7 +583,7 @@ export default function Dialer() {
       } else {
         throw new Error('Failed to save configuration')
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Save Error",
         description: "Failed to save Twilio configuration.",
@@ -755,7 +762,7 @@ export default function Dialer() {
                       {callStatus !== 'connected' && (
                         <Button
                           type="submit"
-                          disabled={isCalling || (callStatus as any) === 'connected' || !deviceState.isReady}
+                          disabled={isCalling || callStatus === 'connected' || !deviceState.isReady}
                           className="h-14 text-lg rounded-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
                           title={!deviceState.isReady ? 'Device is initializing...' : 'Make a call'}
                         >
@@ -896,7 +903,7 @@ export default function Dialer() {
                       <FormItem>
                         <FormLabel>Twilio Phone Number</FormLabel>
                         <FormControl><Input placeholder="+1234567890" {...field} /></FormControl>
-                        <FormDescription>The Twilio phone number you'll be calling from</FormDescription>
+                        <FormDescription>The Twilio phone number you&apos;ll be calling from</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )} />
@@ -971,7 +978,7 @@ export default function Dialer() {
                       <li>Sign up for a Twilio account at <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">twilio.com</a></li>
                       <li>Navigate to your <strong>Console Dashboard</strong></li>
                       <li>Copy your <strong>Account SID</strong> and <strong>Auth Token</strong></li>
-                      <li>Purchase a Twilio phone number if you don't have one</li>
+                      <li>Purchase a Twilio phone number if you don&apos;t have one</li>
                     </ol>
                   </AccordionContent>
                 </AccordionItem>
@@ -986,9 +993,9 @@ export default function Dialer() {
                   <AccordionContent>
                     <ol className="list-decimal pl-5 space-y-2 text-sm">
                       <li>Go to <strong>Console → Settings → API Keys & Tokens</strong></li>
-                      <li>Click <strong>"Create API Key"</strong></li>
-                      <li>Give it a friendly name (e.g., "Voice SDK Key")</li>
-                      <li>Set key type to <strong>"Standard"</strong></li>
+                      <li>Click <strong>&ldquo;Create API Key&rdquo;</strong></li>
+                      <li>Give it a friendly name (e.g., &ldquo;Voice SDK Key&rdquo;)</li>
+                      <li>Set key type to <strong>&ldquo;Standard&rdquo;</strong></li>
                       <li>Copy both the <strong>SID</strong> and <strong>Secret</strong> (secret shown only once!)</li>
                     </ol>
                   </AccordionContent>
@@ -1004,11 +1011,11 @@ export default function Dialer() {
                   <AccordionContent>
                     <ol className="list-decimal pl-5 space-y-2 text-sm">
                       <li>Go to <strong>Console → Voice → TwiML → Apps</strong></li>
-                      <li>Click <strong>"Create new TwiML App"</strong></li>
-                      <li>Give it a friendly name (e.g., "Dialer App")</li>
+                      <li>Click <strong>&ldquo;Create new TwiML App&rdquo;</strong></li>
+                      <li>Give it a friendly name (e.g., &ldquo;Dialer App&rdquo;)</li>
                       <li>For <strong>Voice URL</strong>, enter: <code className="bg-gray-100 px-1 rounded">{`${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-domain.com'}/api/twilio/voice`}</code></li>
                       <li>Leave other fields empty for now</li>
-                      <li>Click <strong>"Save"</strong> and copy the <strong>App SID</strong></li>
+                      <li>Click <strong>&ldquo;Save&rdquo;</strong> and copy the <strong>App SID</strong></li>
                     </ol>
                   </AccordionContent>
                 </AccordionItem>
@@ -1041,15 +1048,15 @@ export default function Dialer() {
                     <ul className="list-disc pl-5 space-y-2 text-sm">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-3 w-3 text-green-500" />
-                        Account SID starts with "AC"
+                        Account SID starts with &ldquo;AC&rdquo;
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-3 w-3 text-green-500" />
-                        API Key SID starts with "SK"
+                        API Key SID starts with &ldquo;SK&rdquo;
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-3 w-3 text-green-500" />
-                        TwiML App SID starts with "AP"
+                        TwiML App SID starts with &ldquo;AP&rdquo;
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-3 w-3 text-green-500" />

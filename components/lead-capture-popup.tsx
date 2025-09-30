@@ -221,7 +221,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
                 Beat Your Rate
               </h3>
               <p className="text-[10px] text-brown-600 hidden sm:block">
-                We'll beat your current management fee by 1%*
+                We&apos;ll beat your current management fee by 1%*
               </p>
             </div>
 
@@ -379,7 +379,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
 
             <div className="bg-brown-50 p-2 sm:p-3 rounded-lg">
               <h4 className="font-medium text-brown-800 mb-1 text-xs sm:text-sm">
-                What You'll Get:
+                What You&apos;ll Get:
               </h4>
               <ul className="text-[10px] sm:text-xs text-brown-700 space-y-0.5 leading-tight">
                 <li>✓ Comprehensive property and rental market analysis</li>
@@ -412,7 +412,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
             <p className="text-[10px] sm:text-xs text-brown-500 text-center leading-tight px-1 sm:px-0">
               * New clients only. Minimum 12-month agreement. 1 month free
               guaranteed; eligible clients may receive 2–3 months. If not
-              applicable, we'll beat your current rate by 1%.
+              applicable, we&apos;ll beat your current rate by 1%.
             </p>
           </form>
         </CardContent>

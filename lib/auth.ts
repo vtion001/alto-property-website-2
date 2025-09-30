@@ -11,7 +11,7 @@ export interface AdminUser {
 }
 
 // In-memory storage for demo - in production, use a database
-let adminUsers: AdminUser[] = [
+const adminUsers: AdminUser[] = [
   {
     id: '1',
     email: 'admin@altoproperty.com',

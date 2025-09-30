@@ -48,7 +48,7 @@ export default function SellingPage() {
                   <p className="text-xl font-light text-brown-700 max-w-xl leading-relaxed">
                     Achieve exceptional results with our proven sales process.
                     We combine market expertise with personalized service to
-                    maximize your property's value.
+                    maximize your property&apos;s value.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6">
@@ -231,7 +231,7 @@ export default function SellingPage() {
               </h2>
               <p className="text-xl text-brown-100 leading-relaxed">
                 Get started with a free property appraisal and discover your
-                property's true market value.
+                property&apos;s true market value.
               </p>
               <div className="flex justify-center">
                 <Link href="/selling/property-report#report-form">

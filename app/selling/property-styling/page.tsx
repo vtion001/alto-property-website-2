@@ -119,7 +119,7 @@ export default function PropertyStylingPage() {
             <div className="space-y-10 max-w-4xl mx-auto">
               <h2 className="text-4xl font-light sm:text-5xl">Ready to Style Your Property?</h2>
               <p className="text-xl text-brown-100 leading-relaxed">
-                Contact our styling team to discuss how professional styling can maximize your property's appeal and
+                Contact our styling team to discuss how professional styling can maximize your property&apos;s appeal and
                 sale price.
               </p>
               <Button

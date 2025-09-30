@@ -167,7 +167,7 @@ export default function GoogleReviewsSection() {
           </div>
           
           <p className="text-xl font-light text-brown-700 max-w-2xl mx-auto leading-relaxed">
-            Don't just take our word for it - hear from our satisfied clients on Google Reviews.
+            Don&apos;t just take our word for it - hear from our satisfied clients on Google Reviews.
           </p>
         </div>
         
@@ -175,7 +175,7 @@ export default function GoogleReviewsSection() {
           {mockReviews.map((review) => (
             <div key={review.id} className="bg-brown-50 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-brown-100">
               <h3 className="font-medium text-brown-900 text-lg mb-3">{review.name}</h3>
-              <p className="text-brown-700 font-light italic leading-relaxed">"{review.content}"</p>
+              <p className="text-brown-700 font-light italic leading-relaxed">&ldquo;{review.content}&rdquo;</p>
             </div>
           ))}
         </div>

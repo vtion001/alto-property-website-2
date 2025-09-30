@@ -14,7 +14,7 @@ export default function TopTipsPage() {
       number: "02",
       title: "Maximize Curb Appeal",
       description:
-        "First impressions count. Ensure your property's exterior is well-maintained, gardens are tidy, and the entrance is welcoming.",
+        "First impressions count. Ensure your property&apos;s exterior is well-maintained, gardens are tidy, and the entrance is welcoming.",
     },
     {
       number: "03",

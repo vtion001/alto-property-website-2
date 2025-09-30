@@ -26,7 +26,7 @@ export default function TeamPage() {
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
                 Our experienced professionals are dedicated to delivering exceptional results with genuine care. Meet
-                the team that makes Alto Property Group Brisbane's most trusted property specialists.
+                the team that makes Alto Property Group Brisbane&apos;s most trusted property specialists.
               </p>
             </div>
           </div>
