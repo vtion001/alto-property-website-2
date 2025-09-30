@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
       const attempt = await supabase
         .from('blog_posts')
         .select('*')
-        // @ts-expect-error: owner scoping if column exists
         .eq('owner_username', defaultOwner)
         .order('date', { ascending: false })
         
@@ -68,7 +67,8 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Blog posts API error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      const errorMessage = (error as { message?: string })?.message || 'Unknown error'
+      return NextResponse.json({ error: errorMessage }, { status: 500 })
     }
     
     const mapped = (data || []).map((b: unknown) => {
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
 
     let insert = await supabase.from('blog_posts').insert(rowBase).select('*').single()
     if (insert.error && /column .*owner_username/i.test(insert.error.message)) {
-      const { owner_username, ...withoutOwner } = rowBase
+      const { owner_username: _owner_username, ...withoutOwner } = rowBase
       insert = await supabase.from('blog_posts').insert(withoutOwner).select('*').single()
     }
     
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
     }
     
     return NextResponse.json(mapped, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Blog posts POST unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

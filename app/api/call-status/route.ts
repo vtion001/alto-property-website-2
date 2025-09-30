@@ -51,9 +51,10 @@ export async function GET(request: NextRequest) {
         price: call.price,
         priceUnit: call.priceUnit
       })
-    } catch (twilioError: any) {
+    } catch (twilioError: unknown) {
       // Twilio returns 20404 for not found
-      if (twilioError?.status === 404 || twilioError?.code === 20404) {
+      const error = twilioError as { status?: number; code?: number }
+      if (error?.status === 404 || error?.code === 20404) {
         return NextResponse.json({ error: 'Call not found' }, { status: 404 })
       }
       console.error('Twilio API error:', twilioError)

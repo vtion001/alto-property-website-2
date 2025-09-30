@@ -16,12 +16,12 @@ async function requireAdmin(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Allow unauthenticated access for dialer functionality
   // Only require admin auth for sensitive operations via POST/PUT/DELETE
   try {
     // First try to get config from database
-    let config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
+    const config = await prisma.twilioConfig.findFirst({ where: { isActive: true } })
     
     // If no database config found, fall back to environment variables
     if (!config) {

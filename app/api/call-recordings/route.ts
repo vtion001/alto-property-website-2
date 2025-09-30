@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const callLogId = searchParams.get('callLogId')
-    const includeAnalysis = searchParams.get('includeAnalysis') === 'true'
+    const _includeAnalysis = searchParams.get('includeAnalysis') === 'true'
 
     if (callLogId) {
       // Get specific recording with call log details
@@ -184,7 +184,12 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const updateData: any = {
+    const updateData: {
+      updated_at: string
+      consent_given?: boolean
+      consent_timestamp?: string
+      is_processed?: boolean
+    } = {
       updated_at: new Date().toISOString()
     }
     

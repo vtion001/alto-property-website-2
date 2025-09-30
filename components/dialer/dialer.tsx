@@ -100,11 +100,11 @@ const twilioConfigSchema = z.object({
   twimlAppSid: z.string().min(1, 'TwiML App SID is required'),
 })
 
-type callStatus = 'idle' | 'dialing' | 'ringing' | 'connected' | 'ended'
+type CallStatusType = 'idle' | 'dialing' | 'ringing' | 'connected' | 'ended'
 
 export default function Dialer() {
   const [isCalling, setIsCalling] = useState(false)
-  const [callStatus, setCallStatus] = useState<callStatus>('idle')
+  const [callStatus, setCallStatus] = useState<CallStatusType>('idle')
   const [twilioConfig, setTwilioConfig] = useState<{
     accountSid: string
     authToken: string
@@ -112,6 +112,7 @@ export default function Dialer() {
     apiKeySid: string
     apiKeySecret: string
     twimlAppSid: string
+    isActive?: boolean
   } | null>(null)
   const [callLogs, setCallLogs] = useState<CallLog[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
@@ -762,7 +763,7 @@ export default function Dialer() {
                       {callStatus !== 'connected' && (
                         <Button
                           type="submit"
-                          disabled={isCalling || callStatus === 'connected' || !deviceState.isReady}
+                          disabled={isCalling || !deviceState.isReady}
                           className="h-14 text-lg rounded-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
                           title={!deviceState.isReady ? 'Device is initializing...' : 'Make a call'}
                         >

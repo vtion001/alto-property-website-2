@@ -201,7 +201,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const updateData: any = {}
+    const updateData: { overallScore?: number; sentimentScore?: number; keyPoints?: string; recommendations?: string[]; summary?: string } = {}
     
     if (typeof overallScore === 'number') {
       updateData.overallScore = overallScore

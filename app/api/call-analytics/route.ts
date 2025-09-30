@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get call logs with related data
     const callLogs = await prisma.callLog.findMany({

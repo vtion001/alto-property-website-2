@@ -16,7 +16,7 @@ async function requireAdmin(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Allow unauthenticated access for dialer functionality
   try {
     const supabase = getSupabaseServerClient() // Use server client with service role

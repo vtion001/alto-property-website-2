@@ -20,6 +20,12 @@ interface RentalProperty {
   listingType?: string
   image?: string
   description?: string
+  type?: string
+  status?: string
+  suburb?: string
+  location?: string
+  beds?: number
+  baths?: number
 }
 
 export default function SearchRentalsPage() {
@@ -109,7 +115,7 @@ export default function SearchRentalsPage() {
                   <div className="relative">
                     <Image
                       src={rental.image || "/placeholder.svg"}
-                      alt={rental.title}
+                      alt={rental.title || "Rental property"}
                       width={400}
                       height={300}
                       className="w-full h-64 object-cover"

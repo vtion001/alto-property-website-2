@@ -50,7 +50,7 @@ export default function BlogAdminPage() {
       } else {
         setMessage('Failed to create blog post. Please try again.');
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);

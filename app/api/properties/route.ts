@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { jwtVerify } from 'jose'
 
+type Property = {
+  id?: string
+  title: string
+  address: string
+  suburb: string
+  price: string
+  beds: number
+  baths: number
+  parking: number
+  land_size?: string
+  status: string
+  type: string
+  listing_type: string
+  image?: string
+  date_added: string
+  description?: string
+  features?: string[]
+  commission_rate?: number
+  owner_username?: string
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Test database connection
@@ -15,39 +36,39 @@ export async function GET(request: NextRequest) {
       if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
         const { payload } = await jwtVerify(token, secret)
-        ownerUsername = (payload as any).username || null
+        ownerUsername = (payload as { username?: string }).username || null
       }
     } catch {}
 
-    let data: any[] | null = null
-    let error: any = null
+    let data: Property[] | null = null
+    let error: unknown = null
     const defaultOwner = ownerUsername || process.env.ADMIN_DEFAULT_USERNAME || 'altoadmin'
     
     if (defaultOwner) {
       const attempt = await supabase
         .from('properties')
         .select('*')
-        // @ts-ignore optional owner scoping
         .eq('owner_username', defaultOwner)
         .order('date_added', { ascending: false })
       
       if (attempt.error && /column .*owner_username/i.test(attempt.error.message)) {
         const fb = await supabase.from('properties').select('*').order('date_added', { ascending: false })
-        data = fb.data as any[]
+        data = fb.data as Property[]
         error = fb.error
       } else {
-        data = attempt.data as any[]
+        data = attempt.data as Property[]
         error = attempt.error
       }
     }
     
     if (error) {
       console.error('Properties API error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      const errorMessage = (error as { message?: string })?.message || 'Unknown error'
+      return NextResponse.json({ error: errorMessage }, { status: 500 })
     }
     
     return NextResponse.json(data || [])
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Properties API unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -60,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
     
     const body = await req.json()
-    let rowBase: any = {
+    const rowBase: Partial<Property> = {
       title: body.title,
       address: body.address,
       suburb: body.suburb,
@@ -84,7 +105,7 @@ export async function POST(req: NextRequest) {
       if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
         const { payload } = await jwtVerify(token, secret)
-        const ownerUsername = (payload as any).username || null
+        const ownerUsername = (payload as { username?: string }).username || null
         if (ownerUsername) rowBase.owner_username = ownerUsername
       }
     } catch {}
@@ -95,7 +116,7 @@ export async function POST(req: NextRequest) {
       .select('*').single()
       
     if (insert.error && /column .*owner_username/i.test(insert.error.message)) {
-      const { owner_username, ...withoutOwner } = rowBase
+      const { owner_username: _owner_username, ...withoutOwner } = rowBase
       insert = await supabase.from('properties').insert(withoutOwner).select('*').single()
     }
     
@@ -105,7 +126,7 @@ export async function POST(req: NextRequest) {
     }
     
     return NextResponse.json(insert.data, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Properties POST unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

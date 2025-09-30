@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase-server'
 
+type ReviewData = {
+  id: string
+  reviewer_name: string
+  review_date: string
+  rating: number
+  comment: string
+}
+
 // Mock data fallback – used when Supabase env is not configured
 const mockGoogleReviews = [
   {
@@ -51,7 +59,7 @@ export async function GET() {
       .order('review_date', { ascending: false })
 
     if (!error && data) {
-      const reviews = (data || []).map((r: any) => ({
+      const reviews = (data || []).map((r: ReviewData) => ({
         id: r.id,
         name: r.reviewer_name,
         date: r.review_date ? new Date(r.review_date).toLocaleDateString() : '',
@@ -77,7 +85,7 @@ export async function GET() {
         },
       })
     }
-  } catch (e) {
+  } catch (_e) {
     // ignore and fallback to mock
   }
 
@@ -95,7 +103,7 @@ export async function GET() {
         },
       },
     })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch reviews' },
       { status: 500 }

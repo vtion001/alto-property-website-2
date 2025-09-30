@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       provider = 'openai-whisper',
       language = 'en',
       includeTimestamps = true,
-      includeSpeakerLabels = false
+      _includeSpeakerLabels = false
     } = body
 
     // Validate required fields
@@ -195,7 +195,13 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const updateData: any = {}
+    const updateData: {
+      transcriptText?: string
+      wordCount?: number
+      confidence?: number
+      status?: string
+      isProcessed?: boolean
+    } = {}
     
     if (transcriptionText !== undefined) {
       updateData.transcriptText = transcriptionText

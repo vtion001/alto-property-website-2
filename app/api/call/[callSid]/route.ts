@@ -58,11 +58,12 @@ export async function DELETE(
       })
 
       return NextResponse.json({ success: true, message: 'Call ended successfully' })
-    } catch (twilioError: any) {
+    } catch (twilioError: unknown) {
       console.error('Twilio API error:', twilioError)
       
       // If the call is already completed or doesn't exist, still update our database
-      if (twilioError.code === 20404 || twilioError.status === 404) {
+      const error = twilioError as { code?: number; status?: number }
+      if (error.code === 20404 || error.status === 404) {
         await prisma.callLog.updateMany({
           where: { callSid },
           data: { 
@@ -73,9 +74,10 @@ export async function DELETE(
         return NextResponse.json({ success: true, message: 'Call already ended' })
       }
       
+      const errorMessage = (twilioError as { message?: string })?.message || 'Unknown error'
       return NextResponse.json({ 
         error: 'Failed to end call', 
-        details: twilioError.message 
+        details: errorMessage 
       }, { status: 500 })
     }
   } catch (error) {

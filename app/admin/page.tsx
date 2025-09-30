@@ -379,7 +379,23 @@ export default function AdminPage() {
     image: ""
   })
 
-  const [newProperty, setNewProperty] = useState({
+  const [newProperty, setNewProperty] = useState<{
+    title: string
+    address: string
+    suburb: string
+    price: string
+    beds: string
+    baths: string
+    parking: string
+    landSize: string
+    type: Property['type']
+    listingType: Property['listingType']
+    description: string
+    features: string[]
+    image: string
+    images: string[]
+    commissionRate: string
+  }>({
     title: "",
     address: "",
     suburb: "",
@@ -388,12 +404,12 @@ export default function AdminPage() {
     baths: "",
     parking: "",
     landSize: "",
-    type: "house" as const,
-    listingType: "sale" as const,
+    type: "house",
+    listingType: "sale",
     description: "",
-    features: [] as string[],
+    features: [],
     image: "",
-    images: [] as string[], // Added for new property images
+    images: [],
     commissionRate: ""
   })
 
@@ -885,7 +901,7 @@ export default function AdminPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
                           <Label htmlFor="prop-type">Property Type</Label>
-                          <Select value={newProperty.type} onValueChange={(value: string) => setNewProperty({...newProperty, type: value as Property['type']})}>
+                          <Select value={newProperty.type} onValueChange={(value) => setNewProperty({...newProperty, type: value as Property['type']})}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>

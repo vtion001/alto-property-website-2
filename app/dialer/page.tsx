@@ -200,15 +200,7 @@ export default function DialerPage() {
       console.log('🆕 Creating new Twilio Device...')
       // Create new device
       const newDevice = new Device(token, {
-        logLevel: 'debug',
-        answerOnBridge: true,
-        audioConstraints: {
-          optional: [
-            { googEchoCancellation: true },
-            { googNoiseSuppression: true },
-            { googAutoGainControl: true }
-          ]
-        }
+        logLevel: 'debug'
       })
 
       console.log('📡 Setting up device event listeners BEFORE registration...')

@@ -34,8 +34,8 @@ export default function BlogPage() {
       try {
         const res = await fetch('/api/blog-posts', { cache: 'no-store' })
         const data = await res.json()
-        const published = (data || []).filter((p: any) => p.published !== false)
-        const sorted = published.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        const published = (data || []).filter((p: BlogPost) => p.published !== false)
+        const sorted = published.sort((a: BlogPost, b: BlogPost) => new Date(b.date).getTime() - new Date(a.date).getTime())
         setPosts(sorted)
       } catch {}
     })()
@@ -94,7 +94,7 @@ export default function BlogPage() {
         setEmailError('');
       }, 3000);
       
-    } catch (error) {
+    } catch (_error) {
       setEmailError('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);

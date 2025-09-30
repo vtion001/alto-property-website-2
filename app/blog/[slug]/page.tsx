@@ -1,6 +1,6 @@
 import { Navigation } from "@/components/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, ArrowLeft } from "lucide-react";
+import { Calendar, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getPostBySlug, getAllPosts } from "@/lib/blog";

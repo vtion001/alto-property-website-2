@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const callSid = formData.get('CallSid') as string
     const digits = formData.get('Digits') as string
     const speechResult = formData.get('SpeechResult') as string
-    const confidence = formData.get('Confidence') as string
+    const _confidence = formData.get('Confidence') as string
 
     console.log(`Twilio Gather - Call: ${callSid}, Digits: ${digits}, Speech: ${speechResult}`)
 

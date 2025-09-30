@@ -55,7 +55,13 @@ export async function POST(request: NextRequest) {
     if (callStatus || from || to) {
       if (existingCallLog) {
         // Update existing call log
-        const updateData: any = {}
+        const updateData: {
+          status?: string
+          duration?: number
+          ended_at?: string
+          from_number?: string
+          to_number?: string
+        } = {}
         
         if (callStatus) updateData.status = callStatus.toLowerCase()
         if (callDuration) updateData.duration = parseInt(callDuration)

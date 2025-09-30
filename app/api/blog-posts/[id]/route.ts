@@ -44,7 +44,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     })
     .eq('id', id)
   if (ownerUsername) {
-    // @ts-expect-error - optional owner scoping
     query = query.eq('owner_username', ownerUsername)
   }
   let { data, error } = await query.select('*').single()

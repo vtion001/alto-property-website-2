@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Shield, Target, TrendingUp, Users, Home, Search, CheckCircle, DollarSign, Handshake, FileText } from "lucide-react"
+import { Shield, Home, Search, Handshake, FileText } from "lucide-react"
 import ClientImage from "@/components/ui/client-image"
 import Footer from "@/components/ui/footer"
 import Link from "next/link"

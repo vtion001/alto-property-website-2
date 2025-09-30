@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server'
 
+type GoogleReview = {
+  reviewId?: string
+  name?: string
+  reviewer?: {
+    displayName?: string
+  }
+  starRating?: number
+  rating?: number
+  comment?: string
+  createTime?: string
+}
+
 // NOTE: This route assumes you've granted the required scopes in OAuth.
 // Replace the fetch URL with the correct Google My Business API endpoint for reviews.
 
@@ -57,13 +69,13 @@ export async function POST() {
 
     // 4) Map and upsert into google_reviews
     const reviews = Array.isArray(reviewsJson?.reviews) ? reviewsJson.reviews : []
-    const rows = reviews.map((r: any) => ({
+    const rows = reviews.map((r: GoogleReview) => ({
       review_id: r.reviewId || r.name || null,
       account_id: accountId,
       location_id: locationId,
       reviewer_name: r.reviewer?.displayName || 'Google User',
       rating: Math.round(r.starRating || r.rating || 0),
-      comment: r.comment || r.text || '',
+      comment: r.comment || '',
       review_date: r.createTime ? new Date(r.createTime).toISOString() : new Date().toISOString(),
       review_url: r.reviewId ? `https://search.google.com/local/reviews?placeid=${r.reviewId}` : null,
     }))

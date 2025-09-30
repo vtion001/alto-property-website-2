@@ -15,7 +15,7 @@ const supabase = createClient(
   }
 )
 
-async function requireAdmin(request: NextRequest) {
+async function _requireAdmin(request: NextRequest) {
   const token = request.cookies.get('alto_admin')?.value
   if (!token) return null
   try {
@@ -27,7 +27,7 @@ async function requireAdmin(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     console.log('Fetching call logs from Supabase...')
     
