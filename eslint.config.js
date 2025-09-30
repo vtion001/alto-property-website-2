@@ -27,6 +27,7 @@ export default [
         'caughtErrorsIgnorePattern': '^_'
       }],
       'no-unused-vars': 'off', // Turn off base rule as it conflicts with TypeScript rule
+      'react/no-unescaped-entities': 'off', // Disable unescaped entities rule
     },
   },
   

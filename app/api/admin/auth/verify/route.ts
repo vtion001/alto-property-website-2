@@ -5,8 +5,6 @@ import { findUserById } from '@/lib/auth-supabase'
 
 export const runtime = 'nodejs'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
-
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('Authorization')
@@ -24,7 +22,7 @@ export async function GET(request: NextRequest) {
     const { payload } = await jwtVerify(token, secret)
     
     // Find user to ensure they still exist
-    const user = await findUserById((payload as any).userId)
+    const user = await findUserById((payload as { userId: string }).userId)
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -38,7 +36,7 @@ export async function GET(request: NextRequest) {
       user
     }, { status: 200 })
 
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Invalid token' },
       { status: 401 }

@@ -5,7 +5,7 @@ import { useState } from "react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Phone, Calendar, TrendingUp, Home, Shield, Users, Calculator } from "lucide-react"
+import { CheckCircle, Calendar, TrendingUp, Home, Shield, Users, Calculator } from "lucide-react"
 import { Navigation } from "@/components/navigation"
 import Script from "next/script"
 

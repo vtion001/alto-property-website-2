@@ -113,7 +113,7 @@ export default function PropertyReportPage() {
                   Your {formData.reportType === 'property-appraisal' ? 'Property Appraisal' : 'Market Analysis'} request has been submitted successfully.
                 </p>
                 <p className="text-brown-600 font-light">
-                  We'll prepare your comprehensive report and send it to <strong>{formData.email}</strong> within 24 hours.
+                  We&apos;ll prepare your comprehensive report and send it to <strong>{formData.email}</strong> within 24 hours.
                 </p>
               </div>
 
@@ -126,7 +126,7 @@ export default function PropertyReportPage() {
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="bg-brown-200 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 text-xs font-medium">2</div>
-                    <p className="text-brown-700 font-light">We'll prepare your detailed report with market insights</p>
+                    <p className="text-brown-700 font-light">We&apos;ll prepare your detailed report with market insights</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="bg-brown-200 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 text-xs font-medium">3</div>
@@ -462,7 +462,7 @@ export default function PropertyReportPage() {
           </div>
         </section>
 
-        {/* What's Included Section */}
+        {/* What&apos;s Included Section */}
         <section className="py-24 bg-brown-50">
           <div className="container">
             <div className="text-center space-y-8 mb-16">
@@ -491,7 +491,7 @@ export default function PropertyReportPage() {
                   <div className="bg-brown-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                     <TrendingUp className="h-10 w-10 text-brown-700" />
                   </div>
-                  <h3 className="text-xl font-light text-brown-900 mb-4">Market Trends & Forecasting</h3>
+                  <h3 className="text-xl font-light text-brown-900 mb-4">Market Trends &amp; Forecasting</h3>
                   <p className="text-brown-700 font-light leading-relaxed">
                     Current market conditions, price trends, and future market predictions for your suburb and property
                     type.

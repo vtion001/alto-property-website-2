@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
         setMessage(data.error || "Invalid credentials")
         setMessageType("error")
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage("An error occurred. Please try again.")
       setMessageType("error")
     } finally {

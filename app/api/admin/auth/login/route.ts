@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by username/email in DB
-    let user: any = null
+    let user: { password_hash?: string } | null = null
     try {
       user = await findUserByUsername(username)
     } catch (dbErr) {

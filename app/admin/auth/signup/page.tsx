@@ -86,7 +86,7 @@ export default function AdminSignupPage() {
         setMessage(data.error || "Failed to create account")
         setMessageType("error")
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage("An error occurred. Please try again.")
       setMessageType("error")
     } finally {

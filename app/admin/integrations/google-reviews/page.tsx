@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter } from '@/components/ui/alert-dialog';
+import { AlertDialog as _AlertDialog, AlertDialogAction as _AlertDialogAction, AlertDialogCancel as _AlertDialogCancel, AlertDialogContent as _AlertDialogContent, AlertDialogDescription as _AlertDialogDescription, AlertDialogFooter as _AlertDialogFooter } from '@/components/ui/alert-dialog';
 import { Trash2, Plus, Star } from 'lucide-react';
 import Link from 'next/link'
 
@@ -24,6 +24,17 @@ interface GoogleReview {
   review_url: string;
 }
 
+interface GoogleAccount {
+  name?: string;
+  accountName?: string;
+}
+
+interface GoogleLocation {
+  name: string;
+  locationName?: string;
+  title?: string;
+}
+
 export default function GoogleReviewsIntegration() {
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,8 +42,8 @@ export default function GoogleReviewsIntegration() {
   const [editingReview, setEditingReview] = useState<GoogleReview | null>(null);
   const [syncing, setSyncing] = useState(false);
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const [accounts, setAccounts] = useState<any[]>([])
-  const [locations, setLocations] = useState<any[]>([])
+  const [accounts, setAccounts] = useState<GoogleAccount[]>([])
+  const [locations, setLocations] = useState<GoogleLocation[]>([])
   const [_selectedAccount, setSelectedAccount] = useState<string>('')
   const [formData, setFormData] = useState({
     reviewer_name: '',
@@ -87,8 +98,8 @@ export default function GoogleReviewsIntegration() {
         await fetchReviews()
         alert(`Imported ${json?.imported ?? 0} reviews from Google.`)
       }
-    } catch (e: any) {
-      alert(`Sync error: ${e?.message || String(e)}`)
+    } catch (e: unknown) {
+      alert(`Sync error: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setSyncing(false)
     }
@@ -201,7 +212,7 @@ export default function GoogleReviewsIntegration() {
                   <Select onValueChange={(val) => { setSelectedAccount(val); loadLocations(val) }}>
                     <SelectTrigger className="w-80"><SelectValue placeholder="Select Account" /></SelectTrigger>
                     <SelectContent>
-                      {accounts.map((a: any) => (
+                      {accounts.map((a: GoogleAccount) => (
                         <SelectItem key={a.name || a.accountName} value={(a.name || a.accountName || '').replace('accounts/', '')}>
                           {(a.accountName || a.name || '').toString()}
                         </SelectItem>
@@ -211,7 +222,7 @@ export default function GoogleReviewsIntegration() {
                   <Select>
                     <SelectTrigger className="w-96"><SelectValue placeholder="Select Location" /></SelectTrigger>
                     <SelectContent>
-                      {locations.map((l: any) => (
+                      {locations.map((l: GoogleLocation) => (
                         <SelectItem key={l.name} value={(l.name || '').replace(/^accounts\/[^/]+\//, '')}>
                           {(l.locationName || l.title || l.name || '').toString()}
                         </SelectItem>

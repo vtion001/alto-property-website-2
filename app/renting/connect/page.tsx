@@ -59,7 +59,7 @@ export default function ConnectPage() {
                     </Button>
                   </div>
                   <div className="text-center pt-4 border-t border-brown-100">
-                    <p className="text-brown-700 mb-4">Don't have an account?</p>
+                    <p className="text-brown-700 mb-4">Don&apos;t have an account?</p>
                     <Button
                       variant="outline"
                       className="border-brown-200 text-brown-800 hover:bg-brown-50 bg-transparent"

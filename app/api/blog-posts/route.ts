@@ -38,30 +38,30 @@ export async function GET(request: NextRequest) {
       if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
         const { payload } = await jwtVerify(token, secret)
-        ownerUsername = (payload as any).username || null
+        ownerUsername = (payload as { username?: string }).username || null
       }
     } catch {}
 
     // Prefer scoping by owner_username column when available. Default to altoadmin when unauthenticated.
-    let data: any[] | null = null
-    let error: any = null
+    let data: unknown[] | null = null
+    let error: unknown = null
     const defaultOwner = ownerUsername || process.env.ADMIN_DEFAULT_USERNAME || 'altoadmin'
     
     if (defaultOwner) {
       const attempt = await supabase
         .from('blog_posts')
         .select('*')
-        // @ts-ignore: owner scoping if column exists
+        // @ts-expect-error: owner scoping if column exists
         .eq('owner_username', defaultOwner)
         .order('date', { ascending: false })
         
       if (attempt.error && /column .*owner_username/i.test(attempt.error.message)) {
         // Column missing → fallback to unscoped (previous behavior)
         const fb = await supabase.from('blog_posts').select('*').order('date', { ascending: false })
-        data = fb.data as any[]
+        data = fb.data as unknown[]
         error = fb.error
       } else {
-        data = attempt.data as any[]
+        data = attempt.data as unknown[]
         error = attempt.error
       }
     }
@@ -71,23 +71,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
     
-    const mapped = (data || []).map((b: any) => ({
-      id: b.id,
-      title: b.title,
-      slug: b.slug,
-      excerpt: b.excerpt,
-      content: b.content,
-      date: b.date,
-      author: b.author,
-      category: b.category,
-      image: b.image,
-      published: b.published ?? (b.status === 'published'),
-      isExternal: b.is_external,
-      originalUrl: b.original_url,
-    }))
+    const mapped = (data || []).map((b: unknown) => {
+      const blogPost = b as Record<string, unknown>
+      return {
+      id: blogPost.id,
+      title: blogPost.title,
+      slug: blogPost.slug,
+      excerpt: blogPost.excerpt,
+      content: blogPost.content,
+      date: blogPost.date,
+      author: blogPost.author,
+      category: blogPost.category,
+      image: blogPost.image,
+      published: blogPost.published ?? (blogPost.status === 'published'),
+      isExternal: blogPost.is_external,
+      originalUrl: blogPost.original_url,
+    }
+    })
     
     return NextResponse.json(mapped)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Blog posts API unexpected error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -108,11 +111,11 @@ export async function POST(req: NextRequest) {
       if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
         const { payload } = await jwtVerify(token, secret)
-        ownerUsername = (payload as any).username || null
+        ownerUsername = (payload as { username?: string }).username || null
       }
     } catch {}
 
-    const rowBase: any = {
+    const rowBase: Record<string, unknown> = {
       title: body.title,
       slug: body.slug,
       excerpt: body.excerpt,

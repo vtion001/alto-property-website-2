@@ -132,7 +132,7 @@ interface CallAnalytics {
 
 export default function AdminPage() {
   const makeSlug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
-  const blogPathFor = (post: BlogPost) => `/blog/${(post as any).slug || makeSlug(post.title)}`
+  const blogPathFor = (post: BlogPost) => `/blog/${post.slug || makeSlug(post.title)}`
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("overview")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -173,26 +173,29 @@ export default function AdminPage() {
 
   // Load properties from API (falls back to localStorage on failure)
   useEffect(() => {
-    const mapPropertyRow = (row: any): Property => ({
-      id: row.id,
-      title: row.title,
-      address: row.address,
-      suburb: row.suburb,
-      price: row.price,
-      beds: row.beds,
-      baths: row.baths,
-      parking: row.parking,
-      landSize: row.land_size || row.landSize || '',
-      status: row.status,
-      type: row.type,
-      listingType: row.listing_type || row.listingType,
-      image: row.image,
-      images: row.images || [],
-      dateAdded: row.date_added || row.dateAdded || '',
-      description: row.description || '',
-      features: row.features || [],
-      commissionRate: row.commission_rate ?? row.commissionRate ?? 0,
-    })
+    const mapPropertyRow = (row: unknown): Property => {
+      const r = row as Record<string, unknown>
+      return {
+        id: String(r.id || ''),
+        title: String(r.title || ''),
+        address: String(r.address || ''),
+        suburb: String(r.suburb || ''),
+        price: String(r.price || ''),
+        beds: Number(r.beds || 0),
+        baths: Number(r.baths || 0),
+        parking: Number(r.parking || 0),
+        landSize: String(r.land_size || r.landSize || ''),
+        status: String(r.status || 'available') as Property['status'],
+        type: String(r.type || 'house') as Property['type'],
+        listingType: String(r.listing_type || r.listingType || 'sale') as Property['listingType'],
+        image: String(r.image || ''),
+        images: Array.isArray(r.images) ? r.images.map(String) : [],
+        dateAdded: String(r.date_added || r.dateAdded || ''),
+        description: String(r.description || ''),
+        features: Array.isArray(r.features) ? r.features.map(String) : [],
+        commissionRate: Number(r.commission_rate ?? r.commissionRate ?? 0),
+      }
+    }
     ;(async () => {
       try {
         const res = await fetch('/api/properties', { cache: 'no-store' })
@@ -210,7 +213,6 @@ export default function AdminPage() {
         }
       } catch {}
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -226,17 +228,20 @@ export default function AdminPage() {
         const res = await fetch('/api/blog-posts', { cache: 'no-store' })
         const data = await res.json()
         if (Array.isArray(data)) {
-          const mapped = data.map((b: any) => ({
-            id: b.id,
-            title: b.title,
-            excerpt: b.excerpt,
-            author: b.author,
-            category: b.category,
-            date: b.date,
-            status: (b.published ? 'published' : 'draft') as 'published' | 'draft',
-            views: b.views || 0,
-            slug: b.slug,
-          }))
+          const mapped = data.map((b: unknown): BlogPost => {
+            const blog = b as Record<string, unknown>
+            return {
+              id: String(blog.id || ''),
+              title: String(blog.title || ''),
+              excerpt: String(blog.excerpt || ''),
+              author: String(blog.author || ''),
+              category: String(blog.category || ''),
+              date: String(blog.date || ''),
+              status: (blog.published ? 'published' : 'draft') as 'published' | 'draft',
+              views: Number(blog.views || 0),
+              slug: String(blog.slug || ''),
+            }
+          })
           setBlogPosts(mapped)
           return
         }
@@ -249,7 +254,6 @@ export default function AdminPage() {
         }
       } catch {}
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -294,7 +298,7 @@ export default function AdminPage() {
           }
           setCallAnalytics(analytics)
         }
-      } catch (error) {
+      } catch (_error) {
         // Fallback to mock data for development
         const mockCallLogs: CallLog[] = [
           {
@@ -364,7 +368,7 @@ export default function AdminPage() {
     loadCallData()
   }, [])
 
-  const [rentalApplications, setRentalApplications] = useState<RentalApplication[]>([])
+  const [rentalApplications, _setRentalApplications] = useState<RentalApplication[]>([])
 
   const [newBlogPost, setNewBlogPost] = useState({
     title: "",
@@ -439,12 +443,12 @@ export default function AdminPage() {
     })()
   }
 
-  const handleViewBlogPost = (post: BlogPost) => {
+  const _handleViewBlogPost = (post: BlogPost) => {
     setSelectedBlogPost(post)
     setIsBlogViewOpen(true)
   }
 
-  const handleOpenEditBlogPost = (post: BlogPost) => {
+  const _handleOpenEditBlogPost = (post: BlogPost) => {
     setEditedBlogPost({ ...post })
     setIsBlogEditOpen(true)
   }
@@ -881,7 +885,7 @@ export default function AdminPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
                           <Label htmlFor="prop-type">Property Type</Label>
-                          <Select value={newProperty.type} onValueChange={(value: any) => setNewProperty({...newProperty, type: value})}>
+                          <Select value={newProperty.type} onValueChange={(value: string) => setNewProperty({...newProperty, type: value as Property['type']})}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -895,7 +899,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                           <Label htmlFor="prop-listing-type">Listing Type</Label>
-                          <Select value={newProperty.listingType} onValueChange={(value: any) => setNewProperty({...newProperty, listingType: value})}>
+                          <Select value={newProperty.listingType} onValueChange={(value: string) => setNewProperty({...newProperty, listingType: value as Property['listingType']})}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -1039,7 +1043,7 @@ export default function AdminPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
                           <Label htmlFor="edit-prop-type">Property Type</Label>
-                          <Select value={editedProperty.type} onValueChange={(value: any) => setEditedProperty({...editedProperty, type: value})}>
+                          <Select value={editedProperty.type} onValueChange={(value: string) => setEditedProperty({...editedProperty, type: value as Property['type']})}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -1053,7 +1057,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                           <Label htmlFor="edit-prop-listing-type">Listing Type</Label>
-                          <Select value={editedProperty.listingType} onValueChange={(value: any) => setEditedProperty({...editedProperty, listingType: value})}>
+                          <Select value={editedProperty.listingType} onValueChange={(value: string) => setEditedProperty({...editedProperty, listingType: value as Property['listingType']})}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -1155,7 +1159,7 @@ export default function AdminPage() {
                           </div>
                         ))}
                         {/* Placeholder for adding more images */}
-                        {selectedPropertyForMedia.images?.length! < 5 && (
+                        {(selectedPropertyForMedia.images?.length || 0) < 5 && (
                           <label htmlFor="media-upload" className="flex items-center justify-center border-2 border-dashed rounded-md cursor-pointer h-40 bg-gray-50 hover:bg-gray-100">
                             <Plus className="h-6 w-6 text-gray-500" />
                             <Input
@@ -1169,7 +1173,7 @@ export default function AdminPage() {
                           </label>
                         )}
                       </div>
-                      {selectedPropertyForMedia.images?.length! >= 5 && (
+                      {(selectedPropertyForMedia.images?.length || 0) >= 5 && (
                         <p className="text-sm text-center text-gray-500">Maximum of 5 photos reached.</p>
                       )}
                     </div>
@@ -1565,7 +1569,7 @@ export default function AdminPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-xl font-light">Phone Dialing System</CardTitle>
-                    <CardDescription>Place calls and manage Twilio configuration. Clicking "Open Dialer" will take you to the dedicated dialer interface.</CardDescription>
+                    <CardDescription>Place calls and manage Twilio configuration. Clicking &quot;Open Dialer&quot; will take you to the dedicated dialer interface.</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 text-brown-700 text-sm">
@@ -2034,7 +2038,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                           <Label htmlFor="edit-blog-status">Status</Label>
-                          <Select value={editedBlogPost.status} onValueChange={(v: any) => setEditedBlogPost({ ...editedBlogPost, status: v })}>
+                          <Select value={editedBlogPost.status} onValueChange={(v: string) => setEditedBlogPost({ ...editedBlogPost, status: v as BlogPost['status'] })}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>

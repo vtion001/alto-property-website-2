@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Phone, PhoneOutgoing, PhoneMissed, Settings, User, History, Mic, MicOff, Square, Play } from 'lucide-react'
+import { Phone, PhoneOutgoing, PhoneMissed, Settings, User, History } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -65,12 +65,10 @@ const twilioConfigSchema = z.object({
 export default function DialerPage() {
   const [isCalling, setIsCalling] = useState(false)
   const [callStatus, setCallStatus] = useState<'idle' | 'dialing' | 'ringing' | 'connected' | 'ended'>('idle')
-  const [twilioConfig, setTwilioConfig] = useState<any>(null)
+  const [twilioConfig, setTwilioConfig] = useState<TwilioConfig | null>(null)
   const [callLogs, setCallLogs] = useState<CallLog[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [currentCallSid, setCurrentCallSid] = useState<string | null>(null)
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordingConsent, setRecordingConsent] = useState(false)
   const { toast } = useToast()
 
   // Twilio Device Manager State
@@ -108,7 +106,7 @@ export default function DialerPage() {
   // Initialize Audio Context (required for WebRTC)
   const initializeAudioContext = async () => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
       await audioContext.resume()
       setAudioContextInitialized(true)
       toast({
@@ -435,14 +433,7 @@ export default function DialerPage() {
     await makeCall(data.phoneNumber, data.recordingConsent)
   }
 
-  // Fetch functions (keep existing)
-  useEffect(() => {
-    fetchTwilioConfig()
-    fetchCallLogs()
-    fetchContacts()
-  }, [])
-
-  const fetchTwilioConfig = async () => {
+  const fetchTwilioConfig = useCallback(async () => {
     try {
       const response = await fetch('/api/twilio/config')
       if (response.ok) {
@@ -459,9 +450,9 @@ export default function DialerPage() {
     } catch (error) {
       console.error('Error fetching Twilio config:', error)
     }
-  }
+  }, [configForm])
 
-  const fetchCallLogs = async () => {
+  const fetchCallLogs = useCallback(async () => {
     try {
       const response = await fetch('/api/call-logs')
       if (response.ok) {
@@ -471,9 +462,9 @@ export default function DialerPage() {
     } catch (error) {
       console.error('Error fetching call logs:', error)
     }
-  }
+  }, [])
 
-  const fetchContacts = async () => {
+  const fetchContacts = useCallback(async () => {
     try {
       const response = await fetch('/api/contacts')
       if (response.ok) {
@@ -483,7 +474,14 @@ export default function DialerPage() {
     } catch (error) {
       console.error('Error fetching contacts:', error)
     }
-  }
+  }, [])
+
+  // Fetch functions on component mount
+  useEffect(() => {
+    fetchTwilioConfig()
+    fetchCallLogs()
+    fetchContacts()
+  }, [fetchTwilioConfig, fetchCallLogs, fetchContacts])
 
   // Config form submit handler
   const onConfigSubmit = async (data: z.infer<typeof twilioConfigSchema>) => {
@@ -505,7 +503,7 @@ export default function DialerPage() {
       } else {
         throw new Error('Failed to save configuration')
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Save Error",
         description: "Failed to save Twilio configuration.",

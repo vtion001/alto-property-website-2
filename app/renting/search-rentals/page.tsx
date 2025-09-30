@@ -8,16 +8,30 @@ import { Badge } from "@/components/ui/badge"
 import { Search, MapPin, Bed, Bath, Car } from "lucide-react"
 import Image from "next/image"
 
+interface RentalProperty {
+  id: string | number
+  title?: string
+  address?: string
+  price?: number
+  bedrooms?: number
+  bathrooms?: number
+  parking?: number
+  listing_type?: string
+  listingType?: string
+  image?: string
+  description?: string
+}
+
 export default function SearchRentalsPage() {
   const [mounted, setMounted] = useState(false)
-  const [rentals, setRentals] = useState<any[]>([])
+  const [rentals, setRentals] = useState<RentalProperty[]>([])
   useEffect(() => {
     setMounted(true)
     ;(async () => {
       try {
         const res = await fetch('/api/properties', { cache: 'no-store' })
         const data = await res.json()
-        const rentOnly = (data || []).filter((p: any) => p.listing_type === 'rent' || p.listingType === 'rent')
+        const rentOnly = (data || []).filter((p: RentalProperty) => p.listing_type === 'rent' || p.listingType === 'rent')
         setRentals(rentOnly)
       } catch {}
     })()
@@ -87,7 +101,7 @@ export default function SearchRentalsPage() {
         <section className="py-32 bg-white">
           <div className="container">
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {rentals.map((rental: any, index: number) => (
+              {rentals.map((rental: RentalProperty, index: number) => (
                 <Card
                   key={index}
                   className="overflow-hidden hover:shadow-xl transition-all duration-500 border border-brown-100"

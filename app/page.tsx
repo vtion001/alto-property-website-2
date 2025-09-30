@@ -1,21 +1,15 @@
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Users,
   TrendingUp,
   CheckCircle,
   DollarSign,
-  Settings,
   Star,
-  MapPin,
   ArrowRight,
-  Shield,
-  Clock,
   Target,
   Calculator,
-  FileText,
   Home,
   Heart,
   Award,

@@ -23,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (token) {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'change-me')
       const { payload } = await jwtVerify(token, secret)
-      ownerUsername = (payload as any).username || null
+      ownerUsername = (payload as { username?: string }).username || null
     }
   } catch {}
 
@@ -44,7 +44,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     })
     .eq('id', id)
   if (ownerUsername) {
-    // @ts-ignore - optional owner scoping
+    // @ts-expect-error - optional owner scoping
     query = query.eq('owner_username', ownerUsername)
   }
   let { data, error } = await query.select('*').single()
