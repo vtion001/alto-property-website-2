@@ -37,8 +37,9 @@ export async function POST(request: NextRequest) {
     
     const { reviewer_name, rating, comment, review_date, review_url } = await request.json();
     
-    const { data, error } = await supabase
-      .from('google_reviews')
+    const { data, error } = await (supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('google_reviews') as any)
       .insert([{ reviewer_name, rating, comment, review_date, review_url }])
       .select();
     

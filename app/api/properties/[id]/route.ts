@@ -26,8 +26,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
   } catch {}
 
-  let query = supabase
-    .from('properties')
+  let query = (supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('properties') as any)
     .update({
       title: body.title,
       address: body.address,
@@ -52,8 +53,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
   let { data, error } = await query.select('*').single()
   if (error && ownerUsername && /column .*owner_username/i.test(error.message)) {
-    const fb = await supabase
-      .from('properties')
+    const fb = await (supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('properties') as any)
       .update({
         title: body.title,
         address: body.address,

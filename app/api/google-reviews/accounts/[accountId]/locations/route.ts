@@ -14,7 +14,8 @@ export async function GET(
     .eq('provider', 'google')
     .single()
 
-  if (tokenErr || !tokenRow?.refresh_token) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (tokenErr || !(tokenRow as any)?.refresh_token) {
     return NextResponse.json({ ok: false, error: 'Missing stored refresh token. Connect Google first.' }, { status: 400 })
   }
 
@@ -30,7 +31,8 @@ export async function GET(
     body: new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
-      refresh_token: tokenRow.refresh_token,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      refresh_token: (tokenRow as any).refresh_token,
       grant_type: 'refresh_token',
     }),
   })

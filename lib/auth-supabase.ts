@@ -44,8 +44,9 @@ export async function findUserById(id: string): Promise<AdminUser | null> {
 export async function createUser({ username, password, role }: { username: string; password: string; role: 'admin' | 'super_admin' }) {
   const password_hash = await bcrypt.hash(password, 12)
   const supabase = getSupabaseServerClient()
-  const { data, error } = await supabase
-    .from('admin_users')
+  const { data, error } = await (supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('admin_users') as any)
     .insert({ username, password_hash, role })
     .select('id, username, role, created_at')
     .single()

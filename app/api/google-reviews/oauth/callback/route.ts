@@ -51,8 +51,9 @@ export async function GET(request: NextRequest) {
     const refreshToken = tokenJson.refresh_token as string | undefined
     if (refreshToken) {
       // upsert by provider
-      const { error: upsertError } = await supabase
-        .from('google_integration_tokens')
+      const { error: upsertError } = await (supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('google_integration_tokens') as any)
         .upsert({ provider: 'google', refresh_token: refreshToken }, { onConflict: 'provider' })
       if (upsertError) {
         console.error('Failed to store refresh token:', upsertError)

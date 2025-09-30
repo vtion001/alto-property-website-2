@@ -13,9 +13,19 @@ export async function PUT(
   
   const { reviewer_name, rating, comment, review_date, review_url } = await request.json();
   
-  const { data, error } = await supabase
-    .from('google_reviews')
-    .update({ reviewer_name, rating, comment, review_date, review_url })
+  // Create update object with defined values
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: Record<string, any> = {};
+  if (reviewer_name !== undefined) updateData.reviewer_name = reviewer_name;
+  if (rating !== undefined) updateData.rating = rating;
+  if (comment !== undefined) updateData.comment = comment;
+  if (review_date !== undefined) updateData.review_date = review_date;
+  if (review_url !== undefined) updateData.review_url = review_url;
+
+  const { data, error } = await (supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('google_reviews') as any)
+    .update(updateData)
     .eq('id', id)
     .select();
   
