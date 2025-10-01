@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Phone, PhoneMissed, X, Settings, User, History, Key, CheckCircle, AlertCircle } from 'lucide-react'
+import { Phone, PhoneMissed, X, Settings, User, History, Key, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from '@/components/ui/input'
@@ -119,6 +119,7 @@ export default function Dialer() {
   const [currentCallSid, setCurrentCallSid] = useState<string | null>(null)
   const [callRecordings, setCallRecordings] = useState<CallRecording[]>([])
   const [_recordingConsent, _setRecordingConsent] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
   const { toast } = useToast()
 
   // Twilio Device Manager State
@@ -549,6 +550,62 @@ export default function Dialer() {
       }
     } catch (error) {
       console.error('Error fetching call recordings:', error)
+    }
+  }
+
+  const syncRecordings = async () => {
+    setIsSyncing(true)
+    try {
+      toast({
+        title: "Syncing Recordings",
+        description: "Fetching recordings from Twilio...",
+      })
+
+      const response = await fetch('/api/call-recordings/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          limit: 50 // Sync last 50 recordings
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        if (result.success) {
+          toast({
+            title: "Sync Complete",
+            description: result.message,
+          })
+          
+          // Refresh the recordings list
+          await fetchCallRecordings()
+        } else {
+          toast({
+            title: "Sync Failed",
+            description: result.error || "Failed to sync recordings",
+            variant: "destructive"
+          })
+        }
+      } else {
+        const errorData = await response.json()
+        toast({
+          title: "Sync Failed",
+          description: errorData.error || "Failed to sync recordings",
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      console.error('Error syncing recordings:', error)
+      toast({
+        title: "Sync Error",
+        description: "An error occurred while syncing recordings",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSyncing(false)
     }
   }
 
@@ -1154,8 +1211,22 @@ export default function Dialer() {
           {/* Add new Recordings section */}
           <Card>
             <CardHeader>
-              <CardTitle>Call Recordings</CardTitle>
-              <CardDescription>Recorded calls with playback options</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Call Recordings</CardTitle>
+                  <CardDescription>Recorded calls with playback options</CardDescription>
+                </div>
+                <Button
+                  onClick={syncRecordings}
+                  disabled={isSyncing}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Syncing...' : 'Sync from Twilio'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
