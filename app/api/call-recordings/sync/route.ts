@@ -42,7 +42,11 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Starting Twilio recordings sync...')
 
     // Fetch recordings from Twilio API
-    const recordingsOptions: any = {
+    const recordingsOptions: {
+      limit: number;
+      dateCreatedAfter?: Date;
+      callSid?: string;
+    } = {
       limit: Math.min(limit, 100) // Cap at 100 for safety
     }
 

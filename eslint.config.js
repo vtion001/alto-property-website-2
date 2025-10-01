@@ -11,7 +11,7 @@ const compat = new FlatCompat({
 
 export default [
   // Extend Next.js ESLint configurations
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...compat.extends('next', 'next/core-web-vitals', 'next/typescript'),
   
   // Global configuration
   {
@@ -26,6 +26,7 @@ export default [
         'varsIgnorePattern': '^_',
         'caughtErrorsIgnorePattern': '^_'
       }],
+      '@typescript-eslint/no-explicit-any': 'error', // Enforce no explicit any
       'no-unused-vars': 'off', // Turn off base rule as it conflicts with TypeScript rule
       'react/no-unescaped-entities': 'off', // Disable unescaped entities rule
     },
