@@ -4,10 +4,14 @@ import OpenAI from 'openai'
 
 const prisma = new PrismaClient()
 
-// Initialize OpenAI client for analysis
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+// Initialize OpenAI client lazily to avoid build-time issues
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is not set')
+  }
+  return new OpenAI({ apiKey })
+}
 
 // GET - Fetch call analyses
 export async function GET(request: NextRequest) {
@@ -272,6 +276,7 @@ Focus on:
 - Recommendations for improvement
 `
 
+    const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
