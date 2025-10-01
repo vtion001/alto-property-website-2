@@ -11,22 +11,51 @@ export type AdminUser = {
 }
 
 export async function findUserByUsername(username: string): Promise<(AdminUser & { password_hash: string }) | null> {
+  console.log('🔍 findUserByUsername called with:', username)
   const supabase = getSupabaseServerClient()
+  
   // Try by username first (app-core schema), then by email (supabase schema)
+  console.log('🔍 Searching by username...')
   const byUsername = await supabase
     .from('admin_users')
     .select('id, username, email, role, password_hash, created_at')
     .eq('username', username)
     .maybeSingle()
+  
+  console.log('👤 Username search result:', { 
+    data: byUsername.data ? { 
+      id: byUsername.data.id, 
+      username: byUsername.data.username, 
+      email: byUsername.data.email, 
+      role: byUsername.data.role,
+      hasPasswordHash: !!byUsername.data.password_hash
+    } : null, 
+    error: byUsername.error 
+  })
+  
   if (byUsername.data) return byUsername.data as AdminUser & { password_hash: string }
 
+  console.log('🔍 Searching by email...')
   const byEmail = await supabase
     .from('admin_users')
     .select('id, username, email, role, password_hash, created_at')
     .eq('email', username)
     .maybeSingle()
+    
+  console.log('📧 Email search result:', { 
+    data: byEmail.data ? { 
+      id: byEmail.data.id, 
+      username: byEmail.data.username, 
+      email: byEmail.data.email, 
+      role: byEmail.data.role,
+      hasPasswordHash: !!byEmail.data.password_hash
+    } : null, 
+    error: byEmail.error 
+  })
+  
   if (byEmail.data) return byEmail.data as AdminUser & { password_hash: string }
 
+  console.log('❌ No user found by username or email')
   return null
 }
 
