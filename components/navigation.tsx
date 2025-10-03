@@ -164,27 +164,21 @@ export function Navigation() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/finance" legacyBehavior passHref>
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
-                  Finance
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
+                <Link href="/finance">Finance</Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/team" legacyBehavior passHref>
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
-                  Team
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
+                <Link href="/team">Team</Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/blog" legacyBehavior passHref>
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
-                  Blog
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
+                <Link href="/blog">Blog</Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>

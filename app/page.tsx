@@ -39,7 +39,7 @@ export default function HomePage() {
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-150">
               <source
-                src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752833883/hero-background-alto.mp4"
+                src="https://res.cloudinary.com/dbviya1rj/video/upload/v1752811390/ahkwwnqzlasp5ab5xub0.mp4"
                 type="video/mp4"
               />
             </video>
