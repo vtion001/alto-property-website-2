@@ -38,6 +38,8 @@ import {
   Phone,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   BarChart3,
   Play,
   Download,
@@ -152,6 +154,7 @@ export default function AdminPage() {
   const [callAnalytics, setCallAnalytics] = useState<CallAnalytics | null>(null)
   const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null)
   const [isCallLogViewOpen, setIsCallLogViewOpen] = useState(false)
+  const [isCallLogsCollapsed, setIsCallLogsCollapsed] = useState(false)
 
   const adminNavItems = [
     { value: 'overview', label: 'Overview', icon: Home },
@@ -2479,10 +2482,32 @@ export default function AdminPage() {
 
                 {/* Call Logs Table */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl font-light">Recent Call Logs</CardTitle>
-                    <CardDescription>Detailed call history and recordings</CardDescription>
+                  <CardHeader className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-light">Recent Call Logs</CardTitle>
+                      <CardDescription>Detailed call history and recordings</CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsCallLogsCollapsed(v => !v)}
+                      className="flex items-center gap-1"
+                      aria-label={isCallLogsCollapsed ? "Expand call logs" : "Collapse call logs"}
+                    >
+                      {isCallLogsCollapsed ? (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          Expand
+                        </>
+                      ) : (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          Minimize
+                        </>
+                      )}
+                    </Button>
                   </CardHeader>
+                  {!isCallLogsCollapsed && (
                   <CardContent>
                     <Table>
                       <TableHeader>
@@ -2583,6 +2608,7 @@ export default function AdminPage() {
                       </TableBody>
                     </Table>
                   </CardContent>
+                  )}
                 </Card>
 
                 {/* Call Detail Dialog */}

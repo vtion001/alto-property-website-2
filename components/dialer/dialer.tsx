@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Phone, PhoneMissed, X, Settings, User, History, Key, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
+import { Phone, PhoneMissed, X, Settings, User, History, Key, CheckCircle, AlertCircle, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from '@/components/ui/input'
@@ -121,6 +121,8 @@ export default function Dialer() {
   const [_recordingConsent, _setRecordingConsent] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const { toast } = useToast()
+  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false)
+  const [isRecordingsCollapsed, setIsRecordingsCollapsed] = useState(false)
 
   // Twilio Device Manager State
   const [device, setDevice] = useState<Device | null>(null)
@@ -1134,10 +1136,32 @@ export default function Dialer() {
 
         <TabsContent value="history" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Call History</CardTitle>
-              <CardDescription>Recent calls made through the system</CardDescription>
+            <CardHeader className="flex items-center justify-between">
+              <div>
+                <CardTitle>Call History</CardTitle>
+                <CardDescription>Recent calls made through the system</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsHistoryCollapsed(v => !v)}
+                className="flex items-center gap-1"
+                aria-label={isHistoryCollapsed ? "Expand call history" : "Collapse call history"}
+              >
+                {isHistoryCollapsed ? (
+                  <>
+                    <ChevronDown className="h-4 w-4" />
+                    Expand
+                  </>
+                ) : (
+                  <>
+                    <ChevronUp className="h-4 w-4" />
+                    Minimize
+                  </>
+                )}
+              </Button>
             </CardHeader>
+            {!isHistoryCollapsed && (
             <CardContent>
               <div className="space-y-2">
                 {callLogs.length > 0 ? (
@@ -1206,6 +1230,7 @@ export default function Dialer() {
                 )}
               </div>
             </CardContent>
+            )}
           </Card>
 
           {/* Add new Recordings section */}
@@ -1216,18 +1241,40 @@ export default function Dialer() {
                   <CardTitle>Call Recordings</CardTitle>
                   <CardDescription>Recorded calls with playback options</CardDescription>
                 </div>
-                <Button
-                  onClick={syncRecordings}
-                  disabled={isSyncing}
-                  size="sm"
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Syncing...' : 'Sync from Twilio'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsRecordingsCollapsed(v => !v)}
+                    className="flex items-center gap-1"
+                    aria-label={isRecordingsCollapsed ? "Expand recordings" : "Collapse recordings"}
+                  >
+                    {isRecordingsCollapsed ? (
+                      <>
+                        <ChevronDown className="h-4 w-4" />
+                        Expand
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="h-4 w-4" />
+                        Minimize
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={syncRecordings}
+                    disabled={isSyncing}
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                    {isSyncing ? 'Syncing...' : 'Sync from Twilio'}
+                  </Button>
+                </div>
               </div>
             </CardHeader>
+            {!isRecordingsCollapsed && (
             <CardContent>
               <div className="space-y-2">
                 {callRecordings.length > 0 ? (
@@ -1273,6 +1320,7 @@ export default function Dialer() {
                 )}
               </div>
             </CardContent>
+            )}
           </Card>
         </TabsContent>
       </Tabs>
