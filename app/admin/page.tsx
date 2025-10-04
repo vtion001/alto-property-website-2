@@ -268,18 +268,57 @@ export default function AdminPage() {
 
   // Load call logs and analytics
   useEffect(() => {
+    // Normalize various API shapes (Twilio, Supabase) to CallLog interface expected by UI
+    const normalizeCallLogs = (logs: any[]): CallLog[] => {
+      if (!Array.isArray(logs)) return []
+      return logs.map((item: any, index: number) => {
+        const id = String(item.id ?? item.callSid ?? item.call_sid ?? `temp-${index}`)
+        const callSid = String(item.callSid ?? item.call_sid ?? item.sid ?? id)
+        const to = String(item.to ?? item.to_number ?? '')
+        const from = String(item.from ?? item.from_number ?? '')
+        const status = String((item.status ?? '').toLowerCase() || '') as CallLog['status']
+        const durationRaw = item.duration ?? 0
+        const duration = typeof durationRaw === 'number' ? durationRaw : Number(durationRaw) || 0
+        const startTime = String(
+          item.startTime ?? item.started_at ?? item.created_at ?? new Date().toISOString()
+        )
+        const endTime = String(
+          item.endTime ?? item.ended_at ?? item.finished_at ?? item.started_at ?? item.created_at ?? new Date().toISOString()
+        )
+        const direction: CallLog['direction'] = (item.direction as CallLog['direction']) ?? 'outbound'
+
+        return {
+          id,
+          callSid,
+          to,
+          from,
+          status,
+          direction,
+          duration,
+          startTime,
+          endTime,
+          recordingUrl: item.recordingUrl ?? item.recording_url ?? undefined,
+          transcription: item.transcription ?? item.transcriptText ?? undefined,
+          sentiment: item.sentiment ?? undefined,
+          qualityScore: typeof item.qualityScore === 'number' ? item.qualityScore : undefined,
+          tags: Array.isArray(item.tags) ? item.tags : undefined,
+        }
+      })
+    }
+
     const loadCallData = async () => {
       try {
         // Try to fetch from API first
         const [logsRes, analyticsRes] = await Promise.all([
-          fetch('/api/call-logs', { cache: 'no-store' }),
-          fetch('/api/call-analytics', { cache: 'no-store' })
+          fetch('/api/call-logs?source=twilio', { cache: 'no-store' }),
+          fetch('/api/call-analytics?source=twilio', { cache: 'no-store' })
         ])
         
         if (logsRes.ok) {
           const logs = await logsRes.json()
-          if (Array.isArray(logs)) {
-            setCallLogs(logs)
+          const normalized = normalizeCallLogs(logs)
+          if (normalized.length > 0) {
+            setCallLogs(normalized)
           }
         }
         
@@ -375,16 +414,55 @@ export default function AdminPage() {
 
   // Auto-refresh call logs and analytics periodically
   useEffect(() => {
+    // Reuse normalization for polling updates
+    const normalizeCallLogs = (logs: any[]): CallLog[] => {
+      if (!Array.isArray(logs)) return []
+      return logs.map((item: any, index: number) => {
+        const id = String(item.id ?? item.callSid ?? item.call_sid ?? `temp-${index}`)
+        const callSid = String(item.callSid ?? item.call_sid ?? item.sid ?? id)
+        const to = String(item.to ?? item.to_number ?? '')
+        const from = String(item.from ?? item.from_number ?? '')
+        const status = String((item.status ?? '').toLowerCase() || '') as CallLog['status']
+        const durationRaw = item.duration ?? 0
+        const duration = typeof durationRaw === 'number' ? durationRaw : Number(durationRaw) || 0
+        const startTime = String(
+          item.startTime ?? item.started_at ?? item.created_at ?? new Date().toISOString()
+        )
+        const endTime = String(
+          item.endTime ?? item.ended_at ?? item.finished_at ?? item.started_at ?? item.created_at ?? new Date().toISOString()
+        )
+        const direction: CallLog['direction'] = (item.direction as CallLog['direction']) ?? 'outbound'
+
+        return {
+          id,
+          callSid,
+          to,
+          from,
+          status,
+          direction,
+          duration,
+          startTime,
+          endTime,
+          recordingUrl: item.recordingUrl ?? item.recording_url ?? undefined,
+          transcription: item.transcription ?? item.transcriptText ?? undefined,
+          sentiment: item.sentiment ?? undefined,
+          qualityScore: typeof item.qualityScore === 'number' ? item.qualityScore : undefined,
+          tags: Array.isArray(item.tags) ? item.tags : undefined,
+        }
+      })
+    }
+
     const pollCallData = async () => {
       try {
         const [logsRes, analyticsRes] = await Promise.all([
-          fetch('/api/call-logs', { cache: 'no-store' }),
-          fetch('/api/call-analytics', { cache: 'no-store' })
+          fetch('/api/call-logs?source=twilio', { cache: 'no-store' }),
+          fetch('/api/call-analytics?source=twilio', { cache: 'no-store' })
         ])
 
         if (logsRes.ok) {
           const logs = await logsRes.json()
-          if (Array.isArray(logs)) setCallLogs(logs)
+          const normalized = normalizeCallLogs(logs)
+          if (normalized.length > 0) setCallLogs(normalized)
         }
 
         if (analyticsRes.ok) {

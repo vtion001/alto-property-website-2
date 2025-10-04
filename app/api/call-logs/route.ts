@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 import { createClient } from '@supabase/supabase-js'
+import twilio from 'twilio'
 
 export const runtime = 'nodejs'
 
@@ -27,15 +28,49 @@ async function _requireAdmin(request: NextRequest) {
   }
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const source = (searchParams.get('source') || '').toLowerCase()
+    const useTwilio = source === 'twilio' || searchParams.get('twilio') === 'true'
+
+    if (useTwilio) {
+      const accountSid = process.env.TWILIO_ACCOUNT_SID
+      const authToken = process.env.TWILIO_AUTH_TOKEN
+
+      if (!accountSid || !authToken) {
+        console.warn('Twilio credentials not configured. Falling back to Supabase call_logs.')
+      } else {
+        const client = twilio(accountSid, authToken)
+        console.log('Fetching recent call logs from Twilio API...')
+        try {
+          const calls = await client.calls.list()
+          const mapped = calls.map((call) => ({
+            id: call.sid, // Use Twilio SID as identifier
+            call_sid: call.sid,
+            from_number: call.from || '',
+            to_number: call.to || '',
+            status: (call.status || '').toLowerCase(),
+            duration: typeof call.duration === 'number' ? call.duration : Number(call.duration) || null,
+            started_at: call.startTime ? new Date(call.startTime as unknown as Date).toISOString() : null,
+            ended_at: call.endTime ? new Date(call.endTime as unknown as Date).toISOString() : null,
+            created_at: call.startTime ? new Date(call.startTime as unknown as Date).toISOString() : new Date().toISOString(),
+          }))
+          console.log(`Fetched ${mapped.length} calls from Twilio`)
+          return NextResponse.json(mapped)
+        } catch (twilioErr) {
+          console.error('Twilio calls.list error:', twilioErr)
+          // Fall through to Supabase fetch below
+        }
+      }
+    }
+
     console.log('Fetching call logs from Supabase...')
     
     const { data: callLogs, error } = await supabase
       .from('call_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50)
 
     if (error) {
       console.error('Supabase error:', error)
