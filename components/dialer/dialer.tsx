@@ -512,6 +512,16 @@ export default function Dialer() {
     fetchCallRecordings()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-refresh call logs and recordings periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchCallLogs()
+      fetchCallRecordings()
+    }, 10000) // refresh every 10 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
   const fetchTwilioConfig = async () => {
     try {
       const response = await fetch('/api/twilio/config')

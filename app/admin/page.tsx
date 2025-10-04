@@ -371,6 +371,43 @@ export default function AdminPage() {
     loadCallData()
   }, [])
 
+  // Auto-refresh call logs and analytics periodically
+  useEffect(() => {
+    const pollCallData = async () => {
+      try {
+        const [logsRes, analyticsRes] = await Promise.all([
+          fetch('/api/call-logs', { cache: 'no-store' }),
+          fetch('/api/call-analytics', { cache: 'no-store' })
+        ])
+
+        if (logsRes.ok) {
+          const logs = await logsRes.json()
+          if (Array.isArray(logs)) setCallLogs(logs)
+        }
+
+        if (analyticsRes.ok) {
+          const apiResponse = await analyticsRes.json()
+          const analytics: CallAnalytics = {
+            totalCalls: apiResponse.overview?.totalCalls || 0,
+            completedCalls: apiResponse.overview?.successfulCalls || 0,
+            averageDuration: apiResponse.overview?.averageDuration || 0,
+            successRate: apiResponse.overview?.successRate || 0,
+            averageQualityScore: apiResponse.overview?.qualityScore || 0,
+            sentimentBreakdown: { positive: 0, neutral: 0, negative: 0 },
+            callsByDay: [],
+            topPerformers: []
+          }
+          setCallAnalytics(analytics)
+        }
+      } catch (_err) {
+        // Silently ignore during polling
+      }
+    }
+
+    const interval = setInterval(pollCallData, 10000) // refresh every 10 seconds
+    return () => clearInterval(interval)
+  }, [])
+
   const [rentalApplications, _setRentalApplications] = useState<RentalApplication[]>([])
 
   const [newBlogPost, setNewBlogPost] = useState({
