@@ -155,6 +155,7 @@ export default function AdminPage() {
   const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null)
   const [isCallLogViewOpen, setIsCallLogViewOpen] = useState(false)
   const [isCallLogsCollapsed, setIsCallLogsCollapsed] = useState(false)
+  const [lastAdminRefresh, setLastAdminRefresh] = useState<Date | null>(null)
 
   const adminNavItems = [
     { value: 'overview', label: 'Overview', icon: Home },
@@ -301,6 +302,7 @@ export default function AdminPage() {
           }
           setCallAnalytics(analytics)
         }
+        setLastAdminRefresh(new Date())
       } catch (_error) {
         // Fallback to mock data for development
         const mockCallLogs: CallLog[] = [
@@ -399,6 +401,7 @@ export default function AdminPage() {
           }
           setCallAnalytics(analytics)
         }
+        setLastAdminRefresh(new Date())
       } catch (_err) {
         // Silently ignore during polling
       }
@@ -2520,10 +2523,15 @@ export default function AdminPage() {
                 {/* Call Logs Table */}
                 <Card>
                   <CardHeader className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl font-light">Recent Call Logs</CardTitle>
-                      <CardDescription>Detailed call history and recordings</CardDescription>
+                <div>
+                  <CardTitle className="text-xl font-light">Recent Call Logs</CardTitle>
+                  <CardDescription>Detailed call history and recordings</CardDescription>
+                  {lastAdminRefresh && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Last refresh: {lastAdminRefresh.toLocaleTimeString()}
                     </div>
+                  )}
+                </div>
                     <Button
                       variant="ghost"
                       size="sm"

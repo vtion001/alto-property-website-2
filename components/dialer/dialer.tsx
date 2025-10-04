@@ -123,6 +123,9 @@ export default function Dialer() {
   const { toast } = useToast()
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false)
   const [isRecordingsCollapsed, setIsRecordingsCollapsed] = useState(false)
+  // Last refresh indicators for logs and recordings
+  const [lastLogsRefresh, setLastLogsRefresh] = useState<Date | null>(null)
+  const [lastRecordingsRefresh, setLastRecordingsRefresh] = useState<Date | null>(null)
 
   // Twilio Device Manager State
   const [device, setDevice] = useState<Device | null>(null)
@@ -547,6 +550,7 @@ export default function Dialer() {
       if (response.ok) {
         const logs = await response.json()
         setCallLogs(logs)
+        setLastLogsRefresh(new Date())
       }
     } catch (error) {
       console.error('Error fetching call logs:', error)
@@ -559,6 +563,7 @@ export default function Dialer() {
       if (response.ok) {
         const recordings = await response.json()
         setCallRecordings(recordings)
+        setLastRecordingsRefresh(new Date())
       }
     } catch (error) {
       console.error('Error fetching call recordings:', error)
@@ -1150,6 +1155,11 @@ export default function Dialer() {
               <div>
                 <CardTitle>Call History</CardTitle>
                 <CardDescription>Recent calls made through the system</CardDescription>
+                {lastLogsRefresh && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Last refresh: {lastLogsRefresh.toLocaleTimeString()}
+                  </div>
+                )}
               </div>
               <Button
                 variant="ghost"
@@ -1250,6 +1260,11 @@ export default function Dialer() {
                 <div>
                   <CardTitle>Call Recordings</CardTitle>
                   <CardDescription>Recorded calls with playback options</CardDescription>
+                  {lastRecordingsRefresh && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Last refresh: {lastRecordingsRefresh.toLocaleTimeString()}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
