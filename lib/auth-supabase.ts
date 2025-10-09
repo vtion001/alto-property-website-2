@@ -21,19 +21,21 @@ export async function findUserByUsername(username: string): Promise<(AdminUser &
     .select('id, username, email, role, password_hash, created_at')
     .eq('username', username)
     .maybeSingle()
+  type AdminUserWithHash = AdminUser & { password_hash?: string }
+  const byUsernameData = byUsername.data as AdminUserWithHash | null
   
   console.log('👤 Username search result:', { 
-    data: byUsername.data ? { 
-      id: byUsername.data.id, 
-      username: byUsername.data.username, 
-      email: byUsername.data.email, 
-      role: byUsername.data.role,
-      hasPasswordHash: !!byUsername.data.password_hash
+    data: byUsernameData ? { 
+      id: byUsernameData.id, 
+      username: byUsernameData.username, 
+      email: byUsernameData.email, 
+      role: byUsernameData.role,
+      hasPasswordHash: !!byUsernameData.password_hash
     } : null, 
     error: byUsername.error 
   })
   
-  if (byUsername.data) return byUsername.data as AdminUser & { password_hash: string }
+  if (byUsernameData) return byUsernameData as AdminUser & { password_hash: string }
 
   console.log('🔍 Searching by email...')
   const byEmail = await supabase
@@ -41,19 +43,20 @@ export async function findUserByUsername(username: string): Promise<(AdminUser &
     .select('id, username, email, role, password_hash, created_at')
     .eq('email', username)
     .maybeSingle()
+  const byEmailData = byEmail.data as AdminUserWithHash | null
     
   console.log('📧 Email search result:', { 
-    data: byEmail.data ? { 
-      id: byEmail.data.id, 
-      username: byEmail.data.username, 
-      email: byEmail.data.email, 
-      role: byEmail.data.role,
-      hasPasswordHash: !!byEmail.data.password_hash
+    data: byEmailData ? { 
+      id: byEmailData.id, 
+      username: byEmailData.username, 
+      email: byEmailData.email, 
+      role: byEmailData.role,
+      hasPasswordHash: !!byEmailData.password_hash
     } : null, 
     error: byEmail.error 
   })
   
-  if (byEmail.data) return byEmail.data as AdminUser & { password_hash: string }
+  if (byEmailData) return byEmailData as AdminUser & { password_hash: string }
 
   console.log('❌ No user found by username or email')
   return null

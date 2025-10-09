@@ -1192,15 +1192,31 @@ export default function Dialer() {
                     return (
                       <div key={log.id} className="flex items-center justify-between p-3 border rounded-md">
                         <div>
-                          <p className="font-medium">{log.to_number}</p>
-                          <p className="text-sm text-gray-600">
-                            {log.created_at ? new Date(log.created_at).toLocaleString() : 'Unknown date'}
+                          <p className="font-medium">
+                            {(
+                              log.to_number ||
+                              ((log as Record<string, unknown>).to as string | undefined) ||
+                              log.from_number ||
+                              ((log as Record<string, unknown>).from as string | undefined) ||
+                              'Unknown number'
+                            )}
                           </p>
-                          {log.started_at && (
-                            <p className="text-xs text-gray-500">
-                              Started: {new Date(log.started_at).toLocaleString()}
-                            </p>
-                          )}
+                          <p className="text-sm text-gray-600">
+                            {(() => {
+                              const created = log.created_at ||
+                                ((log as Record<string, unknown>).startTime as string | undefined) ||
+                                log.started_at ||
+                                ((log as Record<string, unknown>).endTime as string | undefined) ||
+                                log.ended_at
+                              return created ? new Date(created).toLocaleString() : 'Unknown date'
+                            })()}
+                          </p>
+                          {(() => {
+                            const started = log.started_at || ((log as Record<string, unknown>).startTime as string | undefined)
+                            return started ? (
+                              <p className="text-xs text-gray-500">Started: {new Date(started).toLocaleString()}</p>
+                            ) : null
+                          })()}
                           {recording && (
                             <div className="flex items-center gap-1 mt-1">
                               <div className="w-2 h-2 bg-red-500 rounded-full"></div>

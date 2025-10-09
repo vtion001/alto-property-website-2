@@ -132,6 +132,73 @@ interface CallAnalytics {
   topPerformers: { agent: string; calls: number; avgScore: number }[]
 }
 
+// Raw shapes the UI may receive from various APIs
+type RawCallLog = {
+  id?: string | number
+  callSid?: string
+  call_sid?: string
+  sid?: string
+  to?: string
+  to_number?: string
+  from?: string
+  from_number?: string
+  status?: string
+  duration?: number | string
+  startTime?: string
+  started_at?: string
+  created_at?: string
+  endTime?: string
+  ended_at?: string
+  finished_at?: string
+  recordingUrl?: string
+  recording_url?: string
+  transcription?: string
+  transcriptText?: string
+  sentiment?: 'positive' | 'neutral' | 'negative'
+  qualityScore?: number
+  tags?: string[]
+  direction?: 'inbound' | 'outbound' | string
+}
+
+// Normalize various API shapes (Twilio, Supabase) to CallLog interface expected by UI
+const normalizeCallLogs = (logs: unknown[]): CallLog[] => {
+  if (!Array.isArray(logs)) return []
+  return logs.map((log, index: number) => {
+    const item = log as RawCallLog
+    const id = String(item.id ?? item.callSid ?? item.call_sid ?? `temp-${index}`)
+    const callSid = String(item.callSid ?? item.call_sid ?? item.sid ?? id)
+    const to = String(item.to ?? item.to_number ?? '')
+    const from = String(item.from ?? item.from_number ?? '')
+    const status = String((item.status ?? '').toLowerCase() || '') as CallLog['status']
+    const durationRaw = item.duration ?? 0
+    const duration = typeof durationRaw === 'number' ? durationRaw : Number(durationRaw) || 0
+    const startTime = String(
+      item.startTime ?? item.started_at ?? item.created_at ?? new Date().toISOString()
+    )
+    const endTime = String(
+      item.endTime ?? item.ended_at ?? item.finished_at ?? item.started_at ?? item.created_at ?? new Date().toISOString()
+    )
+    const direction: CallLog['direction'] = (item.direction as CallLog['direction']) ?? 'outbound'
+
+    return {
+      id,
+      callSid,
+      to,
+      from,
+      status,
+      direction,
+      duration,
+      startTime,
+      endTime,
+      recordingUrl: item.recordingUrl ?? item.recording_url ?? undefined,
+      transcription: item.transcription ?? item.transcriptText ?? undefined,
+      sentiment: item.sentiment ?? undefined,
+      qualityScore: typeof item.qualityScore === 'number' ? item.qualityScore : undefined,
+      tags: Array.isArray(item.tags) ? item.tags : undefined,
+    }
+  })
+}
+
 export default function AdminPage() {
   const makeSlug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
   const blogPathFor = (post: BlogPost) => `/blog/${post.slug || makeSlug(post.title)}`
@@ -156,6 +223,10 @@ export default function AdminPage() {
   const [isCallLogViewOpen, setIsCallLogViewOpen] = useState(false)
   const [isCallLogsCollapsed, setIsCallLogsCollapsed] = useState(false)
   const [lastAdminRefresh, setLastAdminRefresh] = useState<Date | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    const d = new Date()
+    return d.toISOString().split('T')[0]
+  })
 
   const adminNavItems = [
     { value: 'overview', label: 'Overview', icon: Home },
@@ -268,50 +339,14 @@ export default function AdminPage() {
 
   // Load call logs and analytics
   useEffect(() => {
-    // Normalize various API shapes (Twilio, Supabase) to CallLog interface expected by UI
-    const normalizeCallLogs = (logs: any[]): CallLog[] => {
-      if (!Array.isArray(logs)) return []
-      return logs.map((item: any, index: number) => {
-        const id = String(item.id ?? item.callSid ?? item.call_sid ?? `temp-${index}`)
-        const callSid = String(item.callSid ?? item.call_sid ?? item.sid ?? id)
-        const to = String(item.to ?? item.to_number ?? '')
-        const from = String(item.from ?? item.from_number ?? '')
-        const status = String((item.status ?? '').toLowerCase() || '') as CallLog['status']
-        const durationRaw = item.duration ?? 0
-        const duration = typeof durationRaw === 'number' ? durationRaw : Number(durationRaw) || 0
-        const startTime = String(
-          item.startTime ?? item.started_at ?? item.created_at ?? new Date().toISOString()
-        )
-        const endTime = String(
-          item.endTime ?? item.ended_at ?? item.finished_at ?? item.started_at ?? item.created_at ?? new Date().toISOString()
-        )
-        const direction: CallLog['direction'] = (item.direction as CallLog['direction']) ?? 'outbound'
-
-        return {
-          id,
-          callSid,
-          to,
-          from,
-          status,
-          direction,
-          duration,
-          startTime,
-          endTime,
-          recordingUrl: item.recordingUrl ?? item.recording_url ?? undefined,
-          transcription: item.transcription ?? item.transcriptText ?? undefined,
-          sentiment: item.sentiment ?? undefined,
-          qualityScore: typeof item.qualityScore === 'number' ? item.qualityScore : undefined,
-          tags: Array.isArray(item.tags) ? item.tags : undefined,
-        }
-      })
-    }
+    // Use top-level normalizeCallLogs
 
     const loadCallData = async () => {
       try {
         // Try to fetch from API first
         const [logsRes, analyticsRes] = await Promise.all([
-          fetch('/api/call-logs?source=twilio', { cache: 'no-store' }),
-          fetch('/api/call-analytics?source=twilio', { cache: 'no-store' })
+          fetch(`/api/call-logs?source=twilio&date=${encodeURIComponent(selectedDate)}`, { cache: 'no-store' }),
+          fetch(`/api/call-analytics?source=twilio&date=${encodeURIComponent(selectedDate)}`, { cache: 'no-store' })
         ])
         
         if (logsRes.ok) {
@@ -410,53 +445,17 @@ export default function AdminPage() {
     }
     
     loadCallData()
-  }, [])
+  }, [selectedDate])
 
   // Auto-refresh call logs and analytics periodically
   useEffect(() => {
-    // Reuse normalization for polling updates
-    const normalizeCallLogs = (logs: any[]): CallLog[] => {
-      if (!Array.isArray(logs)) return []
-      return logs.map((item: any, index: number) => {
-        const id = String(item.id ?? item.callSid ?? item.call_sid ?? `temp-${index}`)
-        const callSid = String(item.callSid ?? item.call_sid ?? item.sid ?? id)
-        const to = String(item.to ?? item.to_number ?? '')
-        const from = String(item.from ?? item.from_number ?? '')
-        const status = String((item.status ?? '').toLowerCase() || '') as CallLog['status']
-        const durationRaw = item.duration ?? 0
-        const duration = typeof durationRaw === 'number' ? durationRaw : Number(durationRaw) || 0
-        const startTime = String(
-          item.startTime ?? item.started_at ?? item.created_at ?? new Date().toISOString()
-        )
-        const endTime = String(
-          item.endTime ?? item.ended_at ?? item.finished_at ?? item.started_at ?? item.created_at ?? new Date().toISOString()
-        )
-        const direction: CallLog['direction'] = (item.direction as CallLog['direction']) ?? 'outbound'
-
-        return {
-          id,
-          callSid,
-          to,
-          from,
-          status,
-          direction,
-          duration,
-          startTime,
-          endTime,
-          recordingUrl: item.recordingUrl ?? item.recording_url ?? undefined,
-          transcription: item.transcription ?? item.transcriptText ?? undefined,
-          sentiment: item.sentiment ?? undefined,
-          qualityScore: typeof item.qualityScore === 'number' ? item.qualityScore : undefined,
-          tags: Array.isArray(item.tags) ? item.tags : undefined,
-        }
-      })
-    }
+    // Use the top-level normalizeCallLogs for polling updates
 
     const pollCallData = async () => {
       try {
         const [logsRes, analyticsRes] = await Promise.all([
-          fetch('/api/call-logs?source=twilio', { cache: 'no-store' }),
-          fetch('/api/call-analytics?source=twilio', { cache: 'no-store' })
+          fetch(`/api/call-logs?source=twilio&date=${encodeURIComponent(selectedDate)}`, { cache: 'no-store' }),
+          fetch(`/api/call-analytics?source=twilio&date=${encodeURIComponent(selectedDate)}`, { cache: 'no-store' })
         ])
 
         if (logsRes.ok) {
@@ -487,7 +486,7 @@ export default function AdminPage() {
 
     const interval = setInterval(pollCallData, 10000) // refresh every 10 seconds
     return () => clearInterval(interval)
-  }, [])
+  }, [selectedDate])
 
   const [rentalApplications, _setRentalApplications] = useState<RentalApplication[]>([])
 
@@ -2504,6 +2503,18 @@ export default function AdminPage() {
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-light text-brown-800">Call Analysis Dashboard</h2>
                   <p className="text-brown-600">Monitor call performance, quality, and analytics</p>
+                </div>
+
+                {/* Date Selector */}
+                <div className="flex items-center justify-end gap-2 mb-2">
+                  <Label htmlFor="call-analysis-date" className="text-sm">Date</Label>
+                  <Input
+                    id="call-analysis-date"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-[180px]"
+                  />
                 </div>
 
                 {/* Analytics Overview Cards */}

@@ -5,10 +5,17 @@ import twilio from 'twilio'
 export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const source = (searchParams.get('source') || '').toLowerCase()
+  const useTwilio = source === 'twilio' || searchParams.get('twilio') === 'true'
+  const dateParam = searchParams.get('date')
+  const targetDate = dateParam ? new Date(dateParam) : new Date()
+  const startOfDay = new Date(targetDate)
+  startOfDay.setHours(0, 0, 0, 0)
+  const endOfDay = new Date(startOfDay)
+  endOfDay.setDate(endOfDay.getDate() + 1)
+  
   try {
-    const { searchParams } = new URL(request.url)
-    const source = (searchParams.get('source') || '').toLowerCase()
-    const useTwilio = source === 'twilio' || searchParams.get('twilio') === 'true'
 
     // If requested, source recent calls from Twilio directly
     if (useTwilio) {
@@ -27,7 +34,15 @@ export async function GET(request: NextRequest) {
 
       const client = twilio(accountSid, authToken)
       try {
-        const calls = await client.calls.list({ limit: 50 })
+        const listOptions: { startTimeAfter?: Date; startTimeBefore?: Date; limit?: number } = {}
+        // If a date is provided, restrict results to that day (local time)
+        if (dateParam) {
+          listOptions.startTimeAfter = startOfDay
+          listOptions.startTimeBefore = endOfDay
+        }
+        // Fetch a generous amount to cover the day; Twilio paginates internally
+        listOptions.limit = 1000
+        const calls = await client.calls.list(listOptions)
         // Normalize Twilio calls to a common shape
         const callLogs = calls.map((call) => ({
           id: call.sid,
@@ -85,19 +100,24 @@ export async function GET(request: NextRequest) {
           sentimentScore: null
         }))
 
-        const now = new Date()
-        const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-        const recentCallLogs = callLogs.filter(call => call.createdAt && call.createdAt >= last24Hours)
+        // Build hourly volume for the selected day (or last 24 hours if no date)
+        const recentCallLogs = callLogs.filter(call => {
+          if (!call.createdAt) return false
+          return dateParam
+            ? call.createdAt >= startOfDay && call.createdAt < endOfDay
+            : call.createdAt >= new Date(Date.now() - 24 * 60 * 60 * 1000)
+        })
 
+        const baseDay = dateParam ? startOfDay : new Date()
         const callVolumeByHour = Array.from({ length: 24 }, (_, i) => {
-          const hour = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000).getHours()
-          const hourStart = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000)
-          hourStart.setMinutes(0, 0, 0)
-          const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000)
+          const hourStart = new Date(baseDay)
+          hourStart.setHours(i, 0, 0, 0)
+          const hourEnd = new Date(hourStart)
+          hourEnd.setHours(i + 1, 0, 0, 0)
           const callsInHour = recentCallLogs.filter(call => 
             call.createdAt && call.createdAt >= hourStart && call.createdAt < hourEnd
           ).length
-          return { hour: hour.toString().padStart(2, '0') + ':00', calls: callsInHour }
+          return { hour: i.toString().padStart(2, '0') + ':00', calls: callsInHour }
         })
 
         const analytics = {
@@ -134,6 +154,7 @@ export async function GET(request: NextRequest) {
 
     // Default: use Prisma (database) for analytics
     const callLogs = await prisma.callLog.findMany({
+      where: dateParam ? { createdAt: { gte: startOfDay, lt: endOfDay } } : undefined,
       include: {
         recording: true,
         transcription: true,
@@ -192,26 +213,23 @@ export async function GET(request: NextRequest) {
     }))
 
     // Calculate call volume by hour for the last 24 hours
-    const now = new Date()
-    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-    const recentCallLogs = callLogs.filter(call => 
-      call.createdAt && call.createdAt >= last24Hours
-    )
+    const recentCallLogs = callLogs.filter(call => {
+      if (!call.createdAt) return false
+      return dateParam
+        ? call.createdAt >= startOfDay && call.createdAt < endOfDay
+        : call.createdAt >= new Date(Date.now() - 24 * 60 * 60 * 1000)
+    })
 
+    const baseDay = dateParam ? startOfDay : new Date()
     const callVolumeByHour = Array.from({ length: 24 }, (_, i) => {
-      const hour = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000).getHours()
-      const hourStart = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000)
-      hourStart.setMinutes(0, 0, 0)
-      const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000)
-      
+      const hourStart = new Date(baseDay)
+      hourStart.setHours(i, 0, 0, 0)
+      const hourEnd = new Date(hourStart)
+      hourEnd.setHours(i + 1, 0, 0, 0)
       const callsInHour = recentCallLogs.filter(call => 
         call.createdAt && call.createdAt >= hourStart && call.createdAt < hourEnd
       ).length
-
-      return {
-        hour: hour.toString().padStart(2, '0') + ':00',
-        calls: callsInHour
-      }
+      return { hour: i.toString().padStart(2, '0') + ':00', calls: callsInHour }
     })
 
     const analytics = {
@@ -243,7 +261,13 @@ export async function GET(request: NextRequest) {
       const authToken = process.env.TWILIO_AUTH_TOKEN
       if (accountSid && authToken) {
         const client = twilio(accountSid, authToken)
-        const calls = await client.calls.list({ limit: 20 })
+        const listOptions: { startTimeAfter?: Date; startTimeBefore?: Date; limit?: number } = {}
+        if (dateParam) {
+          listOptions.startTimeAfter = startOfDay
+          listOptions.startTimeBefore = endOfDay
+        }
+        listOptions.limit = 1000
+        const calls = await client.calls.list(listOptions)
         const callLogs = calls.map((call) => ({
           id: call.sid,
           callSid: call.sid,

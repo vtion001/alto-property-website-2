@@ -3,6 +3,29 @@ import { jwtVerify } from 'jose'
 import { createClient } from '@supabase/supabase-js'
 import twilio from 'twilio'
 
+type TwilioCall = {
+  sid: string
+  startTime?: Date | string
+  endTime?: Date | string
+  to?: string
+  from?: string
+  status?: string
+  duration?: number | string
+  direction?: string
+}
+
+type SupabaseCallRow = {
+  id?: string | number
+  call_sid?: string
+  to_number?: string
+  from_number?: string
+  status?: string
+  duration?: number | string
+  started_at?: string
+  ended_at?: string
+  created_at?: string
+}
+
 export const runtime = 'nodejs'
 
 const supabase = createClient(
@@ -33,6 +56,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const source = (searchParams.get('source') || '').toLowerCase()
     const useTwilio = source === 'twilio' || searchParams.get('twilio') === 'true'
+    const dateParam = searchParams.get('date')
+    const targetDate = dateParam ? new Date(dateParam) : null
+    const startOfDay = targetDate ? new Date(targetDate) : null
+    if (startOfDay) startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = startOfDay ? new Date(startOfDay) : null
+    if (endOfDay) endOfDay.setDate(endOfDay.getDate() + 1)
 
     if (useTwilio) {
       const accountSid = process.env.TWILIO_ACCOUNT_SID
@@ -44,20 +73,53 @@ export async function GET(request: NextRequest) {
         const client = twilio(accountSid, authToken)
         console.log('Fetching recent call logs from Twilio API...')
         try {
-          const calls = await client.calls.list()
-          const mapped = calls.map((call) => ({
-            id: call.sid, // Use Twilio SID as identifier
-            call_sid: call.sid,
-            from_number: call.from || '',
-            to_number: call.to || '',
-            status: (call.status || '').toLowerCase(),
-            duration: typeof call.duration === 'number' ? call.duration : Number(call.duration) || null,
-            started_at: call.startTime ? new Date(call.startTime as unknown as Date).toISOString() : null,
-            ended_at: call.endTime ? new Date(call.endTime as unknown as Date).toISOString() : null,
-            created_at: call.startTime ? new Date(call.startTime as unknown as Date).toISOString() : new Date().toISOString(),
-          }))
-          console.log(`Fetched ${mapped.length} calls from Twilio`)
-          return NextResponse.json(mapped)
+          const listOptions: { startTimeAfter?: Date; startTimeBefore?: Date; limit?: number } = {}
+          if (startOfDay && endOfDay) {
+            listOptions.startTimeAfter = startOfDay
+            listOptions.startTimeBefore = endOfDay
+          }
+          listOptions.limit = 1000
+          const calls = await client.calls.list(listOptions)
+
+          const BUSINESS_NUMBER = process.env.TWILIO_BUSINESS_NUMBER || ''
+          const normalized = calls.map((call: TwilioCall) => {
+            const started = call.startTime ? new Date(call.startTime as Date).toISOString() : null
+            const ended = call.endTime ? new Date(call.endTime as Date).toISOString() : null
+            const to = call.to || ''
+            const from = call.from || ''
+            let direction: 'inbound' | 'outbound' = 'outbound'
+            if (BUSINESS_NUMBER) {
+              // If the call is to the business number, it's inbound
+              if (to && BUSINESS_NUMBER && to.replace(/\D/g, '') === BUSINESS_NUMBER.replace(/\D/g, '')) {
+                direction = 'inbound'
+              } else if (from && BUSINESS_NUMBER && from.replace(/\D/g, '') === BUSINESS_NUMBER.replace(/\D/g, '')) {
+                direction = 'outbound'
+              }
+            } else if (call.direction) {
+              // Fallback to Twilio-provided direction if available
+              direction = String(call.direction).includes('inbound') ? 'inbound' : 'outbound'
+            }
+
+            return {
+              id: call.sid,
+              callSid: call.sid,
+              to,
+              from,
+              status: (call.status || '').toLowerCase(),
+              duration: typeof call.duration === 'number' ? call.duration : Number(call.duration) || 0,
+              startTime: started || new Date().toISOString(),
+              endTime: ended || started || new Date().toISOString(),
+              direction,
+              recordingUrl: undefined,
+              transcription: undefined,
+              sentiment: undefined,
+              qualityScore: undefined,
+              tags: undefined,
+            }
+          })
+
+          console.log(`Fetched ${normalized.length} calls from Twilio`)
+          return NextResponse.json(normalized)
         } catch (twilioErr) {
           console.error('Twilio calls.list error:', twilioErr)
           // Fall through to Supabase fetch below
@@ -67,10 +129,16 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching call logs from Supabase...')
     
-    const { data: callLogs, error } = await supabase
+    let supabaseQuery = supabase
       .from('call_logs')
       .select('*')
       .order('created_at', { ascending: false })
+    if (startOfDay && endOfDay) {
+      supabaseQuery = supabaseQuery
+        .gte('created_at', startOfDay.toISOString())
+        .lt('created_at', endOfDay.toISOString())
+    }
+    const { data: callLogs, error } = await supabaseQuery
 
     if (error) {
       console.error('Supabase error:', error)
@@ -81,7 +149,37 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`Fetched ${callLogs?.length || 0} call logs`)
-    return NextResponse.json(callLogs || [])
+    const BUSINESS_NUMBER = process.env.TWILIO_BUSINESS_NUMBER || ''
+    const normalizedFromSupabase = (callLogs || []).map((row) => {
+      const r = row as SupabaseCallRow
+      const to = String(r.to_number || '')
+      const from = String(r.from_number || '')
+      let direction: 'inbound' | 'outbound' = 'outbound'
+      if (BUSINESS_NUMBER) {
+        if (to && BUSINESS_NUMBER && to.replace(/\D/g, '') === BUSINESS_NUMBER.replace(/\D/g, '')) {
+          direction = 'inbound'
+        } else if (from && BUSINESS_NUMBER && from.replace(/\D/g, '') === BUSINESS_NUMBER.replace(/\D/g, '')) {
+          direction = 'outbound'
+        }
+      }
+      return {
+        id: String(r.id ?? r.call_sid ?? ''),
+        callSid: String(r.call_sid ?? ''),
+        to,
+        from,
+        status: String((r.status || '').toLowerCase()),
+        duration: typeof r.duration === 'number' ? r.duration : Number(r.duration) || 0,
+        startTime: r.started_at ? new Date(r.started_at).toISOString() : (r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()),
+        endTime: r.ended_at ? new Date(r.ended_at).toISOString() : (r.started_at ? new Date(r.started_at).toISOString() : new Date().toISOString()),
+        direction,
+        recordingUrl: undefined,
+        transcription: undefined,
+        sentiment: undefined,
+        qualityScore: undefined,
+        tags: undefined,
+      }
+    })
+    return NextResponse.json(normalizedFromSupabase)
   } catch (error) {
     console.error('Error in call logs GET:', error)
     return NextResponse.json({ 
