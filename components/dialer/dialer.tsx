@@ -159,6 +159,33 @@ export default function Dialer() {
     },
   })
 
+  // Helpers for recording playback via public proxy
+  const getRecordingSid = (recording: CallRecording): string | null => {
+    if (recording.recording_sid) return recording.recording_sid
+    const url = recording.recording_url || ''
+    const regexMatch = url.match(/Recordings\/([A-Za-z0-9]+)\.mp3/i)
+    if (regexMatch && regexMatch[1]) return regexMatch[1]
+    const last = url.split('/').pop()
+    return last ? last.replace('.mp3', '') : null
+  }
+
+  const getPlaybackUrl = (recording: CallRecording): string => {
+    const sid = getRecordingSid(recording)
+    // Use our proxy endpoint if SID can be derived (no login required)
+    if (sid) return `/api/recordings/${sid}`
+    // Fallback to original URL if no SID available
+    return recording.recording_url
+  }
+
+  const playRecording = (recording: CallRecording) => {
+    const url = getPlaybackUrl(recording)
+    const audio = new Audio(url)
+    // Attempt inline playback; if blocked, open in new tab as fallback
+    audio.play().catch(() => {
+      window.open(url, '_blank')
+    })
+  }
+
   // Initialize Audio Context (required for WebRTC)
   const initializeAudioContext = async () => {
     try {
@@ -1195,28 +1222,28 @@ export default function Dialer() {
                           <p className="font-medium">
                             {(
                               log.to_number ||
-                              ((log as Record<string, unknown>).to as string | undefined) ||
+                              ((log as unknown as { to?: string }).to) ||
                               log.from_number ||
-                              ((log as Record<string, unknown>).from as string | undefined) ||
+                              ((log as unknown as { from?: string }).from) ||
                               'Unknown number'
                             )}
                           </p>
                           <p className="text-sm text-gray-600">
                             {(() => {
                               const created = log.created_at ||
-                                ((log as Record<string, unknown>).startTime as string | undefined) ||
+                                ((log as unknown as { startTime?: string }).startTime) ||
                                 log.started_at ||
-                                ((log as Record<string, unknown>).endTime as string | undefined) ||
+                                ((log as unknown as { endTime?: string }).endTime) ||
                                 log.ended_at
                               return created ? new Date(created).toLocaleString() : 'Unknown date'
                             })()}
                           </p>
-                          {(() => {
-                            const started = log.started_at || ((log as Record<string, unknown>).startTime as string | undefined)
-                            return started ? (
-                              <p className="text-xs text-gray-500">Started: {new Date(started).toLocaleString()}</p>
-                            ) : null
-                          })()}
+                            {(() => {
+                              const started = log.started_at || ((log as unknown as { startTime?: string }).startTime)
+                              return started ? (
+                                <p className="text-xs text-gray-500">Started: {new Date(started).toLocaleString()}</p>
+                              ) : null
+                            })()}
                           {recording && (
                             <div className="flex items-center gap-1 mt-1">
                               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -1240,19 +1267,7 @@ export default function Dialer() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                // Extract recording SID from URL
-                                const recordingSid = recording.recording_sid ||
-                                  recording.recording_url.split('/').pop()?.replace('.mp3', '')
-
-                                if (recordingSid) {
-                                  // Use your proxy endpoint
-                                  window.open(`/api/recordings/${recordingSid}`, '_blank')
-                                } else {
-                                  // Fallback: try to play directly (may require auth)
-                                  window.open(recording.recording_url, '_blank')
-                                }
-                              }}
+                              onClick={() => playRecording(recording)}
                             >
                               Play
                             </Button>
@@ -1342,7 +1357,7 @@ export default function Dialer() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.open(recording.recording_url, '_blank')}
+                          onClick={() => playRecording(recording)}
                         >
                           Play
                         </Button>
