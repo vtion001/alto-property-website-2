@@ -139,8 +139,11 @@ export default function Dialer() {
   })
   const [currentCall, setCurrentCall] = useState<Call | null>(null)
   const [audioContextInitialized, setAudioContextInitialized] = useState(false)
+  const [playingRecordingKey, setPlayingRecordingKey] = useState<string | null>(null)
+  const [isAudioLoading, setIsAudioLoading] = useState(false)
 
   const deviceRef = useRef<Device | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const dialForm = useForm<z.infer<typeof dialSchema>>({
     resolver: zodResolver(dialSchema),
@@ -169,6 +172,14 @@ export default function Dialer() {
     return last ? last.replace('.mp3', '') : null
   }
 
+  const getRecordingKey = (recording: CallRecording): string => {
+    return getRecordingSid(recording) ?? `url:${recording.recording_url}`
+  }
+
+  const isRecordingPlaying = (recording: CallRecording): boolean => {
+    return playingRecordingKey === getRecordingKey(recording)
+  }
+
   const getPlaybackUrl = (recording: CallRecording): string => {
     const sid = getRecordingSid(recording)
     // Use our proxy endpoint if SID can be derived (no login required)
@@ -178,10 +189,55 @@ export default function Dialer() {
   }
 
   const playRecording = (recording: CallRecording) => {
+    const key = getRecordingKey(recording)
     const url = getPlaybackUrl(recording)
+
+    // If this recording is already playing, toggle to stop
+    if (playingRecordingKey === key) {
+      try {
+        audioRef.current?.pause()
+      } catch {}
+      audioRef.current = null
+      setPlayingRecordingKey(null)
+      setIsAudioLoading(false)
+      return
+    }
+
+    // Stop any existing playback before starting new
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause()
+      } catch {}
+      audioRef.current = null
+    }
+
+    setIsAudioLoading(true)
+    setPlayingRecordingKey(key)
+
     const audio = new Audio(url)
+    audioRef.current = audio
+
+    const clearState = () => {
+      setPlayingRecordingKey(null)
+      setIsAudioLoading(false)
+      audioRef.current = null
+    }
+
+    audio.addEventListener('playing', () => {
+      setIsAudioLoading(false)
+    })
+
+    audio.addEventListener('ended', clearState)
+    audio.addEventListener('pause', clearState)
+    audio.addEventListener('error', () => {
+      clearState()
+      // Fallback to opening in a new tab if inline playback fails
+      window.open(url, '_blank')
+    })
+
     // Attempt inline playback; if blocked, open in new tab as fallback
     audio.play().catch(() => {
+      clearState()
       window.open(url, '_blank')
     })
   }
@@ -1268,8 +1324,21 @@ export default function Dialer() {
                               size="sm"
                               variant="outline"
                               onClick={() => playRecording(recording)}
+                              aria-pressed={isRecordingPlaying(recording)}
+                              className="flex items-center gap-2"
                             >
-                              Play
+                              {isRecordingPlaying(recording) ? (
+                                <>
+                                  {isAudioLoading ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                                  )}
+                                  {isAudioLoading ? 'Loading' : 'Playing'}
+                                </>
+                              ) : (
+                                'Play'
+                              )}
                             </Button>
                           )}
                         </div>
@@ -1358,8 +1427,21 @@ export default function Dialer() {
                           size="sm"
                           variant="outline"
                           onClick={() => playRecording(recording)}
+                          aria-pressed={isRecordingPlaying(recording)}
+                          className="flex items-center gap-2"
                         >
-                          Play
+                          {isRecordingPlaying(recording) ? (
+                            <>
+                              {isAudioLoading ? (
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                              )}
+                              {isAudioLoading ? 'Loading' : 'Playing'}
+                            </>
+                          ) : (
+                            'Play'
+                          )}
                         </Button>
                         <Button
                           size="sm"
