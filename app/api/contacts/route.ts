@@ -113,21 +113,33 @@ export async function PUT(request: NextRequest) {
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { id, name, phoneNumber, email } = await request.json()
-    if (!id || !name || !phoneNumber) {
-      return NextResponse.json({ error: 'Missing required fields: id, name, and phoneNumber' }, { status: 400 })
+    // Accept partial updates; only 'id' is required
+    const body = await request.json()
+    const { id } = body
+    if (!id) {
+      return NextResponse.json({ error: 'Missing required field: id' }, { status: 400 })
     }
 
     const supabase = getSupabaseServerClient()
 
+    // Build update payload, mapping camelCase to snake_case columns
+    const updatePayload: Record<string, any> = {}
+    if (typeof body.name !== 'undefined') updatePayload.name = body.name
+    if (typeof body.phoneNumber !== 'undefined') updatePayload.phone_number = body.phoneNumber
+    if (typeof body.email !== 'undefined') updatePayload.email = body.email || null
+    if (typeof body.notes !== 'undefined') updatePayload.notes = body.notes
+    if (typeof body.tags !== 'undefined') updatePayload.tags = body.tags
+    if (typeof body.isFavorite !== 'undefined') updatePayload.is_favorite = body.isFavorite
+    // Always update timestamp when making changes
+    updatePayload.updated_at = new Date().toISOString()
+
+    if (Object.keys(updatePayload).length === 1 && 'updated_at' in updatePayload) {
+      return NextResponse.json({ error: 'No fields provided to update' }, { status: 400 })
+    }
+
     const { data: contact, error } = await supabase
       .from('contacts')
-      .update({
-        name,
-        phoneNumber,
-        email: email || null
-        // updatedAt will be handled by a trigger or manually set updatedAt: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single()
@@ -137,7 +149,20 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 })
     }
 
-    return NextResponse.json(contact)
+    // Normalize response to camelCase
+    const formattedContact = {
+      id: contact.id,
+      name: contact.name,
+      phoneNumber: contact.phone_number || contact.phoneNumber,
+      email: contact.email,
+      notes: contact.notes,
+      tags: contact.tags,
+      isFavorite: contact.is_favorite || contact.isFavorite,
+      createdAt: contact.created_at || contact.createdAt,
+      updatedAt: contact.updated_at || contact.updatedAt
+    }
+
+    return NextResponse.json(formattedContact)
   } catch (error) {
     console.error('Contacts PUT error', error)
     return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 })

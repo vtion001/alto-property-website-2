@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
 
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { 
   FileText, 
@@ -45,7 +47,12 @@ import {
   Download,
   Star,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  Filter,
+  MoreVertical,
+  Mail,
+  MessageSquare,
+  ExternalLink
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -239,6 +246,76 @@ export default function AdminPage() {
     postalAddress: "",
   })
 
+  // Contacts: list, selection and loading state
+  const [contacts, setContacts] = useState<any[]>([])
+  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([])
+  const [contactsLoading, setContactsLoading] = useState(false)
+  const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false)
+  const [activeContact, setActiveContact] = useState<any | null>(null)
+  const [isEditingContact, setIsEditingContact] = useState(false)
+
+  const extractAddressFromNotes = (notes?: string) => {
+    if (!notes) return ""
+    const line = notes.split("\n").find(l => l.toLowerCase().startsWith("address:"))
+    return line ? line.split(":").slice(1).join(":").trim() : ""
+  }
+
+  const formatDateTime = (iso?: string) => {
+    if (!iso) return "–"
+    try {
+      return new Date(iso).toLocaleString("en-AU", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+    } catch {
+      return "–"
+    }
+  }
+
+  const loadContacts = async () => {
+    setContactsLoading(true)
+    try {
+      const res = await fetch('/api/contacts')
+      if (res.ok) {
+        const data = await res.json()
+        setContacts(data)
+      }
+    } catch {}
+    finally {
+      setContactsLoading(false)
+    }
+  }
+
+  const openContactDetails = (contact: any) => {
+    setActiveContact(contact)
+    setIsContactDetailsOpen(true)
+    setIsEditingContact(false)
+  }
+
+  const handleUpdateContact = async () => {
+    if (!activeContact) return
+    const payload = {
+      id: activeContact.id,
+      name: (activeContact.name || '').trim(),
+      phoneNumber: (activeContact.phoneNumber || '').trim(),
+      email: (activeContact.email || '').trim() || undefined,
+    }
+    if (!payload.name || !payload.phoneNumber) return
+    try {
+      const res = await fetch('/api/contacts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      if (res.ok) {
+        await loadContacts()
+        setIsEditingContact(false)
+        setIsContactDetailsOpen(false)
+      }
+    } catch {}
+  }
+
+  useEffect(() => {
+    loadContacts()
+  }, [])
+
   const handleSaveContact = async () => {
     const name = `${newContact.firstName} ${newContact.lastName}`.trim()
     const phoneNumber = newContact.phone.trim()
@@ -259,6 +336,7 @@ export default function AdminPage() {
       if (res.ok) {
         setIsAddContactOpen(false)
         setNewContact({ firstName: "", lastName: "", email: "", phone: "", address: "", postalAddress: "" })
+        await loadContacts()
       }
     } catch {
       // silent fail in UI; API may require admin auth cookie
@@ -1758,27 +1836,348 @@ export default function AdminPage() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="contacts" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-light text-brown-800">Contacts</h2>
-                  <Button 
-                    onClick={() => setIsAddContactOpen(true)}
-                    className="bg-brown-800 hover:bg-brown-900"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Contact
-                  </Button>
+              <TabsContent value="contacts" className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" className="border-brown-300 text-brown-800" onClick={() => setIsAddContactOpen(true)}>
+                      <Plus className="h-4 w-4 mr-2" /> New Contact
+                    </Button>
+                    <Button variant="outline" className="border-brown-300 text-brown-800">
+                      <Filter className="h-4 w-4 mr-2" /> Filter Contacts
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-brown-700">
+                    <span>{contacts.length ? `1 - ${Math.min(contacts.length, 20)} of ${contacts.length}` : '0 of 0'}</span>
+                    <Button variant="ghost" size="icon" className="text-brown-700"><ChevronLeft className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-brown-700"><ChevronRight className="h-4 w-4" /></Button>
+                  </div>
                 </div>
+                <p className="text-xs text-brown-600">select one or more records in order to see the actions</p>
+
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-xl font-light">Saved Contacts</CardTitle>
-                    <CardDescription>Manage and view your contacts.
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl font-light">My Contacts</CardTitle>
+                      <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                    </div>
+                    <CardDescription>Manage and view your contacts.</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-brown-700">Contacts panel coming soon.</p>
+                  <CardContent className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-10">
+                            <Checkbox
+                              checked={selectedContactIds.length > 0 && selectedContactIds.length === contacts.length}
+                              onCheckedChange={(checked) => {
+                                if (checked) setSelectedContactIds(contacts.map((c: any) => c.id))
+                                else setSelectedContactIds([])
+                              }}
+                            />
+                          </TableHead>
+                          <TableHead>Contact Name</TableHead>
+                          <TableHead>Email Address</TableHead>
+                          <TableHead>Phone Number</TableHead>
+                          <TableHead>Owned By</TableHead>
+                          <TableHead>Address</TableHead>
+                          <TableHead>Last Contacted</TableHead>
+                          <TableHead>Last Modified</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {contactsLoading && (
+                          <TableRow>
+                            <TableCell colSpan={9} className="text-center text-brown-700">Loading contacts…</TableCell>
+                          </TableRow>
+                        )}
+                        {!contactsLoading && contacts.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={9} className="text-center text-brown-700">No contacts yet</TableCell>
+                          </TableRow>
+                        )}
+                        {!contactsLoading && contacts.map((c: any) => (
+                          <TableRow key={c.id}>
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedContactIds.includes(c.id)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedContactIds(prev => checked ? [...prev, c.id] : prev.filter(id => id !== c.id))
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium text-brown-800">{c.name || '—'}</TableCell>
+                            <TableCell className="text-brown-700">{c.email || '—'}</TableCell>
+                            <TableCell className="text-brown-700">{c.phoneNumber || '—'}</TableCell>
+                            <TableCell className="text-brown-700">—</TableCell>
+                            <TableCell className="text-brown-700">{extractAddressFromNotes(c.notes) || '—'}</TableCell>
+                            <TableCell className="text-brown-700">—</TableCell>
+                            <TableCell className="text-brown-700">{formatDateTime(c.updatedAt || c.createdAt)}</TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" aria-label="Actions">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => openContactDetails(c)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </CardContent>
                 </Card>
+                {/* Contact Details Dialog */}
+                <Dialog open={isContactDetailsOpen} onOpenChange={setIsContactDetailsOpen}>
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-3">
+                          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brown-100 text-brown-700">{(activeContact?.name || 'U').charAt(0).toUpperCase()}</span>
+                          {isEditingContact ? (
+                            <Input value={activeContact?.name || ''} onChange={(e) => setActiveContact({ ...activeContact, name: e.target.value })} className="font-medium text-brown-800" />
+                          ) : (
+                            <span className="font-medium text-brown-800">{activeContact?.name}</span>
+                          )}
+                          <ExternalLink className="h-4 w-4 text-brown-500" />
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {!isEditingContact && <Button variant="outline" onClick={() => setIsEditingContact(true)}>Edit</Button>}
+                          {/* Removed duplicate More dropdown in header; toolbar More remains */}
+                        </div>
+                      </DialogTitle>
+                      <DialogDescription>
+                        <div className="flex items-center gap-2 text-brown-700">
+                          {isEditingContact ? (
+                            <Input value={activeContact?.phoneNumber || ''} onChange={(e) => setActiveContact({ ...activeContact, phoneNumber: e.target.value })} className="w-48" />
+                          ) : (
+                            <span>{activeContact?.phoneNumber}</span>
+                          )}
+                          <span>•</span>
+                          {isEditingContact ? (
+                            <Input value={activeContact?.email || ''} onChange={(e) => setActiveContact({ ...activeContact, email: e.target.value })} className="w-64" />
+                          ) : (
+                            <span>{activeContact?.email}</span>
+                          )}
+                        </div>
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex items-center gap-6 border-y border-brown-100 py-4">
+                      <Button variant="ghost" className="text-brown-800"><Mail className="h-4 w-4 mr-2" /> Email</Button>
+                      <Button variant="ghost" className="text-brown-800"><MessageSquare className="h-4 w-4 mr-2" /> SMS</Button>
+                      <Button variant="ghost" className="text-brown-800"><ThumbsUp className="h-4 w-4 mr-2" /> Feedback</Button>
+                      <Button variant="ghost" className="text-brown-800"><FileText className="h-4 w-4 mr-2" /> Note</Button>
+                      <div className="ml-auto">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="text-brown-800" aria-label="More actions">
+                              More <ChevronDown className="h-4 w-4 ml-2" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                if (!activeContact?.id) return
+                                const updatedNotes = `${activeContact?.notes || ''}\nReminder: Follow up scheduled`
+                                const res = await fetch('/api/contacts', {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: activeContact.id, notes: updatedNotes })
+                                })
+                                if (res.ok) {
+                                  setActiveContact({ ...activeContact, notes: updatedNotes })
+                                  await loadContacts()
+                                }
+                              }}
+                            >
+                              Add Reminder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={async () => {
+                                if (!activeContact?.id) return
+                                const updatedNotes = `${activeContact?.notes || ''}\nAppointment: Booked`
+                                const res = await fetch('/api/contacts', {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: activeContact.id, notes: updatedNotes })
+                                })
+                                if (res.ok) {
+                                  setActiveContact({ ...activeContact, notes: updatedNotes })
+                                  await loadContacts()
+                                }
+                              }}
+                            >
+                              Book Appointment
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+
+                    {/* Top action bar to mirror screenshot (Merge, Trash, More, Record mode) */}
+                    <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" className="border-brown-200 text-brown-800">Merge</Button>
+                        <Button variant="outline" className="border-brown-200 text-brown-800"><Trash2 className="h-4 w-4 mr-2" /> Trash</Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="border-brown-200 text-brown-800">More <ChevronDown className="h-4 w-4 ml-2" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            <DropdownMenuItem>Export</DropdownMenuItem>
+                            <DropdownMenuItem>Archive</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-brown-700">
+                        <Badge variant="secondary" className="bg-brown-100 text-brown-800">in record mode</Badge>
+                      </div>
+                    </div>
+
+                    {/* Tabs row to mirror screenshot */}
+                    <div className="flex items-center gap-2 py-2">
+                      <Button variant="secondary" className="bg-brown-100 text-brown-800">Contact</Button>
+                      <Button variant="ghost" className="text-brown-800">Match</Button>
+                      <Button variant="ghost" className="text-brown-800">Documents</Button>
+                      <Button variant="ghost" className="text-brown-800">Bank details</Button>
+                    </div>
+
+                    {/* Two-column layout: left details and right sidebar */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4 text-sm">
+                      {/* Left main details (span 2 cols) */}
+                      <div className="md:col-span-2 space-y-6">
+                        {/* Email section */}
+                        <div className="border rounded-md overflow-hidden">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Email</div>
+                          <div className="px-4 py-3">
+                            <div className="text-brown-800">{activeContact?.email || '—'}</div>
+                            <Button variant="ghost" size="sm" className="mt-2 text-brown-700">+ Add another email</Button>
+                          </div>
+                        </div>
+
+                        {/* Phone section */}
+                        <div className="border rounded-md overflow-hidden">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Phone</div>
+                          <div className="px-4 py-3">
+                            <div className="text-brown-800">{activeContact?.phoneNumber || '—'}</div>
+                            <Button variant="ghost" size="sm" className="mt-2 text-brown-700">+ Add another phone</Button>
+                          </div>
+                        </div>
+
+                        {/* Location section */}
+                        <div className="border rounded-md overflow-hidden">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Location</div>
+                          <div className="px-4 py-3 space-y-2">
+                            <div className="text-brown-700">address</div>
+                            <div className="text-brown-800">{extractAddressFromNotes(activeContact?.notes || '') || '—'}</div>
+                            <div className="text-brown-700">postal address</div>
+                            <div className="text-brown-800">—</div>
+                          </div>
+                        </div>
+
+                        {/* Marketing section */}
+                        <div className="border rounded-md overflow-hidden">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Marketing</div>
+                          <div className="px-4 py-3 grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-brown-700">gender</div>
+                              <div className="text-brown-800">—</div>
+                            </div>
+                            <div>
+                              <div className="text-brown-700">birthday</div>
+                              <div className="text-brown-800">—</div>
+                            </div>
+                            <div>
+                              <div className="text-brown-700">enquiry source</div>
+                              <div className="text-brown-800">—</div>
+                            </div>
+                            <div>
+                              <div className="text-brown-700">enquiry method</div>
+                              <div className="text-brown-800">—</div>
+                            </div>
+                            <div>
+                              <div className="text-brown-700">postcode</div>
+                              <div className="text-brown-800">—</div>
+                            </div>
+                            <div>
+                              <div className="text-brown-700">last contact</div>
+                              <div className="text-brown-800">—</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right sidebar */}
+                      <div className="space-y-4">
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Active Contracts</div>
+                          <div className="px-4 py-3 text-brown-600">No active contracts</div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Related Listings</div>
+                          <div className="px-4 py-3"><Button variant="outline" size="sm" className="text-brown-800">+ Add Related Listing</Button></div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Related Properties</div>
+                          <div className="px-4 py-3"><Button variant="outline" size="sm" className="text-brown-800">+ Add Related Property</Button></div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Related Contacts</div>
+                          <div className="px-4 py-3"><Button variant="outline" size="sm" className="text-brown-800">+ Add Related Contact</Button></div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Tags</div>
+                          <div className="px-4 py-3"><Button variant="outline" size="sm" className="text-brown-800">+ Add Tag</Button></div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Mailing Lists</div>
+                          <div className="px-4 py-3"><Button variant="outline" size="sm" className="text-brown-800">+ Add Mailing List</Button></div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Third Party Extensions</div>
+                          <div className="px-4 py-3 text-brown-800">DocuSign</div>
+                        </div>
+                        <div className="border rounded-md">
+                          <div className="bg-brown-50 px-4 py-2 text-brown-700">Permissions</div>
+                          <div className="px-4 py-3 text-brown-600">You have rights to read and update this record</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom tabs: Stream, Appointments, Reminders, Feedback */}
+                    <div className="border-t border-brown-100 pt-4">
+                      <div className="flex flex-wrap gap-2 items-center">
+                        <Button variant="secondary" className="bg-brown-100 text-brown-800">Stream</Button>
+                        <Button variant="ghost" className="text-brown-800">Appointments</Button>
+                        <Button variant="ghost" className="text-brown-800">Reminders</Button>
+                        <Button variant="ghost" className="text-brown-800">Feedback</Button>
+                        <div className="ml-auto flex items-center gap-2">
+                          <Button variant="outline" size="sm" className="text-brown-800">+ add a note</Button>
+                          <Button variant="ghost" size="sm" className="text-brown-800"><Filter className="h-4 w-4 mr-2" /> Filter</Button>
+                        </div>
+                      </div>
+                      <div className="mt-6">
+                        <div className="text-brown-800 font-medium mb-2">Activity</div>
+                        <div className="text-brown-600">The stream is currently empty</div>
+                      </div>
+                    </div>
+
+                    {isEditingContact && (
+                      <div className="flex justify-end gap-3 pt-6">
+                        <Button variant="link" onClick={() => setIsEditingContact(false)}>Cancel</Button>
+                        <Button className="bg-red-600 hover:bg-red-700" onClick={handleUpdateContact}>Save</Button>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
                 {/* Add Contact Dialog */}
                 <Dialog open={isAddContactOpen} onOpenChange={setIsAddContactOpen}>
                   <DialogContent className="max-w-3xl">
