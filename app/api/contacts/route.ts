@@ -56,12 +56,19 @@ export async function POST(request: NextRequest) {
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { name, phoneNumber, email } = await request.json()
+    const body = await request.json()
+    const { name, phoneNumber, email, address, postalAddress } = body
     if (!name || !phoneNumber) {
       return NextResponse.json({ error: 'Missing required fields: name and phoneNumber' }, { status: 400 })
     }
 
     const supabase = getSupabaseServerClient()
+    const composedNotes = [
+      address ? `Address: ${address}` : null,
+      postalAddress ? `Postal Address: ${postalAddress}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n') || null
 
     const { data: contact, error } = await supabase
       .from('contacts')
@@ -69,6 +76,7 @@ export async function POST(request: NextRequest) {
         name,
         phone_number: phoneNumber,  // Use snake_case
         email: email || null,
+        notes: composedNotes,
         created_at: new Date().toISOString(),  // Explicitly set timestamps
         updated_at: new Date().toISOString()
       }])

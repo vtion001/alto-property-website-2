@@ -228,6 +228,43 @@ export default function AdminPage() {
     return d.toISOString().split('T')[0]
   })
 
+  // Contacts: add-contact dialog and form state
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false)
+  const [newContact, setNewContact] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    postalAddress: "",
+  })
+
+  const handleSaveContact = async () => {
+    const name = `${newContact.firstName} ${newContact.lastName}`.trim()
+    const phoneNumber = newContact.phone.trim()
+    const email = newContact.email.trim() || undefined
+    if (!name || !phoneNumber) return
+    try {
+      const res = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phoneNumber,
+          email,
+          address: newContact.address.trim() || undefined,
+          postalAddress: newContact.postalAddress.trim() || undefined,
+        })
+      })
+      if (res.ok) {
+        setIsAddContactOpen(false)
+        setNewContact({ firstName: "", lastName: "", email: "", phone: "", address: "", postalAddress: "" })
+      }
+    } catch {
+      // silent fail in UI; API may require admin auth cookie
+    }
+  }
+
   const adminNavItems = [
     { value: 'overview', label: 'Overview', icon: Home },
     { value: 'gci', label: 'GCI', icon: TrendingUp },
@@ -237,6 +274,7 @@ export default function AdminPage() {
     { value: 'rentals', label: 'Rentals', icon: Users },
     { value: 'management', label: 'Management', icon: Settings },
     { value: 'dialer', label: 'Dialer', icon: Phone },
+    { value: 'contacts', label: 'Contacts', icon: Users },
     { value: 'call-analysis', label: 'Call Analysis', icon: BarChart3 },
     { value: 'integrations', label: 'Integrations', icon: Settings },
     { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
@@ -1718,6 +1756,68 @@ export default function AdminPage() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="contacts" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-light text-brown-800">Contacts</h2>
+                  <Button 
+                    onClick={() => setIsAddContactOpen(true)}
+                    className="bg-brown-800 hover:bg-brown-900"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Contact
+                  </Button>
+                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">Saved Contacts</CardTitle>
+                    <CardDescription>Manage and view your contacts.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-brown-700">Contacts panel coming soon.</p>
+                  </CardContent>
+                </Card>
+                {/* Add Contact Dialog */}
+                <Dialog open={isAddContactOpen} onOpenChange={setIsAddContactOpen}>
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle>Add Contact</DialogTitle>
+                      <DialogDescription>Create a new contact in your address book.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="contact-first-name">first name</Label>
+                        <Input id="contact-first-name" value={newContact.firstName} onChange={(e) => setNewContact({ ...newContact, firstName: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label htmlFor="contact-last-name">last name</Label>
+                        <Input id="contact-last-name" value={newContact.lastName} onChange={(e) => setNewContact({ ...newContact, lastName: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label htmlFor="contact-email">email</Label>
+                        <Input id="contact-email" type="email" value={newContact.email} onChange={(e) => setNewContact({ ...newContact, email: e.target.value })} />
+                      </div>
+                      <div>
+                        <Label htmlFor="contact-phone">phone</Label>
+                        <Input id="contact-phone" value={newContact.phone} onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label htmlFor="contact-address">address</Label>
+                        <Input id="contact-address" value={newContact.address} onChange={(e) => setNewContact({ ...newContact, address: e.target.value })} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label htmlFor="contact-postal-address">postal address</Label>
+                        <Input id="contact-postal-address" value={newContact.postalAddress} onChange={(e) => setNewContact({ ...newContact, postalAddress: e.target.value })} />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-6">
+                      <Button variant="link" onClick={() => setIsAddContactOpen(false)}>Cancel</Button>
+                      <Button className="bg-red-600 hover:bg-red-700" onClick={handleSaveContact}>Save Contact</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </TabsContent>
               <Dialog open={isDialerOpen} onOpenChange={setIsDialerOpen}>
                 <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
