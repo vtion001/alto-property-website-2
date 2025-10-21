@@ -8,7 +8,8 @@ const nextConfig = {
   experimental: {
     esmExternals: true
   },
-  // In dev, reduce HMR 404 noise by avoiding custom buildId or assetPrefix
+  // Help Next determine the correct workspace root for file tracing
+  outputFileTracingRoot: process.cwd(),
 }
 
 export default nextConfig;

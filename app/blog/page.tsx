@@ -326,7 +326,7 @@ export default function BlogPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                         <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
                         <YAxis tick={{ fill: '#6B7280' }} tickFormatter={(v)=> new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(v)} />
-                        <Tooltip formatter={(val: any)=> new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(Number(val))} />
+                        <Tooltip formatter={(val)=> new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(Number(val))} />
                         <Line type="monotone" dataKey="medianPrice" stroke="#4B2E2B" strokeWidth={2} dot={false} />
                         <Legend />
                       </LineChart>

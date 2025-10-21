@@ -123,7 +123,16 @@ export async function PUT(request: NextRequest) {
     const supabase = getSupabaseServerClient()
 
     // Build update payload, mapping camelCase to snake_case columns
-    const updatePayload: Record<string, any> = {}
+    type ContactUpdatePayload = {
+      name?: string;
+      phone_number?: string;
+      email?: string | null;
+      notes?: string | null;
+      tags?: string[] | null;
+      is_favorite?: boolean;
+      updated_at?: string;
+    }
+    const updatePayload: ContactUpdatePayload = {}
     if (typeof body.name !== 'undefined') updatePayload.name = body.name
     if (typeof body.phoneNumber !== 'undefined') updatePayload.phone_number = body.phoneNumber
     if (typeof body.email !== 'undefined') updatePayload.email = body.email || null
