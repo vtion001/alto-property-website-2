@@ -34,7 +34,7 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* Hero Section with Video Background */}
-        <section className="relative overflow-hidden min- h-[100svh] sm:min-h-screen flex items-center">
+        <section className="relative overflow-hidden min-h-[100svh] sm:min-h-screen flex items-center">
           {/* Video Background */}
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="absolute top-0 left-0 w-full h-full object-cover scale-150">

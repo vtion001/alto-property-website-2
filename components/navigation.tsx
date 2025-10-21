@@ -182,6 +182,12 @@ export function Navigation() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
+              <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), "text-brown-800 hover:text-brown-900 text-sm md:text-base")}>
+                <Link href="/privacy-policy">Privacy Policy</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
               <NavigationMenuTrigger className="text-brown-800 hover:text-brown-900 text-sm md:text-base">Contact</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid gap-3 p-4 md:p-6 w-[300px] md:w-[500px] md:grid-cols-2">
@@ -253,6 +259,7 @@ export function Navigation() {
                 <MobileNavLink href="/finance" onClick={closeSheet} className="font-semibold text-brown-800">Finance</MobileNavLink>
                 <MobileNavLink href="/team" onClick={closeSheet} className="font-semibold text-brown-800">Team</MobileNavLink>
                 <MobileNavLink href="/blog" onClick={closeSheet} className="font-semibold text-brown-800">Blog</MobileNavLink>
+                <MobileNavLink href="/privacy-policy" onClick={closeSheet} className="font-semibold text-brown-800">Privacy Policy</MobileNavLink>
                 <MobileNavLink href="/contact" onClick={closeSheet} className="font-semibold text-brown-800">Contact Us</MobileNavLink>
               </div>
 
