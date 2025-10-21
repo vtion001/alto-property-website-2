@@ -126,10 +126,7 @@ export default function BlogPage() {
                 </span>
               </h1>
               <p className="text-xl font-light text-brown-700 max-w-4xl mx-auto leading-relaxed">
-                Stay informed with the latest property market trends, investment
-                tips, and expert insights from our experienced team at Alto
-                Property Group, plus curated content from Australia's leading
-                real estate publications.
+                Stay informed with the latest Queensland property market trends, investment tips, and expert insights from our experienced team at Alto Property Group, plus curated content from Australia's leading real estate publications.
               </p>
               <div className="flex justify-center">
                 <Link
@@ -216,7 +213,7 @@ export default function BlogPage() {
                 Explore Our Property Insights
               </h2>
               <p className="text-xl text-brown-700 max-w-3xl mx-auto">
-                From market analysis to investment strategies, our comprehensive guides cover everything you need to know about Brisbane's property landscape.
+                From market analysis to investment strategies, our comprehensive guides cover everything you need to know about Queensland's property landscape.
               </p>
             </div>
 
@@ -255,7 +252,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className="text-2xl font-light text-brown-900 mb-4">Market Intelligence</h3>
                 <p className="text-brown-700 mb-6 leading-relaxed">
-                  Curated insights from leading industry publications, enhanced with our local Brisbane market expertise.
+                  Curated insights from leading industry publications, enhanced with our local Queensland market expertise.
                 </p>
                 <Link href="/blog?category=Market+Insights" className="inline-flex items-center text-brown-600 hover:text-brown-800 font-medium">
                   Read Latest Intelligence
@@ -266,76 +263,6 @@ export default function BlogPage() {
           </div>
         </section>
 
-        {/* Market Trends Section */}
-        <section className="py-20 bg-white">
-          <div className="container">
-            <div className="grid gap-16 lg:grid-cols-2 items-center">
-              <div>
-                <h2 className="text-4xl font-light text-brown-900 mb-6">
-                  Brisbane Market Trends
-                </h2>
-                <p className="text-xl text-brown-700 mb-8 leading-relaxed">
-                  Our data-driven insights help you understand the forces shaping Brisbane's property market, from Olympic infrastructure development to demographic shifts.
-                </p>
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-brown-900 text-cream rounded-full flex items-center justify-center text-sm font-semibold">
-                      1
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-brown-900 mb-2">Olympic Infrastructure Impact</h3>
-                      <p className="text-brown-700">Major transport and venue developments are reshaping Brisbane's property landscape.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-brown-900 text-cream rounded-full flex items-center justify-center text-sm font-semibold">
-                      2
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-brown-900 mb-2">Interstate Migration Patterns</h3>
-                      <p className="text-brown-700">Understanding how population growth affects different Brisbane suburbs and property types.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-brown-900 text-cream rounded-full flex items-center justify-center text-sm font-semibold">
-                      3
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-brown-900 mb-2">Interest Rate Sensitivity</h3>
-                      <p className="text-brown-700">How Brisbane's market responds to monetary policy changes and lending conditions.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="relative">
-                <div className="bg-brown-50 rounded-2xl p-8 border border-brown-100">
-                  <h3 className="text-2xl font-light text-brown-900 mb-6">Latest Market Data</h3>
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center pb-4 border-b border-brown-200">
-                      <span className="text-brown-700">Median House Price</span>
-                      <span className="font-semibold text-brown-900">$785,000</span>
-                    </div>
-                    <div className="flex justify-between items-center pb-4 border-b border-brown-200">
-                      <span className="text-brown-700">Annual Growth</span>
-                      <span className="font-semibold text-green-600">+8.2%</span>
-                    </div>
-                    <div className="flex justify-between items-center pb-4 border-b border-brown-200">
-                      <span className="text-brown-700">Rental Yield</span>
-                      <span className="font-semibold text-brown-900">4.1%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-brown-700">Days on Market</span>
-                      <span className="font-semibold text-brown-900">28 days</span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-brown-600 mt-6">
-                    *Data as of {new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Expert Insights Section */}
         <section className="py-20 bg-gradient-to-r from-brown-50 to-cream">
@@ -376,7 +303,7 @@ export default function BlogPage() {
                   </div>
                 </div>
                 <blockquote className="text-brown-700 italic mb-4">
-                  "Diversification across Brisbane's growth corridors is key. Focus on properties with strong rental yields and infrastructure connectivity for optimal portfolio performance."
+                  "Diversification across Queensland's growth corridors is key. Focus on properties with strong rental yields and infrastructure connectivity for optimal portfolio performance."
                 </blockquote>
               </div>
             </div>
