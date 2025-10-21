@@ -139,6 +139,14 @@ interface CallAnalytics {
   topPerformers: { agent: string; calls: number; avgScore: number }[]
 }
 
+interface VapiCampaign {
+  id: string
+  name: string
+  status?: string
+  phoneNumberId?: string
+  customersCount?: number
+}
+
 // Raw shapes the UI may receive from various APIs
 type RawCallLog = {
   id?: string | number
@@ -359,6 +367,146 @@ export default function AdminPage() {
   ]
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
+
+  const [vapiToken, setVapiToken] = useState<string>('')
+  const [vapiCampaigns, setVapiCampaigns] = useState<VapiCampaign[]>([])
+  const [vapiLoading, setVapiLoading] = useState<boolean>(false)
+  const [vapiError, setVapiError] = useState<string | null>(null)
+  const [newCampaignName, setNewCampaignName] = useState<string>('')
+  const [newCampaignPhoneNumberId, setNewCampaignPhoneNumberId] = useState<string>('')
+  const [newCampaignCustomerNumber, setNewCampaignCustomerNumber] = useState<string>('')
+  const [newCampaignCustomerExtension, setNewCampaignCustomerExtension] = useState<string>('')
+
+  useEffect(() => {
+    try {
+      const t = localStorage.getItem('alto:vapiToken')
+      if (t) setVapiToken(t)
+    } catch {}
+  }, [])
+
+  const persistToken = () => {
+    try {
+      localStorage.setItem('alto:vapiToken', vapiToken.trim())
+    } catch {}
+  }
+
+  const vapiBase = 'https://api.vapi.ai'
+  const fetchVapi = async (path: string, init?: RequestInit) => {
+    if (!vapiToken) throw new Error('Missing VAPI token')
+    const res = await fetch(`${vapiBase}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${vapiToken}`,
+        ...(init?.headers || {})
+      }
+    })
+    if (!res.ok) {
+      throw new Error(`VAPI error ${res.status}`)
+    }
+    return res.json()
+  }
+
+  const loadVapiCampaigns = async () => {
+    setVapiError(null)
+    setVapiLoading(true)
+    try {
+      const data = await fetchVapi('/campaign')
+      const results = (data && (data.results || data)) || []
+      const mapped = Array.isArray(results)
+        ? results.map((c: any) => ({
+            id: String(c.id ?? c._id ?? c.name ?? ''),
+            name: String(c.name ?? ''),
+            status: String(c.status ?? ''),
+            phoneNumberId: String(c.phoneNumberId ?? c.phone_number_id ?? ''),
+            customersCount: Array.isArray(c.customers) ? c.customers.length : undefined
+          }))
+        : []
+      setVapiCampaigns(mapped)
+    } catch (err: any) {
+      setVapiError(err?.message || 'Failed to load campaigns')
+    } finally {
+      setVapiLoading(false)
+    }
+  }
+
+  const startVapiCampaign = async (id: string) => {
+    setVapiError(null)
+    setVapiLoading(true)
+    try {
+      await fetchVapi(`/campaign/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'scheduled' })
+      })
+      await loadVapiCampaigns()
+    } catch (err: any) {
+      setVapiError(err?.message || 'Failed to start campaign')
+    } finally {
+      setVapiLoading(false)
+    }
+  }
+
+  const createVapiCampaign = async () => {
+    setVapiError(null)
+    setVapiLoading(true)
+    try {
+      const customers = newCampaignCustomerNumber
+        ? [{
+            numberE164CheckEnabled: true,
+            extension: newCampaignCustomerExtension || undefined,
+            phoneNumber: newCampaignCustomerNumber
+          }]
+        : []
+      const body: any = {
+        status: 'scheduled',
+        name: newCampaignName,
+        phoneNumberId: newCampaignPhoneNumberId,
+        customers
+      }
+      await fetchVapi('/campaign', { method: 'POST', body: JSON.stringify(body) })
+      setNewCampaignName('')
+      setNewCampaignPhoneNumberId('')
+      setNewCampaignCustomerNumber('')
+      setNewCampaignCustomerExtension('')
+      await loadVapiCampaigns()
+    } catch (err: any) {
+      setVapiError(err?.message || 'Failed to create campaign')
+    } finally {
+      setVapiLoading(false)
+    }
+  }
+
+  const [isSendCampaignDialogOpen, setIsSendCampaignDialogOpen] = useState(false)
+
+  const sendVapiCampaignForSelectedContacts = async () => {
+    setVapiError(null)
+    setVapiLoading(true)
+    try {
+      const selected = contacts.filter((c: any) => selectedContactIds.includes(c.id))
+      const customers = selected
+        .filter((c: any) => c.phoneNumber && String(c.phoneNumber).trim())
+        .map((c: any) => ({
+          numberE164CheckEnabled: true,
+          phoneNumber: String(c.phoneNumber).trim(),
+        }))
+      if (customers.length === 0) throw new Error('No valid phone numbers in selection')
+      const body: any = {
+        status: 'scheduled',
+        name: newCampaignName,
+        phoneNumberId: newCampaignPhoneNumberId,
+        customers,
+      }
+      await fetchVapi('/campaign', { method: 'POST', body: JSON.stringify(body) })
+      setIsSendCampaignDialogOpen(false)
+      setNewCampaignName('')
+      setNewCampaignPhoneNumberId('')
+      await loadVapiCampaigns()
+    } catch (err: any) {
+      setVapiError(err?.message || 'Failed to send campaign')
+    } finally {
+      setVapiLoading(false)
+    }
+  }
 
   const [properties, setProperties] = useState<Property[]>([])
 
@@ -1845,6 +1993,43 @@ export default function AdminPage() {
                     <Button variant="outline" className="border-brown-300 text-brown-800">
                       <Filter className="h-4 w-4 mr-2" /> Filter Contacts
                     </Button>
+                    <Dialog open={isSendCampaignDialogOpen} onOpenChange={setIsSendCampaignDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          className="bg-brown-800 text-white hover:bg-brown-700"
+                          disabled={selectedContactIds.length === 0}
+                          title={selectedContactIds.length === 0 ? 'Select contacts to enable' : undefined}
+                        >
+                          <Play className="h-4 w-4 mr-2" /> Send Campaign (VAPI)
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl font-light">Send Campaign to Selected Contacts</DialogTitle>
+                          <DialogDescription>Use VAPI to call selected contacts.</DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4">
+                          <div className="text-sm text-brown-700">
+                            Selected contacts: {selectedContactIds.length}
+                          </div>
+                          <div>
+                            <Label htmlFor="campaignNameContacts">Campaign Name</Label>
+                            <Input id="campaignNameContacts" value={newCampaignName} onChange={(e) => setNewCampaignName(e.target.value)} placeholder="e.g. QLD Properties Outreach" />
+                          </div>
+                          <div>
+                            <Label htmlFor="phoneNumberIdContacts">Phone Number ID</Label>
+                            <Input id="phoneNumberIdContacts" value={newCampaignPhoneNumberId} onChange={(e) => setNewCampaignPhoneNumberId(e.target.value)} placeholder="VAPI phone number id" />
+                          </div>
+                          {vapiError && <p className="text-red-600 text-sm">{vapiError}</p>}
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setIsSendCampaignDialogOpen(false)}>Cancel</Button>
+                            <Button onClick={sendVapiCampaignForSelectedContacts} disabled={vapiLoading || !vapiToken || !newCampaignName || !newCampaignPhoneNumberId || selectedContactIds.length === 0}>
+                              {vapiLoading ? 'Sending...' : 'Send Campaign'}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-brown-700">
                     <span>{contacts.length ? `1 - ${Math.min(contacts.length, 20)} of ${contacts.length}` : '0 of 0'}</span>
@@ -2868,6 +3053,92 @@ export default function AdminPage() {
 
               <TabsContent value="integrations" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {/* VAPI Campaigns Integration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">VAPI Campaigns</CardTitle>
+                      <CardDescription>Call existing campaigns or create new ones</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div>
+                            <Label htmlFor="vapiToken">VAPI Token</Label>
+                            <Input id="vapiToken" type="password" value={vapiToken} onChange={(e) => setVapiToken(e.target.value)} placeholder="Paste VAPI API token" />
+                          </div>
+                          <div className="flex items-end gap-3">
+                            <Button variant="outline" onClick={persistToken} className="w-full md:w-auto">Save Token</Button>
+                            <Button onClick={loadVapiCampaigns} className="w-full md:w-auto">Load Campaigns</Button>
+                          </div>
+                        </div>
+
+                        {vapiError && <p className="text-red-600 text-sm">{vapiError}</p>}
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div>
+                            <Label htmlFor="campaignName">Campaign Name</Label>
+                            <Input id="campaignName" value={newCampaignName} onChange={(e) => setNewCampaignName(e.target.value)} placeholder="e.g. Spring outreach" />
+                          </div>
+                          <div>
+                            <Label htmlFor="phoneNumberId">Phone Number ID</Label>
+                            <Input id="phoneNumberId" value={newCampaignPhoneNumberId} onChange={(e) => setNewCampaignPhoneNumberId(e.target.value)} placeholder="VAPI phone number id" />
+                          </div>
+                          <div>
+                            <Label htmlFor="customerNumber">Customer Number (optional)</Label>
+                            <Input id="customerNumber" value={newCampaignCustomerNumber} onChange={(e) => setNewCampaignCustomerNumber(e.target.value)} placeholder="+614..." />
+                          </div>
+                          <div>
+                            <Label htmlFor="customerExtension">Extension (optional)</Label>
+                            <Input id="customerExtension" value={newCampaignCustomerExtension} onChange={(e) => setNewCampaignCustomerExtension(e.target.value)} placeholder="e.g. 1234" />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                          <Button variant="outline" onClick={() => { setNewCampaignName(''); setNewCampaignPhoneNumberId(''); setNewCampaignCustomerNumber(''); setNewCampaignCustomerExtension(''); }}>Clear</Button>
+                          <Button onClick={createVapiCampaign} disabled={vapiLoading || !newCampaignName || !newCampaignPhoneNumberId}>
+                            {vapiLoading ? 'Creating...' : 'Create Campaign'}
+                          </Button>
+                        </div>
+
+                        <div className="mt-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-lg font-light text-brown-800">Existing Campaigns</h4>
+                            <Button variant="outline" onClick={loadVapiCampaigns}>Refresh</Button>
+                          </div>
+                          <div className="rounded-lg border">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Name</TableHead>
+                                  <TableHead>Status</TableHead>
+                                  <TableHead>Customers</TableHead>
+                                  <TableHead>Action</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {vapiCampaigns.length === 0 ? (
+                                  <TableRow>
+                                    <TableCell colSpan={4} className="text-brown-600">No campaigns loaded. Load campaigns or create one.</TableCell>
+                                  </TableRow>
+                                ) : vapiCampaigns.map((c) => (
+                                  <TableRow key={c.id}>
+                                    <TableCell className="font-medium">{c.name}</TableCell>
+                                    <TableCell>{c.status || 'unknown'}</TableCell>
+                                    <TableCell>{typeof c.customersCount === 'number' ? c.customersCount : '-'}</TableCell>
+                                    <TableCell>
+                                      <Button variant="outline" size="sm" onClick={() => startVapiCampaign(c.id)} className="inline-flex items-center gap-1">
+                                        <Play className="h-4 w-4" /> Start
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Google Reviews Integration */}
                   <Card>
                     <CardHeader>

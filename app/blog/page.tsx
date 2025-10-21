@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowRight, Rss } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody } from "@/components/ui/table"
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { brisbaneMarketMetrics, brisbanePriceTrend, brisbaneSalesVolume, brisbaneSuburbStats } from "@/data/brisbane-market"
 type BlogPost = {
   id: string;
   title: string;
@@ -263,6 +266,129 @@ export default function BlogPage() {
           </div>
         </section>
 
+
+        {/* Brisbane Market Snapshot */}
+        <section className="py-32 bg-white">
+          <div className="container">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-light text-brown-900 mb-6">Brisbane Market Snapshot</h2>
+              <p className="text-xl text-brown-700 max-w-3xl mx-auto">
+                Key statistics and recent trends based on our latest Brisbane market documents.
+              </p>
+            </div>
+            <div className="grid gap-8 lg:grid-cols-2">
+              <Card className="border border-brown-100">
+                <CardContent className="p-8">
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div>
+                      <div className="text-sm text-brown-600">Median House Price</div>
+                      <div className="text-2xl font-extralight text-brown-900">
+                        {new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(brisbaneMarketMetrics.medianHousePrice)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-brown-600">Annual Growth</div>
+                      <div className="text-2xl font-extralight text-brown-900">
+                        {brisbaneMarketMetrics.annualGrowthRate.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-brown-600">Rental Yield</div>
+                      <div className="text-2xl font-extralight text-brown-900">
+                        {brisbaneMarketMetrics.rentalYield.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-brown-600">Vacancy Rate</div>
+                      <div className="text-2xl font-extralight text-brown-900">
+                        {brisbaneMarketMetrics.vacancyRate.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-brown-600">Days on Market</div>
+                      <div className="text-2xl font-extralight text-brown-900">
+                        {brisbaneMarketMetrics.daysOnMarket} days
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-brown-100">
+                <CardContent className="p-8">
+                  <div className="mb-6">
+                    <h3 className="text-xl font-light text-brown-900">Median Price Trend</h3>
+                    <p className="text-sm text-brown-600">Last 12 months</p>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={brisbanePriceTrend} margin={{ top: 5, right: 20, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
+                        <YAxis tick={{ fill: '#6B7280' }} tickFormatter={(v)=> new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(v)} />
+                        <Tooltip formatter={(val: any)=> new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(Number(val))} />
+                        <Line type="monotone" dataKey="medianPrice" stroke="#4B2E2B" strokeWidth={2} dot={false} />
+                        <Legend />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-8 lg:grid-cols-2 mt-8">
+              <Card className="border border-brown-100">
+                <CardContent className="p-8">
+                  <div className="mb-6">
+                    <h3 className="text-xl font-light text-brown-900">Sales Volume by Quarter</h3>
+                    <p className="text-sm text-brown-600">Brisbane metro</p>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={brisbaneSalesVolume} margin={{ top: 5, right: 20, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="quarter" tick={{ fill: '#6B7280' }} />
+                        <YAxis tick={{ fill: '#6B7280' }} />
+                        <Tooltip />
+                        <Bar dataKey="sales" fill="#8B5E34" />
+                        <Legend />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-brown-100">
+                <CardContent className="p-8">
+                  <div className="mb-6">
+                    <h3 className="text-xl font-light text-brown-900">Top Suburbs</h3>
+                    <p className="text-sm text-brown-600">Median price, growth, yield</p>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Suburb</TableHead>
+                        <TableHead className="text-right">Median Price</TableHead>
+                        <TableHead className="text-right">Growth</TableHead>
+                        <TableHead className="text-right">Rental Yield</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {brisbaneSuburbStats.map((s)=> (
+                        <TableRow key={s.suburb}>
+                          <TableCell className="text-brown-900">{s.suburb}</TableCell>
+                          <TableCell className="text-right">{new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(s.medianPrice)}</TableCell>
+                          <TableCell className="text-right">{s.growth.toFixed(1)}%</TableCell>
+                          <TableCell className="text-right">{s.rentalYield.toFixed(1)}%</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
 
         {/* Expert Insights Section */}
         <section className="py-20 bg-gradient-to-r from-brown-50 to-cream">
