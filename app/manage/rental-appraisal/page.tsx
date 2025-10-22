@@ -238,8 +238,7 @@ export default function RentalAppraisalPage() {
                           onCheckedChange={(checked) => handleInputChange('terms', checked)}
                         />
                         <Label htmlFor="terms" className="text-sm">
-                          I agree to receive my rental appraisal report and marketing communications from Alto Property
-                          Group *
+                          I agree to receive my rental appraisal report and marketing communications from ALTO REAL ESTATE *
                         </Label>
                       </div>
                       {errors.terms && (

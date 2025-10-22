@@ -205,7 +205,7 @@ export function SellerCompetitionPopup({ onClose }: SellerCompetitionPopupProps)
               )}
 
               <p className="text-xs text-brown-500 text-center leading-tight">
-                By entering, you agree to be contacted by Alto Property about your sale. 2% commission offer available to the first 5 eligible sellers who list and sell with us within the promotional period. Standard marketing costs may apply.
+                By entering, you agree to be contacted by ALTO REAL ESTATE about your sale. 2% commission offer available to the first 5 eligible sellers who list and sell with us within the promotional period. Standard marketing costs may apply.
               </p>
             </form>
           </CardContent>

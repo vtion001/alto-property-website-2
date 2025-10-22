@@ -173,7 +173,7 @@ export default function PropertyReportPage() {
         <footer className="bg-brown-900 text-cream py-16">
           <div className="container">
             <div className="text-center">
-              <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+              <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
             </div>
           </div>
         </footer>
@@ -442,7 +442,7 @@ export default function PropertyReportPage() {
                           required
                         />
                         <Label htmlFor="terms" className="text-sm">
-                          I agree to receive my property report and marketing communications from Alto Property Group *
+                          I agree to receive my property report and marketing communications from ALTO REAL ESTATE *
                         </Label>
                       </div>
 
@@ -576,7 +576,7 @@ export default function PropertyReportPage() {
       <footer className="bg-brown-900 text-cream py-16">
         <div className="container">
           <div className="text-center">
-            <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+            <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
           </div>
         </div>
       </footer>

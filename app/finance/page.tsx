@@ -109,7 +109,7 @@ export default function FinancePage() {
         </div>
         <footer className="bg-brown-800 py-8 text-center">
           <div className="container mx-auto px-4">
-            <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+            <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
           </div>
         </footer>
       </div>
@@ -478,8 +478,8 @@ export default function FinancePage() {
                     {isSubmitting ? 'Submitting...' : 'Book Free Consultation'}
                   </button>
 
-                  <p className="text-xs text-brown-600 text-center">
-                    By submitting this form, you agree to receive marketing communications from Alto Property. We respect your privacy and you can unsubscribe at any time.
+                  <p className="text-brown-700 font-light">
+                    By submitting this form, you agree to receive marketing communications from ALTO REAL ESTATE. We respect your privacy and you can unsubscribe at any time.
                   </p>
                 </form>
               </CardContent>
@@ -534,7 +534,7 @@ export default function FinancePage() {
 
       <footer className="bg-brown-800 py-8 text-center">
         <div className="container mx-auto px-4">
-          <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+          <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
         </div>
       </footer>
 

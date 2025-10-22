@@ -9,7 +9,7 @@ interface FooterProps {
 }
 
 export default function Footer({ 
-  companyName = "Alto Property Group"
+  companyName = "ALTO REAL ESTATE"
 }: FooterProps) {
   const year = useCurrentYear();
 

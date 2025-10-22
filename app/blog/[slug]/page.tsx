@@ -118,7 +118,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="container">
           <div className="text-center">
             <p className="text-brown-200">
-              © {new Date().getFullYear()} Alto Property Group. All rights
+              © {new Date().getFullYear()} ALTO REAL ESTATE. All rights
               reserved.
             </p>
           </div>

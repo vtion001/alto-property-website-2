@@ -519,7 +519,7 @@ export default function InvestingTipsPage() {
           </div>
 
           <div className="border-t border-brown-800 mt-16 pt-8 flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-brown-200">© {new Date().getFullYear()} Alto Property Group. All rights reserved.</p>
+            <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
             <div className="flex space-x-8 mt-4 sm:mt-0">
               <Link href="#" className="text-brown-200 hover:text-cream transition-colors">
                 Privacy Policy

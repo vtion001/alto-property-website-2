@@ -236,7 +236,7 @@ export default function AdminSignupPage() {
 
       <footer className="bg-brown-900 text-cream py-8">
         <div className="container text-center">
-          <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+          <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
         </div>
       </footer>
     </div>

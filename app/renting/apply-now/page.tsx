@@ -508,7 +508,7 @@ export default function ApplyNowPage() {
                           onCheckedChange={(checked) => handleInputChange('marketing', checked)}
                         />
                         <Label htmlFor="marketing" className="text-sm">
-                          I would like to receive marketing communications from Alto Property Group
+                          I would like to receive marketing communications from ALTO REAL ESTATE
                         </Label>
                       </div>
                     </div>
@@ -567,7 +567,7 @@ export default function ApplyNowPage() {
       <footer className="bg-brown-900 text-cream py-16">
         <div className="container">
           <div className="text-center">
-            <p className="text-brown-200">© {new Date().getFullYear()} Alto Property Group. All rights reserved.</p>
+            <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
           </div>
         </div>
       </footer>

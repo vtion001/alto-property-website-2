@@ -480,7 +480,7 @@ export default function ContactPage() {
       <footer className="bg-brown-900 text-cream py-16">
         <div className="container">
           <div className="text-center">
-            <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+            <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
           </div>
         </div>
       </footer>

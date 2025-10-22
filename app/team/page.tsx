@@ -81,7 +81,7 @@ export default function TeamPage() {
           <div className="text-center">
             <div className="text-center space-y-4">
               <p className="text-brown-200"> Level 2, 8 Clunies Ross Court Eight Mile Plains QLD 4113</p>
-              <p className="text-brown-200">© {new Date().getFullYear()} ALTO Property. All rights reserved.</p>
+              <p className="text-brown-200">© {new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
             </div>
           </div>
         </div>

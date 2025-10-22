@@ -199,7 +199,7 @@ function generateBlogHTML(posts) {
     <footer class="bg-brown-900 text-cream py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <p class="text-brown-200">© ${new Date().getFullYear()} Alto Property Group. All rights reserved.</p>
+                <p class="text-brown-200">© ${new Date().getFullYear()} ALTO REAL ESTATE. All rights reserved.</p>
             </div>
         </div>
     </footer>
