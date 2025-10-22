@@ -19,10 +19,10 @@ export default function Footer({
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
-              <Image src="/alto-logo.png" alt="Alto Property Group" width={40} height={40} className="h-10 w-10" />
+              <Image src="https://res.cloudinary.com/dbviya1rj/image/upload/v1761117223/nb1ofmfxsmpumme5zztq.jpg" alt="ALTO REAL ESTATE" width={40} height={40} className="h-10 w-auto" />
               <div className="flex flex-col">
                 <span className="font-bold text-lg tracking-wider">ALTO</span>
-                <span className="text-xs text-brown-200 tracking-widest">PROPERTY GROUP</span>
+                <span className="text-xs text-brown-200 tracking-widest">REAL ESTATE</span>
               </div>
             </div>
             <p className="text-brown-200 leading-relaxed">

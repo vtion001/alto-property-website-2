@@ -56,13 +56,13 @@ export function Navigation() {
       <div className="container flex h-16 md:h-20 items-center justify-between px-3 sm:px-4 md:px-6">
         <Link href="/" className="flex items-center space-x-2 md:space-x-3">
           <Image
-            src="https://res.cloudinary.com/dbviya1rj/image/upload/v1754468711/fjyp4efl3h5bkdpnhyl9.png"
-            alt="ALTO Property"
+            src="https://res.cloudinary.com/dbviya1rj/image/upload/v1761117223/nb1ofmfxsmpumme5zztq.jpg"
+            alt="ALTO REAL ESTATE"
             width={48}
             height={48}
             priority
-            className="object-contain w-12 h-12 md:w-[120px] md:h-[80px]"
-            sizes="(max-width: 768px) 48px, 120px"
+            className="object-contain h-10 w-auto md:h-16 md:w-auto"
+            sizes="(max-width: 768px) 40px, 64px"
           />
           <div className="hidden sm:block">
             <div className="font-bold text-brown-800 text-base md:text-xl"></div>
