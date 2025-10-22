@@ -102,7 +102,7 @@ function generateBlogHTML(posts) {
         </h3>
         <p class="text-gray-700 mb-4 leading-relaxed">${post.description.substring(0, 150)}...</p>
         <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-600">By Alto Property Group</span>
+          <span class="text-sm text-gray-600">By ALTO REAL ESTATE</span>
           <a href="/blog/${postSlug}" 
              class="inline-flex items-center text-brown-600 hover:text-brown-800 transition-colors">
             Read Our Analysis →
@@ -119,7 +119,7 @@ function generateBlogHTML(posts) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Market Insights - Alto Property Group</title>
+    <title>Property Market Insights - ALTO REAL ESTATE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -151,7 +151,7 @@ function generateBlogHTML(posts) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-2xl font-light text-brown-900">Alto Property Group</a>
+                    <a href="/" class="text-2xl font-light text-brown-900">ALTO REAL ESTATE</a>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
@@ -180,7 +180,7 @@ function generateBlogHTML(posts) {
                     <span class="block font-extralight text-brown-600 mt-2">Insights</span>
                 </h1>
                 <p class="text-xl font-light text-brown-700 max-w-3xl mx-auto leading-relaxed">
-                    Stay informed with the latest property market trends, investment tips, and expert insights from our experienced team at Alto Property Group, plus curated content from Australia's leading real estate publications.
+                    Stay informed with the latest property market trends, investment tips, and expert insights from our experienced team at ALTO REAL ESTATE, plus curated content from Australia's leading real estate publications.
                 </p>
             </div>
         </div>

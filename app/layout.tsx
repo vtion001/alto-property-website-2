@@ -6,7 +6,7 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Alto Property Group - Brisbane Property Specialists',
+  title: 'ALTO REAL ESTATE - Brisbane Property Specialists',
   description: 'Exceptional Results. Genuine Care. Brisbane\'s premier property specialists.',
   generator: 'Next.js',
 }

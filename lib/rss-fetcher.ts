@@ -437,7 +437,7 @@ function generatePersonalizedContent(item: RSSItem, feedName: string): string {
       content: aiInsights.trends
     },
     {
-      title: "Alto Property Group Analysis",
+      title: "ALTO REAL ESTATE Analysis",
       content: aiInsights.altoAnalysis
     },
     {
