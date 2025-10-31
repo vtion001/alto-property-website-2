@@ -3060,46 +3060,93 @@ export default function AdminPage() {
                       <CardDescription>Call existing campaigns or create new ones</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div>
-                            <Label htmlFor="vapiToken">VAPI Token</Label>
-                            <Input id="vapiToken" type="password" value={vapiToken} onChange={(e) => setVapiToken(e.target.value)} placeholder="Paste VAPI API token" />
-                          </div>
-                          <div className="flex items-end gap-3">
-                            <Button variant="outline" onClick={persistToken} className="w-full md:w-auto">Save Token</Button>
-                            <Button onClick={loadVapiCampaigns} className="w-full md:w-auto">Load Campaigns</Button>
+                      <div className="space-y-6">
+                        {/* Token & Actions */}
+                        <div className="space-y-2">
+                          <Label htmlFor="vapiToken">VAPI Token</Label>
+                          <Input
+                            id="vapiToken"
+                            type="password"
+                            value={vapiToken}
+                            onChange={(e) => setVapiToken(e.target.value)}
+                            placeholder="Paste VAPI API token"
+                          />
+                          <p className="text-xs text-brown-600">Stored locally in your browser for convenience.</p>
+                          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <Button variant="outline" onClick={persistToken} className="sm:w-auto w-full">Save Token</Button>
+                            <Button onClick={loadVapiCampaigns} className="sm:w-auto w-full">Load Campaigns</Button>
                           </div>
                         </div>
 
-                        {vapiError && <p className="text-red-600 text-sm">{vapiError}</p>}
+                        {vapiError && (
+                          <div className="rounded-md border border-red-200 bg-red-50 p-2">
+                            <p className="text-red-700 text-sm">{vapiError}</p>
+                          </div>
+                        )}
 
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div>
-                            <Label htmlFor="campaignName">Campaign Name</Label>
-                            <Input id="campaignName" value={newCampaignName} onChange={(e) => setNewCampaignName(e.target.value)} placeholder="e.g. Spring outreach" />
+                        {/* Create Campaign */}
+                        <div>
+                          <h4 className="text-lg font-light text-brown-800 mb-3">Create Campaign</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="campaignName">Campaign Name</Label>
+                              <Input
+                                id="campaignName"
+                                value={newCampaignName}
+                                onChange={(e) => setNewCampaignName(e.target.value)}
+                                placeholder="e.g. Spring outreach"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="phoneNumberId">Phone Number ID</Label>
+                              <Input
+                                id="phoneNumberId"
+                                value={newCampaignPhoneNumberId}
+                                onChange={(e) => setNewCampaignPhoneNumberId(e.target.value)}
+                                placeholder="VAPI phone number id"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="customerNumber">Customer Number</Label>
+                              <Input
+                                id="customerNumber"
+                                value={newCampaignCustomerNumber}
+                                onChange={(e) => setNewCampaignCustomerNumber(e.target.value)}
+                                placeholder="+614..."
+                              />
+                              <p className="text-xs text-brown-600">Optional: single test number to include.</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="customerExtension">Extension</Label>
+                              <Input
+                                id="customerExtension"
+                                value={newCampaignCustomerExtension}
+                                onChange={(e) => setNewCampaignCustomerExtension(e.target.value)}
+                                placeholder="e.g. 1234"
+                              />
+                              <p className="text-xs text-brown-600">Optional: used with some PBX setups.</p>
+                            </div>
                           </div>
-                          <div>
-                            <Label htmlFor="phoneNumberId">Phone Number ID</Label>
-                            <Input id="phoneNumberId" value={newCampaignPhoneNumberId} onChange={(e) => setNewCampaignPhoneNumberId(e.target.value)} placeholder="VAPI phone number id" />
-                          </div>
-                          <div>
-                            <Label htmlFor="customerNumber">Customer Number (optional)</Label>
-                            <Input id="customerNumber" value={newCampaignCustomerNumber} onChange={(e) => setNewCampaignCustomerNumber(e.target.value)} placeholder="+614..." />
-                          </div>
-                          <div>
-                            <Label htmlFor="customerExtension">Extension (optional)</Label>
-                            <Input id="customerExtension" value={newCampaignCustomerExtension} onChange={(e) => setNewCampaignCustomerExtension(e.target.value)} placeholder="e.g. 1234" />
+                          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                            <Button
+                              variant="outline"
+                              onClick={() => { setNewCampaignName(''); setNewCampaignPhoneNumberId(''); setNewCampaignCustomerNumber(''); setNewCampaignCustomerExtension(''); }}
+                              className="sm:w-auto w-full"
+                            >
+                              Clear
+                            </Button>
+                            <Button
+                              onClick={createVapiCampaign}
+                              disabled={vapiLoading || !vapiToken || !newCampaignName || !newCampaignPhoneNumberId}
+                              className="sm:w-auto w-full"
+                            >
+                              {vapiLoading ? 'Creating...' : 'Create Campaign'}
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex justify-end gap-3">
-                          <Button variant="outline" onClick={() => { setNewCampaignName(''); setNewCampaignPhoneNumberId(''); setNewCampaignCustomerNumber(''); setNewCampaignCustomerExtension(''); }}>Clear</Button>
-                          <Button onClick={createVapiCampaign} disabled={vapiLoading || !newCampaignName || !newCampaignPhoneNumberId}>
-                            {vapiLoading ? 'Creating...' : 'Create Campaign'}
-                          </Button>
-                        </div>
 
-                        <div className="mt-6">
+                        {/* Existing Campaigns */}
+                        <div className="pt-2">
                           <div className="flex items-center justify-between mb-3">
                             <h4 className="text-lg font-light text-brown-800">Existing Campaigns</h4>
                             <Button variant="outline" onClick={loadVapiCampaigns}>Refresh</Button>
