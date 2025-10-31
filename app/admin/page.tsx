@@ -55,7 +55,7 @@ import {
   ExternalLink
 } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Footer from "@/components/ui/footer"
 import Dialer from "@/components/dialer/dialer"
@@ -363,6 +363,7 @@ export default function AdminPage() {
     { value: 'contacts', label: 'Contacts', icon: Users },
     { value: 'call-analysis', label: 'Call Analysis', icon: BarChart3 },
     { value: 'integrations', label: 'Integrations', icon: Settings },
+    { value: 'social-planner', label: 'Social Planner', icon: Calendar, href: '/admin/integrations/social-planner' },
     { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
   ]
 
@@ -1771,11 +1772,20 @@ export default function AdminPage() {
                 >
                   {adminNavItems.map((item) => {
                     const Icon = item.icon
-                    const isActive = activeTab === item.value
+                    const pathname = usePathname()
+                    const isActive = item.href
+                      ? Boolean(pathname && pathname.startsWith(item.href))
+                      : activeTab === item.value
                     return (
                       <button
                         key={item.value}
-                        onClick={() => setActiveTab(item.value)}
+                        onClick={() => {
+                          if (item.href) {
+                            router.push(item.href)
+                          } else {
+                            setActiveTab(item.value)
+                          }
+                        }}
                         className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors ${
                           isActive
                             ? 'bg-brown-100 text-brown-900'
