@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Safari pinned tab mask icon: black shapes define the mask; color is provided via link tag -->
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#000"/>
+  <!-- Stylized "A" cutout -->
+  <path d="M32 14 L50 50 H42 L38 42 H26 L22 50 H14 L32 14 Z M30 36 H34 L32 32 Z" fill="#000"/>
+</svg>

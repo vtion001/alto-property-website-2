@@ -59,6 +59,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Footer from "@/components/ui/footer"
 import Dialer from "@/components/dialer/dialer"
+import SocialPlanner from "@/components/admin/SocialPlanner"
 
 interface BlogPost {
   id: string
@@ -363,7 +364,7 @@ export default function AdminPage() {
     { value: 'contacts', label: 'Contacts', icon: Users },
     { value: 'call-analysis', label: 'Call Analysis', icon: BarChart3 },
     { value: 'integrations', label: 'Integrations', icon: Settings },
-    { value: 'social-planner', label: 'Social Planner', icon: Calendar, href: '/admin/integrations/social-planner' },
+    { value: 'social-planner', label: 'Social Planner', icon: Calendar },
     { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
   ]
 
@@ -1772,20 +1773,11 @@ export default function AdminPage() {
                 >
                   {adminNavItems.map((item) => {
                     const Icon = item.icon
-                    const pathname = usePathname()
-                    const isActive = item.href
-                      ? Boolean(pathname && pathname.startsWith(item.href))
-                      : activeTab === item.value
+                    const isActive = activeTab === item.value
                     return (
                       <button
                         key={item.value}
-                        onClick={() => {
-                          if (item.href) {
-                            router.push(item.href)
-                          } else {
-                            setActiveTab(item.value)
-                          }
-                        }}
+                        onClick={() => setActiveTab(item.value)}
                         className={`w-full flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors ${
                           isActive
                             ? 'bg-brown-100 text-brown-900'
@@ -1968,7 +1960,15 @@ export default function AdminPage() {
                       </div>
                     </CardContent>
                   </Card>
+              </div>
+              </TabsContent>
+
+              <TabsContent value="social-planner" className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-light text-brown-800">Social Planner</h2>
+                  <p className="text-brown-600">Plan, schedule, and publish posts across platforms</p>
                 </div>
+                <SocialPlanner />
               </TabsContent>
 
               <TabsContent value="dialer" className="space-y-6">
