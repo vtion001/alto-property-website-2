@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, Shield, Star, DollarSign } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import type { Metadata } from "next"
 
 export default function ManagementFeesPage() {
   return (
@@ -307,4 +308,34 @@ export default function ManagementFeesPage() {
       </footer>
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Management Fees — Transparent Pricing",
+  description:
+    "Clear, competitive property management fees with no hidden costs. Packages aligned to your investment goals across South East Queensland.",
+  openGraph: {
+    title: "Management Fees — Transparent Pricing",
+    description:
+      "Clear, competitive property management fees with no hidden costs.",
+    url: "/manage/management-fees",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758097997/soyhk4tmtn9qprgqjlp5.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ALTO Management Fees — Transparent pricing",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Management Fees — Transparent Pricing",
+    description:
+      "Clear, competitive property management fees with no hidden costs.",
+    card: "summary_large_image",
+    images: [
+      "https://res.cloudinary.com/dbviya1rj/image/upload/v1758097997/soyhk4tmtn9qprgqjlp5.jpg",
+    ],
+  },
 }

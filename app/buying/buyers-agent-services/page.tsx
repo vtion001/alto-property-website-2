@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Shield, Home, Search, Handshake, FileText } from "lucide-react"
 import ClientImage from "@/components/ui/client-image"
+import type { Metadata } from "next"
 import Footer from "@/components/ui/footer"
 import Link from "next/link"
 import GoogleReviewsSection from "@/components/reviews/GoogleReviewsSection"
@@ -54,7 +55,7 @@ export default function BuyersAgentServicesPage() {
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <ClientImage
                     src="https://res.cloudinary.com/dbviya1rj/image/upload/v1757814157/w6442i2wt5wk70g8cbcv.jpg"
-                    alt="Buyer agent consultation"
+                    alt="ALTO Buyer’s Agent Consultation"
                     width={600}
                     height={700}
                     priority
@@ -226,4 +227,32 @@ export default function BuyersAgentServicesPage() {
       <Footer />
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Buyer’s Agent Services — Property Acquisition Experts",
+  description:
+    "Dedicated buyer’s agent support from brief to settlement. We search, inspect, negotiate, and secure the right property on the right terms.",
+  openGraph: {
+    title: "Buyer’s Agent Services — Property Acquisition Experts",
+    description:
+      "Dedicated buyer’s agent support from brief to settlement. We search, inspect, negotiate, and secure the right property on the right terms.",
+    url: "/buying/buyers-agent-services",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1757814157/w6442i2wt5wk70g8cbcv.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ALTO Buyer’s Agent Services",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Buyer’s Agent Services — Property Acquisition Experts",
+    description:
+      "Dedicated buyer’s agent support from brief to settlement.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1757814157/w6442i2wt5wk70g8cbcv.jpg"],
+  },
 }

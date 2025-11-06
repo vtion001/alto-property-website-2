@@ -9,6 +9,7 @@ import { PopupManager } from "@/components/popup-manager"
 import { LeadCapturePopup } from "@/components/lead-capture-popup"
 import { useState } from "react"
 import Image from "next/image"
+import type { Metadata } from "next"
 import Link from "next/link"
 
 export default function PropertyManagementPage() {
@@ -64,7 +65,7 @@ export default function PropertyManagementPage() {
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src="https://res.cloudinary.com/dbviya1rj/image/upload/v1758097997/soyhk4tmtn9qprgqjlp5.jpg"
-                    alt="Professional property management"
+                    alt="ALTO Property Management services"
                     width={600}
                     height={700}
                     className="object-cover w-full h-auto"
@@ -523,4 +524,32 @@ export default function PropertyManagementPage() {
       </footer>
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Property Management — Maximise Rental Returns",
+  description:
+    "Comprehensive property management across South East Queensland. Tenant screening, maintenance, reporting, and 24/7 support to protect and grow your investment.",
+  openGraph: {
+    title: "Property Management — Maximise Rental Returns",
+    description:
+      "Comprehensive property management across South East Queensland. Tenant screening, maintenance, reporting, and 24/7 support to protect and grow your investment.",
+    url: "/manage/property-management",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758097997/soyhk4tmtn9qprgqjlp5.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ALTO Property Management",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Property Management — Maximise Rental Returns",
+    description:
+      "Comprehensive property management across South East Queensland.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1758097997/soyhk4tmtn9qprgqjlp5.jpg"],
+  },
 }

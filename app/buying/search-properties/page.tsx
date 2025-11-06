@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MapPin, Bed, Bath, Car } from "lucide-react"
 import Image from "next/image"
+// Client component; metadata is provided via layout.tsx
 
 type Property = {
   id: string

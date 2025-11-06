@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, MapPin, Bed, Bath, Car } from "lucide-react"
 import Image from "next/image"
+import type { Metadata } from "next"
 
 interface RentalProperty {
   id: string | number
@@ -115,7 +116,7 @@ export default function SearchRentalsPage() {
                   <div className="relative">
                     <Image
                       src={rental.image || "/placeholder.svg"}
-                      alt={rental.title || "Rental property"}
+                      alt={rental.title || "ALTO Rental Property"}
                       width={400}
                       height={300}
                       className="w-full h-64 object-cover"
@@ -163,4 +164,32 @@ export default function SearchRentalsPage() {
       </main>
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Search Rentals — Find Quality Properties",
+  description:
+    "Browse quality rental properties across South East Queensland. Filter by location, type, bedrooms, bathrooms, and price to find your next home.",
+  openGraph: {
+    title: "Search Rentals — Find Quality Properties",
+    description:
+      "Browse quality rental properties across South East Queensland. Filter by location, type, bedrooms, bathrooms, and price to find your next home.",
+    url: "/renting/search-rentals",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ALTO Search Rentals",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Search Rentals — Find Quality Properties",
+    description:
+      "Browse quality rental properties across South East Queensland with filters to refine your search.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg"],
+  },
 }
