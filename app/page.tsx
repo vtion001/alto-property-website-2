@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -656,4 +657,32 @@ export default function HomePage() {
       <Footer />
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "ALTO Property — Brisbane Real Estate",
+  description:
+    "South East Queensland's premier all-in-one real estate agency. Sell, buy, or rent with confidence and genuine care.",
+  openGraph: {
+    title: "ALTO Property — Brisbane Real Estate",
+    description:
+      "South East Queensland's premier all-in-one real estate agency. Sell, buy, or rent with confidence and genuine care.",
+    url: "/",
+    type: "website",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1762243914/cugd0grw3fbtgdaefa88.png",
+        width: 1200,
+        height: 630,
+        alt: "ALTO Property",
+      },
+    ],
+  },
+  twitter: {
+    title: "ALTO Property — Brisbane Real Estate",
+    description:
+      "South East Queensland's premier all-in-one real estate agency. Sell, buy, or rent with confidence and genuine care.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1762243914/cugd0grw3fbtgdaefa88.png"],
+  },
 }

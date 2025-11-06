@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+ import { useEffect, useState, startTransition } from "react"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -60,6 +60,7 @@ import Link from "next/link"
 import Footer from "@/components/ui/footer"
 import Dialer from "@/components/dialer/dialer"
 import SocialPlanner from "@/components/admin/SocialPlanner"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface BlogPost {
   id: string
@@ -219,6 +220,7 @@ export default function AdminPage() {
   const makeSlug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
   const blogPathFor = (post: BlogPost) => `/blog/${post.slug || makeSlug(post.title)}`
   const router = useRouter()
+  const pathname = usePathname()
   const [activeTab, setActiveTab] = useState("overview")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -262,6 +264,11 @@ export default function AdminPage() {
   const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false)
   const [activeContact, setActiveContact] = useState<any | null>(null)
   const [isEditingContact, setIsEditingContact] = useState(false)
+  const [contactsSource, setContactsSource] = useState<'rex' | 'local'>('rex')
+  const [rexSince, setRexSince] = useState<string>('')
+  const [debouncedRexSince, setDebouncedRexSince] = useState<string>('')
+  const [isValidRexSince, setIsValidRexSince] = useState<boolean>(true)
+  const [rexAuthInvalid, setRexAuthInvalid] = useState<boolean>(false)
 
   const extractAddressFromNotes = (notes?: string) => {
     if (!notes) return ""
@@ -278,18 +285,52 @@ export default function AdminPage() {
     }
   }
 
-  const loadContacts = async () => {
+  const loadRexContacts = async (since?: string) => {
     setContactsLoading(true)
     try {
-      const res = await fetch('/api/contacts')
+      const qp = since ? `?since=${encodeURIComponent(since)}` : ''
+      const res = await fetch(`/api/integrations/rex/contacts/fetch${qp}`)
       if (res.ok) {
         const data = await res.json()
-        setContacts(data)
+        const rexContacts = Array.isArray(data?.contacts) ? data.contacts : []
+        const mapped = rexContacts.map((c: any) => {
+          const phone = Array.isArray(c?.phone) ? c.phone[0] : c?.phone
+          return {
+            id: c?.id,
+            name: c?.name || 'Unknown',
+            phoneNumber: phone || '',
+            email: c?.email || null,
+            notes: c?.notes || null,
+            updatedAt: c?.updatedAt || new Date().toISOString(),
+            source: 'rex',
+          }
+        })
+        setContacts(mapped)
       }
     } catch {}
     finally {
       setContactsLoading(false)
     }
+  }
+
+  const loadLocalContacts = async () => {
+    setContactsLoading(true)
+    try {
+      const res = await fetch('/api/contacts')
+      if (res.ok) {
+        const data = await res.json()
+        const mapped = Array.isArray(data) ? data.map((c: any) => ({ ...c, source: 'local' })) : []
+        setContacts(mapped)
+      }
+    } catch {}
+    finally {
+      setContactsLoading(false)
+    }
+  }
+
+  const loadContacts = async () => {
+    if (contactsSource === 'local') return loadLocalContacts()
+    return loadRexContacts(debouncedRexSince || undefined)
   }
 
   const openContactDetails = (contact: any) => {
@@ -314,7 +355,8 @@ export default function AdminPage() {
         body: JSON.stringify(payload)
       })
       if (res.ok) {
-        await loadContacts()
+        if (contactsSource === 'local') await loadLocalContacts()
+        else await loadRexContacts(rexSince || undefined)
         setIsEditingContact(false)
         setIsContactDetailsOpen(false)
       }
@@ -322,8 +364,82 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    loadContacts()
+    // Initialize contactsSource and rexSince from URL query
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const sourceParam = params.get('contactsSource') || params.get('source')
+      const sinceParam = params.get('rexSince') || params.get('since')
+      const selectedParam = params.get('selected') || params.get('selectedIds')
+      if (sourceParam === 'local' || sourceParam === 'rex') setContactsSource(sourceParam as 'rex' | 'local')
+      if (sinceParam) setRexSince(sinceParam)
+      if (selectedParam) {
+        const ids = selectedParam.split(',').map(s => s.trim()).filter(Boolean)
+        setSelectedContactIds(ids)
+      }
+    } catch {}
+    // Check REX auth status
+    ;(async () => {
+      try {
+        const res = await fetch('/api/integrations/rex/auth/status')
+        const status = await res.json()
+        const invalid = status?.valid !== true
+        setRexAuthInvalid(invalid)
+      } catch {}
+    })()
   }, [])
+
+  // Debounce and validate rexSince input
+  useEffect(() => {
+    const valid = rexSince.trim() === '' || !Number.isNaN(Date.parse(rexSince))
+    setIsValidRexSince(valid)
+    const t = setTimeout(() => setDebouncedRexSince(rexSince), 400)
+    return () => clearTimeout(t)
+  }, [rexSince])
+
+  // Persist contacts state to query string (guard redundant replaces, debounce rexSince)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      params.set('contactsSource', contactsSource)
+      const since = (debouncedRexSince || '').trim()
+      if (since) params.set('rexSince', since)
+      else params.delete('rexSince')
+      if (selectedContactIds.length > 0) params.set('selected', selectedContactIds.join(','))
+      else params.delete('selected')
+      // Only trigger replace when our managed keys differ; ignore other query params
+      const current = new URLSearchParams(window.location.search)
+      const currentSource = current.get('contactsSource')
+      const currentSince = current.get('rexSince')
+      const currentSelected = current.get('selected')
+      const desiredSelected = selectedContactIds.length > 0 ? selectedContactIds.join(',') : null
+      const differs = (
+        currentSource !== contactsSource ||
+        ((since && currentSince !== since) || (!since && current.has('rexSince'))) ||
+        ((desiredSelected && currentSelected !== desiredSelected) || (!desiredSelected && current.has('selected')))
+      )
+      if (differs) {
+        const qs = params.toString()
+        startTransition(() => {
+          router.replace(`${pathname}?${qs}`, { scroll: false })
+        })
+      }
+    } catch {}
+  }, [contactsSource, debouncedRexSince, selectedContactIds])
+
+  // Reload contacts when source or debounced since changes (and input is valid)
+  useEffect(() => {
+    if (contactsSource === 'rex') {
+      if (isValidRexSince) loadRexContacts(debouncedRexSince || undefined)
+    } else {
+      loadLocalContacts()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactsSource, debouncedRexSince, isValidRexSince])
+
+  // Keep selection filtered to currently loaded contacts
+  useEffect(() => {
+    setSelectedContactIds(prev => prev.filter(id => contacts.some((c: any) => c.id === id)))
+  }, [contacts])
 
   const handleSaveContact = async () => {
     const name = `${newContact.firstName} ${newContact.lastName}`.trim()
@@ -345,7 +461,8 @@ export default function AdminPage() {
       if (res.ok) {
         setIsAddContactOpen(false)
         setNewContact({ firstName: "", lastName: "", email: "", phone: "", address: "", postalAddress: "" })
-        await loadContacts()
+        if (contactsSource === 'local') await loadLocalContacts()
+        else await loadRexContacts(rexSince || undefined)
       }
     } catch {
       // silent fail in UI; API may require admin auth cookie
@@ -2053,11 +2170,78 @@ export default function AdminPage() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-xl font-light">My Contacts</CardTitle>
-                      <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Select value={contactsSource} onValueChange={(v) => setContactsSource(v as any)}>
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="rex">REX</SelectItem>
+                            <SelectItem value="local">Local</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <div className="flex flex-col">
+                          <Input 
+                            value={rexSince}
+                            onChange={(e) => setRexSince(e.target.value)}
+                            placeholder="Since (ISO)"
+                            className="w-40"
+                          />
+                          {!isValidRexSince && rexSince.trim() !== '' && (
+                            <span className="text-xs text-red-600 mt-1">Enter a valid ISO date/time</span>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => isValidRexSince && loadRexContacts(rexSince || undefined)}
+                          disabled={contactsSource !== 'rex' || !isValidRexSince}
+                          title={contactsSource !== 'rex' ? 'Switch source to REX to fetch' : (!isValidRexSince ? 'Enter a valid ISO date/time' : undefined)}
+                        >
+                          Fetch
+                        </Button>
+                        <Button
+                          className="bg-brown-800 text-white hover:bg-brown-700"
+                          onClick={async () => {
+                            const qp = rexSince ? `?since=${encodeURIComponent(rexSince)}` : ''
+                            try {
+                              const res = await fetch(`/api/integrations/rex/contacts/sync${qp}`, { method: 'POST' })
+                              if (res.ok) {
+                                setContactsSource('local')
+                                await loadLocalContacts()
+                              }
+                            } catch {}
+                          }}
+                        >
+                          Sync from REX
+                        </Button>
+                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                      </div>
                     </div>
-                    <CardDescription>Manage and view your contacts.</CardDescription>
+                    <CardDescription>
+                      Manage and view your contacts.
+                      {contactsSource === 'rex' && (
+                        <span className="ml-2 text-xs text-brown-600">Edit is disabled in REX view</span>
+                      )}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="overflow-x-auto">
+                    {rexAuthInvalid && contactsSource === 'rex' && (
+                      <Alert className="mb-3 border-red-300 text-red-700">
+                        <AlertTitle className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4" /> REX authorization invalid
+                        </AlertTitle>
+                        <AlertDescription>
+                          Connect or refresh REX to fetch contacts. If mock mode is enabled, this can be ignored.
+                          <div className="mt-2">
+                            <Button asChild className="bg-brown-800 text-white hover:bg-brown-700">
+                              <Link href="/api/integrations/rex/oauth/start" prefetch={false}>
+                                <ExternalLink className="h-4 w-4 mr-2" /> Connect REX
+                              </Link>
+                            </Button>
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+                    )}
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -2077,18 +2261,19 @@ export default function AdminPage() {
                           <TableHead>Address</TableHead>
                           <TableHead>Last Contacted</TableHead>
                           <TableHead>Last Modified</TableHead>
+                          <TableHead>Source</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {contactsLoading && (
                           <TableRow>
-                            <TableCell colSpan={9} className="text-center text-brown-700">Loading contacts…</TableCell>
+                            <TableCell colSpan={10} className="text-center text-brown-700">Loading contacts…</TableCell>
                           </TableRow>
                         )}
                         {!contactsLoading && contacts.length === 0 && (
                           <TableRow>
-                            <TableCell colSpan={9} className="text-center text-brown-700">No contacts yet</TableCell>
+                            <TableCell colSpan={10} className="text-center text-brown-700">No contacts yet</TableCell>
                           </TableRow>
                         )}
                         {!contactsLoading && contacts.map((c: any) => (
@@ -2104,27 +2289,30 @@ export default function AdminPage() {
                             <TableCell className="font-medium text-brown-800">{c.name || '—'}</TableCell>
                             <TableCell className="text-brown-700">{c.email || '—'}</TableCell>
                             <TableCell className="text-brown-700">{c.phoneNumber || '—'}</TableCell>
-                            <TableCell className="text-brown-700">—</TableCell>
+                            <TableCell className="text-brown-700">{c.owner || c.ownedBy || c.assignedTo || '—'}</TableCell>
                             <TableCell className="text-brown-700">{extractAddressFromNotes(c.notes) || '—'}</TableCell>
-                            <TableCell className="text-brown-700">—</TableCell>
+                            <TableCell className="text-brown-700">{formatDateTime(c.lastContacted || (c as any).last_contacted)}</TableCell>
                             <TableCell className="text-brown-700">{formatDateTime(c.updatedAt || c.createdAt)}</TableCell>
+                            <TableCell>
+                              <Badge variant={c.source === 'rex' ? 'outline' : 'secondary'}>{c.source === 'rex' ? 'REX' : 'Local'}</Badge>
+                            </TableCell>
                             <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" aria-label="Actions">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" aria-label="Actions" disabled={contactsSource === 'rex'} title={contactsSource === 'rex' ? 'View-only in REX source' : undefined}>
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => openContactDetails(c)}>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => contactsSource !== 'rex' && openContactDetails(c)} disabled={contactsSource === 'rex'}>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                       </TableBody>
                     </Table>
                   </CardContent>
@@ -2144,7 +2332,7 @@ export default function AdminPage() {
                           <ExternalLink className="h-4 w-4 text-brown-500" />
                         </span>
                         <div className="flex items-center gap-2">
-                          {!isEditingContact && <Button variant="outline" onClick={() => setIsEditingContact(true)}>Edit</Button>}
+                          {!isEditingContact && <Button variant="outline" onClick={() => contactsSource !== 'rex' && setIsEditingContact(true)} disabled={contactsSource === 'rex'} title={contactsSource === 'rex' ? 'Editing disabled for REX contacts' : undefined}>Edit</Button>}
                           {/* Removed duplicate More dropdown in header; toolbar More remains */}
                         </div>
                       </DialogTitle>
@@ -2179,8 +2367,9 @@ export default function AdminPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
+                              disabled={contactsSource === 'rex'}
                               onClick={async () => {
-                                if (!activeContact?.id) return
+                                if (contactsSource === 'rex' || !activeContact?.id) return
                                 const updatedNotes = `${activeContact?.notes || ''}\nReminder: Follow up scheduled`
                                 const res = await fetch('/api/contacts', {
                                   method: 'PUT',
@@ -2189,15 +2378,17 @@ export default function AdminPage() {
                                 })
                                 if (res.ok) {
                                   setActiveContact({ ...activeContact, notes: updatedNotes })
-                                  await loadContacts()
+                                  if (contactsSource === 'local') await loadLocalContacts()
+                                  else await loadRexContacts(rexSince || undefined)
                                 }
                               }}
                             >
                               Add Reminder
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                              disabled={contactsSource === 'rex'}
                               onClick={async () => {
-                                if (!activeContact?.id) return
+                                if (contactsSource === 'rex' || !activeContact?.id) return
                                 const updatedNotes = `${activeContact?.notes || ''}\nAppointment: Booked`
                                 const res = await fetch('/api/contacts', {
                                   method: 'PUT',
@@ -2206,7 +2397,8 @@ export default function AdminPage() {
                                 })
                                 if (res.ok) {
                                   setActiveContact({ ...activeContact, notes: updatedNotes })
-                                  await loadContacts()
+                                  if (contactsSource === 'local') await loadLocalContacts()
+                                  else await loadRexContacts(rexSince || undefined)
                                 }
                               }}
                             >

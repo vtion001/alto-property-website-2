@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Navigation } from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -262,3 +263,31 @@ export default function SellingPage() {
     </div>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Selling — Maximise Your Sale Price",
+  description:
+    "Achieve exceptional results with ALTO’s proven selling process, premium marketing, and expert negotiation.",
+  openGraph: {
+    title: "Selling — Maximise Your Sale Price",
+    description:
+      "Achieve exceptional results with ALTO’s proven selling process, premium marketing, and expert negotiation.",
+    url: "/selling",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758168201/tg0pxnmzsjreop7kuaqt.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sell with ALTO",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Selling — Maximise Your Sale Price",
+    description:
+      "Achieve exceptional results with ALTO’s proven selling process, premium marketing, and expert negotiation.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1758168201/tg0pxnmzsjreop7kuaqt.jpg"],
+  },
+};

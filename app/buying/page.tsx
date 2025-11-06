@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -303,4 +304,32 @@ export default function BuyingPage() {
       </footer>
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Buying — Find Your Perfect Property",
+  description:
+    "Discover exceptional properties with expert guidance. We make buying seamless and successful.",
+  openGraph: {
+    title: "Buying — Find Your Perfect Property",
+    description:
+      "Discover exceptional properties with expert guidance. We make buying seamless and successful.",
+    url: "/buying",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1757814157/w6442i2wt5wk70g8cbcv.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Buy with ALTO",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Buying — Find Your Perfect Property",
+    description:
+      "Discover exceptional properties with expert guidance. We make buying seamless and successful.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1757814157/w6442i2wt5wk70g8cbcv.jpg"],
+  },
 }

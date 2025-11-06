@@ -2,7 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
+  const url = req.nextUrl
+  const { pathname } = url
+
+  // Canonical host redirect: redirect apex domain to www for consistency
+  const apexHost = process.env.NEXT_PUBLIC_APEX_HOST || 'altoproperty.com.au'
+  const canonicalHost = process.env.NEXT_PUBLIC_CANONICAL_HOST || 'www.altoproperty.com.au'
+  const isLocal = url.hostname.includes('localhost') || /^(127\.0\.0\.1|::1)$/.test(url.hostname)
+  if (!isLocal && url.hostname === apexHost) {
+    url.hostname = canonicalHost
+    return NextResponse.redirect(url, 308)
+  }
+
+  // Admin area protection
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/auth')) {
     const token = req.cookies.get('alto_admin')?.value
     if (!token) {
@@ -16,6 +28,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/admin/auth/login', req.url))
     }
   }
+
   // Protect mutating API routes, but allow unauthenticated access to auth endpoints
   if (
     pathname.startsWith('/api') &&
@@ -37,7 +50,8 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/:path*']
+  // Apply to all routes except static assets and well-known files
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)']
 }
 
 

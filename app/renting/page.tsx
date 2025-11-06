@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -173,4 +174,32 @@ export default function RentingPage() {
       </footer>
     </div>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Renting — Quality Rentals & Tenant Support",
+  description:
+    "Discover quality rental properties with a seamless application process and ongoing tenant support.",
+  openGraph: {
+    title: "Renting — Quality Rentals & Tenant Support",
+    description:
+      "Discover quality rental properties with a seamless application process and ongoing tenant support.",
+    url: "/renting",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Rent with ALTO",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    title: "Renting — Quality Rentals & Tenant Support",
+    description:
+      "Discover quality rental properties with a seamless application process and ongoing tenant support.",
+    card: "summary_large_image",
+    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg"],
+  },
 }

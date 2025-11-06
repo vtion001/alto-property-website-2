@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ['latin'] })
 // Global site metadata
 // Purpose: set consistent title and icon references for tabs, SEO, and social sharing
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.altoproperty.com.au'),
   title: {
     default: 'ALTO Property',
     template: '%s | ALTO Property',
@@ -15,6 +16,9 @@ export const metadata: Metadata = {
   description:
     "Exceptional Results. Genuine Care. Brisbane's premier property specialists.",
   generator: 'Next.js',
+  alternates: {
+    canonical: 'https://www.altoproperty.com.au/',
+  },
   icons: {
     icon: [
       { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
@@ -27,6 +31,7 @@ export const metadata: Metadata = {
     description:
       "Exceptional Results. Genuine Care. Brisbane's premier property specialists.",
     siteName: 'ALTO Property',
+    url: 'https://www.altoproperty.com.au/',
     images: [{ url: 'https://res.cloudinary.com/dbviya1rj/image/upload/v1762243914/cugd0grw3fbtgdaefa88.png', width: 1200, height: 630, alt: 'ALTO Property' }],
     type: 'website',
     locale: 'en_AU',
@@ -36,7 +41,17 @@ export const metadata: Metadata = {
     description:
       "Exceptional Results. Genuine Care. Brisbane's premier property specialists.",
     card: 'summary_large_image',
+    // Read Twitter handle from environment; fallback to brand handle
+    site: process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@altoproperty',
     images: ['https://res.cloudinary.com/dbviya1rj/image/upload/v1762243914/cugd0grw3fbtgdaefa88.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
   },
 }
 
