@@ -21,9 +21,27 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
-      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
-      { url: '/favicon.ico', sizes: 'any' },
+      {
+        url: 'https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_32,h_32,r_max/v1762757471/n76qlmffegraw5hamkcx',
+        type: 'image/png',
+        sizes: '32x32',
+      },
+      {
+        url: 'https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_16,h_16,r_max/v1762757471/n76qlmffegraw5hamkcx',
+        type: 'image/png',
+        sizes: '16x16',
+      },
+      {
+        url: 'https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_64,h_64,r_max/v1762757471/n76qlmffegraw5hamkcx',
+        type: 'image/png',
+        sizes: 'any',
+      },
+    ],
+    shortcut: [
+      {
+        url: 'https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_64,h_64,r_max/v1762757471/n76qlmffegraw5hamkcx',
+        type: 'image/png',
+      },
     ],
   },
   openGraph: {
@@ -32,7 +50,7 @@ export const metadata: Metadata = {
       "Exceptional Results. Genuine Care. Brisbane's premier property specialists.",
     siteName: 'ALTO Property',
     url: 'https://www.altoproperty.com.au/',
-    images: [{ url: 'https://res.cloudinary.com/dbviya1rj/image/upload/v1762243914/cugd0grw3fbtgdaefa88.png', width: 1200, height: 630, alt: 'ALTO Property' }],
+    images: [{ url: 'https://res.cloudinary.com/dbviya1rj/image/upload/v1762757471/n76qlmffegraw5hamkcx.jpg', width: 1200, height: 630, alt: 'ALTO Property' }],
     type: 'website',
     locale: 'en_AU',
   },
@@ -43,7 +61,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     // Read Twitter handle from environment; fallback to brand handle
     site: process.env.NEXT_PUBLIC_TWITTER_HANDLE || '@altoproperty',
-    images: ['https://res.cloudinary.com/dbviya1rj/image/upload/v1762243914/cugd0grw3fbtgdaefa88.png'],
+    images: ['https://res.cloudinary.com/dbviya1rj/image/upload/v1762757471/n76qlmffegraw5hamkcx.jpg'],
   },
   robots: {
     index: true,
@@ -65,9 +83,22 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Explicit favicon links to ensure compatibility across browsers and Google search */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_32,h_32,r_max/v1762757471/n76qlmffegraw5hamkcx"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_16,h_16,r_max/v1762757471/n76qlmffegraw5hamkcx"
+        />
+        <link
+          rel="shortcut icon"
+          href="https://res.cloudinary.com/dbviya1rj/image/upload/f_png,q_auto,c_fill,w_64,h_64,r_max/v1762757471/n76qlmffegraw5hamkcx"
+        />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#473c38" />
         {/* PWA and iOS icons */}
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
