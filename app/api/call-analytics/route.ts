@@ -337,7 +337,8 @@ export async function GET(request: NextRequest) {
         successfulCalls: 0,
         successRate: 0,
         averageDuration: 0,
-        qualityScore: 0
+        qualityScore: 0,
+        mock: true
       },
       recentCalls: [],
       callVolumeByHour: Array.from({ length: 24 }, (_, i) => ({

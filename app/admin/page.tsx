@@ -716,6 +716,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     try {
+      // save to local storage
       localStorage.setItem('alto:blogPosts', JSON.stringify(blogPosts))
     } catch {}
   }, [blogPosts])
