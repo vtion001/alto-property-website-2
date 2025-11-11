@@ -34,6 +34,24 @@ export default function OffMarketPage() {
     setIsSubmitting(true)
 
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Off-Market Registration',
+            message: `Preferred Areas: ${formData.preferredAreas}`,
+            source: 'Off-Market',
+            budgetRange: formData.budgetRange,
+            preferredAreas: formData.preferredAreas,
+          })
+        })
+      } catch {}
+
       const response = await fetch('https://services.leadconnectorhq.com/hooks/BsBEKMz2Dy57PRbfOSXz/webhook-trigger/H72d52wmeVAUwEmZxaTv', {
         method: 'POST',
         headers: {

@@ -67,6 +67,23 @@ export default function RentalAppraisalPage() {
     setIsSubmitting(true);
 
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Rental Appraisal Lead',
+            email: null,
+            phone: formData.phone,
+            subject: 'Rental Appraisal Request',
+            message: `Address: ${formData.address}`,
+            source: 'Rental Appraisal',
+            termsAgreed: formData.terms,
+          })
+        })
+      } catch {}
+
       await new Promise(resolve => setTimeout(resolve, 1500));
       setIsSubmitted(true);
     } catch (error) {

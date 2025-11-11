@@ -56,6 +56,27 @@ export default function PropertyReportPage() {
     setIsSubmitting(true)
 
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Property Report Request',
+            message: `Report type: ${formData.reportType}`,
+            source: 'Property Report',
+            streetAddress: formData.streetAddress,
+            city: formData.city,
+            state: formData.state,
+            country: formData.country,
+            postalCode: formData.postalCode,
+          })
+        })
+      } catch {}
+
       // Submit form data to webhook
       const response = await fetch('https://services.leadconnectorhq.com/hooks/BsBEKMz2Dy57PRbfOSXz/webhook-trigger/LnbHjtYQ91aMmN4maWrA', {
         method: 'POST',

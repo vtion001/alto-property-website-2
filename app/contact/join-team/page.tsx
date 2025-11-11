@@ -149,10 +149,24 @@ export default function JoinTeamPage() {
     setIsSubmitting(true)
     
     try {
-      // Here you would typically send the data to your API
-      console.log('Form submitted:', formData)
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: `Join Team Application - ${formData.position}`,
+            message: formData.coverLetter,
+            source: 'Join Team',
+            position: formData.position,
+          })
+        })
+      } catch {}
       
-      // Simulate API call
+      // Simulate external processing
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Show thank you message

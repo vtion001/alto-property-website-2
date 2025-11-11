@@ -141,13 +141,26 @@ interface CallAnalytics {
   topPerformers: { agent: string; calls: number; avgScore: number }[]
 }
 
-interface VapiCampaign {
-  id: string
-  name: string
-  status?: string
-  phoneNumberId?: string
-  customersCount?: number
-}
+  interface VapiCampaign {
+    id: string
+    name: string
+    status?: string
+    phoneNumberId?: string
+    customersCount?: number
+  }
+
+  interface Inquiry {
+    id: string
+    name: string
+    email: string
+    phone?: string
+    source: string
+    subject?: string
+    message: string
+    createdAt: string
+    status: 'new' | 'contacted' | 'closed'
+    notes?: string
+  }
 
 // Raw shapes the UI may receive from various APIs
 type RawCallLog = {
@@ -416,12 +429,12 @@ export default function AdminPage() {
       )
       if (differs) {
         const qs = params.toString()
-        startTransition(() => {
-          router.replace(`${pathname}?${qs}`, { scroll: false })
-        })
+        // Update the URL without triggering a Next.js navigation.
+        // This avoids aborting in-flight RSC fetches that surface as net::ERR_ABORTED in dev.
+        window.history.replaceState(null, '', `${pathname}?${qs}`)
       }
     } catch {}
-  }, [contactsSource, debouncedRexSince, selectedContactIds, router, pathname])
+  }, [contactsSource, debouncedRexSince, selectedContactIds, pathname])
 
   // Reload contacts when source or debounced since changes (and input is valid)
   useEffect(() => {
@@ -475,6 +488,7 @@ export default function AdminPage() {
     { value: 'management', label: 'Management', icon: Settings },
     { value: 'dialer', label: 'Dialer', icon: Phone },
     { value: 'contacts', label: 'Contacts', icon: Users },
+    { value: 'inquiries', label: 'Inquiries', icon: Mail },
     { value: 'call-analysis', label: 'Call Analysis', icon: BarChart3 },
     { value: 'integrations', label: 'Integrations', icon: Settings },
     { value: 'social-planner', label: 'Social Planner', icon: Calendar },
@@ -482,6 +496,104 @@ export default function AdminPage() {
   ]
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
+
+  // Inquiries state
+  const [inquiries, setInquiries] = useState<Inquiry[]>([])
+  const [inquiriesLoading, setInquiriesLoading] = useState<boolean>(false)
+  const [inquiriesError, setInquiriesError] = useState<string | null>(null)
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
+  const [isInquiryViewOpen, setIsInquiryViewOpen] = useState(false)
+
+  const loadInquiries = async () => {
+    setInquiriesLoading(true)
+    setInquiriesError(null)
+    try {
+      const res = await fetch('/api/inquiries', { method: 'GET' })
+      if (res.ok) {
+        const data = await res.json()
+        // Expecting array of inquiries; minimally validate shape
+        const normalized: Inquiry[] = Array.isArray(data)
+          ? data.map((i: any) => ({
+              id: String(i.id ?? crypto.randomUUID()),
+              name: String(i.name ?? 'Unknown'),
+              email: String(i.email ?? ''),
+              phone: i.phone ? String(i.phone) : undefined,
+              source: String(i.source ?? 'website'),
+              subject: i.subject ? String(i.subject) : undefined,
+              message: String(i.message ?? ''),
+              createdAt: String(i.createdAt ?? new Date().toISOString()),
+              status: (i.status === 'contacted' || i.status === 'closed') ? i.status : 'new',
+              notes: typeof i.notes === 'string' ? i.notes : undefined,
+            }))
+          : []
+        setInquiries(normalized)
+      } else {
+        // Fallback to mock if no API
+        setInquiries([
+          {
+            id: 'inq-1',
+            name: 'Jane Smith',
+            email: 'jane@example.com',
+            phone: '0400 123 456',
+            source: 'Contact Page',
+            subject: 'Property inquiry',
+            message: 'Hi, I am interested in 12 Ocean View Rd.',
+            createdAt: new Date().toISOString(),
+            status: 'new',
+          },
+          {
+            id: 'inq-2',
+            name: 'Michael Chen',
+            email: 'michael@example.com',
+            phone: '0412 987 654',
+            source: 'Property Form: 22 River St',
+            subject: 'Arrange inspection',
+            message: 'Can we schedule an inspection this weekend?',
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+            status: 'contacted',
+          },
+        ])
+      }
+    } catch {
+      setInquiriesError('Failed to load inquiries')
+    } finally {
+      setInquiriesLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadInquiries()
+  }, [])
+
+  const updateInquiryStatus = (id: string, status: Inquiry['status']) => {
+    setInquiries((prev) => prev.map((inq) => (inq.id === id ? { ...inq, status } : inq)))
+  }
+
+  const parseInquiryDetails = (notes?: string): { label: string; value: string }[] => {
+    if (!notes) return []
+    return notes
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const idx = line.indexOf(':')
+        if (idx === -1) return { label: 'Note', value: line }
+        const label = line.slice(0, idx).trim()
+        const value = line.slice(idx + 1).trim()
+        return { label, value }
+      })
+      .filter((item) => !['Subject', 'Message', 'Source'].includes(item.label))
+  }
+
+  const inquiryStatusBadge = (status: Inquiry['status']) => {
+    const styles =
+      status === 'new'
+        ? 'bg-yellow-100 text-yellow-800'
+        : status === 'contacted'
+        ? 'bg-blue-100 text-blue-800'
+        : 'bg-green-100 text-green-800'
+    return <Badge className={styles} variant="outline">{status}</Badge>
+  }
 
   const [vapiToken, setVapiToken] = useState<string>('')
   const [vapiCampaigns, setVapiCampaigns] = useState<VapiCampaign[]>([])
@@ -1908,7 +2020,7 @@ export default function AdminPage() {
                       </button>
                     )
                   })}
-                </nav>
+              </nav>
               </aside>
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" id="admin-tabs" data-component="admin-tabs">
 
@@ -2790,6 +2902,126 @@ export default function AdminPage() {
                     </Table>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="inquiries" className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-light text-brown-800">Website Inquiries</h2>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={loadInquiries} disabled={inquiriesLoading}>
+                      {inquiriesLoading ? 'Refreshing...' : 'Refresh'}
+                    </Button>
+                  </div>
+                </div>
+
+                {inquiriesError && (
+                  <Alert>
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{inquiriesError}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-light">Inquiry Management</CardTitle>
+                    <CardDescription>Review and action website form submissions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Source</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {inquiries.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8 text-brown-600">
+                              {inquiriesLoading ? 'Loading inquiries...' : 'No inquiries found'}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {inquiries.map((inq) => (
+                          <TableRow key={inq.id}>
+                            <TableCell className="font-medium">{inq.name}</TableCell>
+                            <TableCell>
+                              <a href={`mailto:${inq.email}`} className="text-brown-800 hover:underline">{inq.email}</a>
+                            </TableCell>
+                            <TableCell>{inq.phone || '-'}</TableCell>
+                            <TableCell className="max-w-xs truncate" title={inq.source}>{inq.source}</TableCell>
+                            <TableCell>{new Date(inq.createdAt).toLocaleString()}</TableCell>
+                            <TableCell>{inquiryStatusBadge(inq.status)}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button variant="ghost" size="sm" onClick={() => updateInquiryStatus(inq.id, 'contacted')} title="Mark as contacted">
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => updateInquiryStatus(inq.id, 'closed')} title="Close inquiry">
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedInquiry(inq); setIsInquiryViewOpen(true) }} title="View details">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+
+                <Dialog open={isInquiryViewOpen} onOpenChange={setIsInquiryViewOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Inquiry Details</DialogTitle>
+                      <DialogDescription>Submitted information</DialogDescription>
+                    </DialogHeader>
+                    {selectedInquiry && (
+                      <div className="space-y-3">
+                        <div className="text-sm">
+                          <div><span className="font-medium">Name:</span> {selectedInquiry.name}</div>
+                          <div><span className="font-medium">Email:</span> {selectedInquiry.email}</div>
+                          <div><span className="font-medium">Phone:</span> {selectedInquiry.phone || '–'}</div>
+                          <div><span className="font-medium">Source:</span> {selectedInquiry.source}</div>
+                          <div><span className="font-medium">Date:</span> {new Date(selectedInquiry.createdAt).toLocaleString()}</div>
+                          <div><span className="font-medium">Status:</span> {selectedInquiry.status}</div>
+                        </div>
+                        {selectedInquiry.subject && (
+                          <div className="text-sm">
+                            <div className="font-medium">Subject</div>
+                            <div>{selectedInquiry.subject}</div>
+                          </div>
+                        )}
+                        {selectedInquiry.message && (
+                          <div className="text-sm">
+                            <div className="font-medium">Message</div>
+                            <div className="whitespace-pre-wrap">{selectedInquiry.message}</div>
+                          </div>
+                        )}
+                        {parseInquiryDetails(selectedInquiry.notes).length > 0 && (
+                          <div className="text-sm">
+                            <div className="font-medium">Other Details</div>
+                            <div className="space-y-1 mt-1">
+                              {parseInquiryDetails(selectedInquiry.notes).map((item, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                  <span className="text-brown-700 min-w-[120px]">{item.label}:</span>
+                                  <span className="flex-1">{item.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </TabsContent>
 
               <TabsContent value="rent-properties" className="space-y-6" id="content-rent-properties" data-content="rent-properties">

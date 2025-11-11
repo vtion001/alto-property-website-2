@@ -83,11 +83,34 @@ export default function SpeakSpecialistPage() {
 
     setIsSubmitting(true)
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsSubmitted(true)
-    setIsSubmitting(false)
+    try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Speak to Specialist Consultation',
+            message: formData.message,
+            source: 'Speak to Specialist',
+            propertyType: formData.propertyType,
+            suburb: formData.suburb,
+            inquiry: formData.inquiry,
+          })
+        })
+      } catch {}
+
+      // Simulate external processing
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error('Form submission error:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isFormValid = formData.firstName.trim() && 

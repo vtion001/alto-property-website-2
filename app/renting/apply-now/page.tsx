@@ -92,6 +92,39 @@ export default function ApplyNowPage() {
     
     // Simulate form submission
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Rental Application',
+            message: formData.additionalInfo,
+            source: 'Apply Now',
+            dateOfBirth: formData.dateOfBirth,
+            occupation: formData.occupation,
+            currentAddress: formData.currentAddress,
+            rentAmount: formData.rentAmount,
+            tenancyLength: formData.tenancyLength,
+            employer: formData.employer,
+            position: formData.position,
+            income: formData.income,
+            preferredProperty: formData.preferredProperty,
+            moveInDate: formData.moveInDate,
+            leaseLength: formData.leaseLength,
+            pets: formData.pets,
+            landlordName: formData.landlordName,
+            landlordPhone: formData.landlordPhone,
+            referenceName: formData.referenceName,
+            referencePhone: formData.referencePhone,
+            marketingOptIn: formData.marketing,
+          })
+        })
+      } catch {}
+
       await new Promise(resolve => setTimeout(resolve, 2000))
       setIsSubmitted(true)
     } catch (error) {

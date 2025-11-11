@@ -61,6 +61,23 @@ export function SellerCompetitionPopup({ onClose }: SellerCompetitionPopupProps)
     setSubmitError(null);
 
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Seller Competition Entry',
+            message: `Property Suburb: ${formData.propertySuburb}`,
+            source: 'Seller Competition Popup',
+            propertySuburb: formData.propertySuburb,
+          })
+        })
+      } catch {}
+
       const webhookUrl =
         "https://primary-production-5c45.up.railway.app/webhook-test/efcb576a-2730-45bc-bc98-c80b36206eee";
 

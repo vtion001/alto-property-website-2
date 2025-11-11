@@ -73,6 +73,24 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
     setSubmitError(null);
 
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Exclusive Property Management Deal',
+            message: `Property Address: ${formData.propertyAddress}\nCurrent Manager: ${formData.currentManager}`,
+            source: 'Lead Capture Popup',
+            propertyAddress: formData.propertyAddress,
+            currentManager: formData.currentManager,
+          })
+        })
+      } catch {}
+
       const webhookUrl =
         "https://primary-production-5c45.up.railway.app/webhook-test/efcb576a-2730-45bc-bc98-c80b36206eee";
       console.log("Attempting to submit to webhook:", webhookUrl);

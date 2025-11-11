@@ -78,6 +78,26 @@ export default function BuyingWithAltoPage() {
     setIsSubmitting(true)
     
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Buyer Registration',
+            message: formData.additionalRequirements,
+            source: 'Buying With Alto',
+            propertyType: formData.propertyType,
+            budgetRange: formData.budgetRange,
+            preferredLocation: formData.preferredLocation,
+            timeline: formData.timeline,
+          })
+        })
+      } catch {}
+
       const response = await fetch('https://services.leadconnectorhq.com/hooks/BsBEKMz2Dy57PRbfOSXz/webhook-trigger/JkLmN7pQxYz9wEfR3sT4', {
         method: 'POST',
         headers: {

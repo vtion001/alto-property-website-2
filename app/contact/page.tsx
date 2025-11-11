@@ -169,6 +169,23 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     try {
+      // Send to local inquiries API for admin visibility
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'General Inquiry',
+            message: formData.message,
+            source: 'Contact Form',
+            helpWith: formData.helpWith,
+          })
+        })
+      } catch {}
+
       const response = await fetch('https://services.leadconnectorhq.com/hooks/BsBEKMz2Dy57PRbfOSXz/webhook-trigger/kkfvyfhChdiFAdyqcERO', {
         method: 'POST',
         headers: {

@@ -44,6 +44,24 @@ export default function FinancePage() {
     setIsSubmitting(true)
 
     try {
+      // Save to Admin Inquiries
+      try {
+        await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email,
+            phone: formData.phone,
+            subject: 'Finance Consultation',
+            message: formData.message,
+            source: 'Finance Consultation',
+            primaryPurpose: formData.primaryPurpose,
+            preferredContactTime: formData.preferredContactTime,
+          })
+        })
+      } catch {}
+
       const response = await fetch('https://services.leadconnectorhq.com/hooks/BsBEKMz2Dy57PRbfOSXz/webhook-trigger/TlSEqEA1jPx2S3lnznNK', {
         method: 'POST',
         headers: {
