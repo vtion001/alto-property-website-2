@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     }
     const post = await createPost({ content, mediaUrls, scheduledAt: scheduledAt || null, platforms })
     return NextResponse.json({ post })
-  } catch (e: any) {
-    return NextResponse.json({ error: 'Failed to create post', detail: e.message }, { status: 500 })
+  } catch (_e) {
+    const message = _e instanceof Error ? _e.message : String(_e)
+    return NextResponse.json({ error: 'Failed to create post', detail: message }, { status: 500 })
   }
 }

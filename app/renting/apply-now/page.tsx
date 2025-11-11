@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { FileText, Upload, CheckCircle } from "lucide-react"
 import Image from "next/image"
-import type { Metadata } from "next"
 import { useState } from "react"
 
 export default function ApplyNowPage() {
@@ -576,30 +575,4 @@ export default function ApplyNowPage() {
   )
 }
 
-export const metadata: Metadata = {
-  title: "Apply Now — Online Rental Application",
-  description:
-    "Submit your rental application quickly and securely online. Our streamlined process makes it easy to apply for your next home.",
-  openGraph: {
-    title: "Apply Now — Online Rental Application",
-    description:
-      "Submit your rental application quickly and securely online. Our streamlined process makes it easy to apply for your next home.",
-    url: "/renting/apply-now",
-    images: [
-      {
-        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg",
-        width: 1200,
-        height: 630,
-        alt: "ALTO Online Rental Application",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    title: "Apply Now — Online Rental Application",
-    description:
-      "Submit your rental application quickly and securely online. Our streamlined process makes it easy to apply for your next home.",
-    card: "summary_large_image",
-    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1758178205/bqhrhmy5oc1mrbgc9cpr.jpg"],
-  },
-}
+// Metadata moved to route layout to satisfy Next.js rule

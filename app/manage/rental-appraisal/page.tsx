@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Calculator, TrendingUp, Clock, CheckCircle, DollarSign, FileText } from "lucide-react"
 import Image from "next/image"
-import type { Metadata } from "next"
 
 export default function RentalAppraisalPage() {
   const [formData, setFormData] = useState({
@@ -395,30 +394,4 @@ export default function RentalAppraisalPage() {
   )
 }
 
-export const metadata: Metadata = {
-  title: "Rental Appraisal — Accurate Market Assessment",
-  description:
-    "Request a comprehensive rental appraisal with comparable data, market insights, and strategies to maximise your rental income.",
-  openGraph: {
-    title: "Rental Appraisal — Accurate Market Assessment",
-    description:
-      "Request a comprehensive rental appraisal with comparable data, market insights, and strategies to maximise your rental income.",
-    url: "/manage/rental-appraisal",
-    images: [
-      {
-        url: "https://res.cloudinary.com/dbviya1rj/image/upload/v1758098419/wwffwu6cjckz0btcqni0.jpg",
-        width: 1200,
-        height: 630,
-        alt: "ALTO Rental Appraisal",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    title: "Rental Appraisal — Accurate Market Assessment",
-    description:
-      "Get a comprehensive rental appraisal with market insights.",
-    card: "summary_large_image",
-    images: ["https://res.cloudinary.com/dbviya1rj/image/upload/v1758098419/wwffwu6cjckz0btcqni0.jpg"],
-  },
-}
+// Metadata moved to route layout to satisfy Next.js rule

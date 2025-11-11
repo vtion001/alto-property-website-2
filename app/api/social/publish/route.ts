@@ -16,7 +16,8 @@ export async function POST(req: Request) {
       results.push(r)
     }
     return NextResponse.json({ results })
-  } catch (e: any) {
-    return NextResponse.json({ error: 'Publish failed', detail: e.message }, { status: 500 })
+  } catch (_e) {
+    const message = _e instanceof Error ? _e.message : String(_e)
+    return NextResponse.json({ error: 'Publish failed', detail: message }, { status: 500 })
   }
 }

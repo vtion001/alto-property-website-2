@@ -158,7 +158,7 @@ export function getToken(platform: Platform, adminKey?: string): OAuthToken | un
   return tokens?.[platform]
 }
 
-export async function publishToPlatform(platform: Platform, post: PostPayload): Promise<PublishResult> {
+export async function publishToPlatform(platform: Platform, _post: PostPayload): Promise<PublishResult> {
   // Rate limit per platform
   const rl = rateLimit(`social:${platform}`, 30, 60_000)
   if (!rl.allowed) return { platform, status: 'failed', error: 'Rate limited' }

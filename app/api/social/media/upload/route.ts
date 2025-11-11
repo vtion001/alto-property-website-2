@@ -19,7 +19,8 @@ export async function POST(req: Request) {
     await fs.writeFile(fullPath, buffer)
     const url = `/uploads/${filename}`
     return NextResponse.json({ url })
-  } catch (e: any) {
-    return NextResponse.json({ error: 'Upload failed', detail: e.message }, { status: 500 })
+  } catch (_e) {
+    const message = _e instanceof Error ? _e.message : String(_e)
+    return NextResponse.json({ error: 'Upload failed', detail: message }, { status: 500 })
   }
 }

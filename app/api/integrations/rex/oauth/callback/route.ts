@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
     }
     res.cookies.set('rex_oauth_state', '', { httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: 0 })
     return res
-  } catch (e: any) {
-    console.error('REX OAuth callback error:', e)
+  } catch (_e) {
+    console.error('REX OAuth callback error:', _e)
     return NextResponse.json({ error: 'OAuth exchange failed' }, { status: 500 })
   }
 }

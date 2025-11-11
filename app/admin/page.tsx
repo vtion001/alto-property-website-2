@@ -328,10 +328,7 @@ export default function AdminPage() {
     }
   }
 
-  const loadContacts = async () => {
-    if (contactsSource === 'local') return loadLocalContacts()
-    return loadRexContacts(debouncedRexSince || undefined)
-  }
+  // Removed unused helper; calls use `loadLocalContacts` or `loadRexContacts` directly
 
   const openContactDetails = (contact: any) => {
     setActiveContact(contact)
@@ -424,7 +421,7 @@ export default function AdminPage() {
         })
       }
     } catch {}
-  }, [contactsSource, debouncedRexSince, selectedContactIds])
+  }, [contactsSource, debouncedRexSince, selectedContactIds, router, pathname])
 
   // Reload contacts when source or debounced since changes (and input is valid)
   useEffect(() => {
@@ -433,7 +430,6 @@ export default function AdminPage() {
     } else {
       loadLocalContacts()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactsSource, debouncedRexSince, isValidRexSince])
 
   // Keep selection filtered to currently loaded contacts

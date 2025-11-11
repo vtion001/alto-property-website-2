@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Users, Shield, Wrench, FileText, Clock } from "lucide-react"
-import Image from "next/image"
+// Image not used on this page
 import Link from "next/link"
 import type { Metadata } from "next"
 

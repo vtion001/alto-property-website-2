@@ -88,7 +88,7 @@ export async function rexApiRequest<T>(pathOrUrl: string, opts: RequestInit = {}
   if (MOCK) {
     // Simulate a contacts list response or ping
     const isContacts = typeof pathOrUrl === 'string' && pathOrUrl.includes('contacts')
-    const mock: any = isContacts
+    const mock: unknown = isContacts
       ? { items: [ { id: 'rex_1', first_name: 'Alice', last_name: 'Doe', primary_email: 'alice@example.com', primary_phone: '+6100000001', updated_at: new Date().toISOString(), notes: 'VIP' }, { id: 'rex_2', first_name: 'Bob', last_name: 'Smith', emails: ['bob@example.com'], phones: ['+6100000002'], updated_at: new Date().toISOString() } ] }
       : { ok: true }
     return mock as T
@@ -119,7 +119,7 @@ export async function rexApiRequest<T>(pathOrUrl: string, opts: RequestInit = {}
       const cookieStoreMutable = await cookies()
       cookieStoreMutable.set('rex_access', accessToken, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' })
       res = await doFetch(accessToken)
-    } catch (e) {
+    } catch (_e) {
       throw new Error('REX auth expired and refresh failed')
     }
   }
@@ -131,15 +131,34 @@ export async function rexApiRequest<T>(pathOrUrl: string, opts: RequestInit = {}
   return res.json()
 }
 
+type RexAPIRaw = {
+  id?: string
+  contact_id?: string
+  name?: string
+  first_name?: string
+  last_name?: string
+  email?: string
+  primary_email?: string
+  emails?: string[]
+  phone?: string | string[]
+  primary_phone?: string
+  phones?: string[]
+  notes?: string
+  description?: string
+  updatedAt?: string
+  updated_at?: string
+  last_updated?: string
+}
+
 export async function listContacts(updatedSince?: string): Promise<RexContact[]> {
   const url = new URL(REX_CONFIG.contactsEndpoint)
   if (updatedSince) {
     url.searchParams.set('updated_since', updatedSince)
   }
   try {
-    const data = await rexApiRequest<any>(url.toString(), { method: 'GET' })
+    const data = await rexApiRequest<{ items?: RexAPIRaw[]; contacts?: RexAPIRaw[] } | RexAPIRaw[]>(url.toString(), { method: 'GET' })
     // Normalize possible response formats
-    const records: any[] = Array.isArray(data) ? data : (data?.items || data?.contacts || [])
+    const records: RexAPIRaw[] = Array.isArray(data) ? data : (data.items ?? data.contacts ?? [])
     return records.map((r) => ({
       id: r.id || r.contact_id,
       name: r.name || [r.first_name, r.last_name].filter(Boolean).join(' '),

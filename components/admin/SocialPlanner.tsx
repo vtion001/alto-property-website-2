@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -40,7 +41,7 @@ export default function SocialPlanner() {
   const [uploading, setUploading] = useState(false)
   const [creating, setCreating] = useState(false)
   const [publishing, setPublishing] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<unknown>(null)
   const [confirmPublishOpen, setConfirmPublishOpen] = useState(false)
   const [resultDialogOpen, setResultDialogOpen] = useState(false)
   const isFormValid = useMemo(() => content.trim().length > 0 || mediaUrls.length > 0, [content, mediaUrls])
@@ -282,7 +283,7 @@ export default function SocialPlanner() {
                     {p.mediaUrls?.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {p.mediaUrls.map((u) => (
-                          <img key={u} src={u} alt="media" className="h-16 w-16 object-cover rounded border" />
+                          <Image key={u} src={u} alt="media" width={64} height={64} className="h-16 w-16 object-cover rounded border" />
                         ))}
                       </div>
                     )}
@@ -316,7 +317,7 @@ export default function SocialPlanner() {
                     {p.mediaUrls?.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {p.mediaUrls.map((u) => (
-                          <img key={u} src={u} alt="media" className="h-16 w-16 object-cover rounded border" />
+                          <Image key={u} src={u} alt="media" width={64} height={64} className="h-16 w-16 object-cover rounded border" />
                         ))}
                       </div>
                     )}
@@ -345,7 +346,7 @@ export default function SocialPlanner() {
           {mediaUrls.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {mediaUrls.map((u) => (
-                <img key={u} src={u} alt="media" className="h-16 w-16 object-cover rounded border" />
+                <Image key={u} src={u} alt="media" width={64} height={64} className="h-16 w-16 object-cover rounded border" />
               ))}
             </div>
           )}
@@ -383,7 +384,7 @@ export default function SocialPlanner() {
                   {mediaUrls.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {mediaUrls.map((u) => (
-                        <img key={u} src={u} alt="media" className="h-20 w-20 object-cover rounded border" />
+                        <Image key={u} src={u} alt="media" width={80} height={80} className="h-20 w-20 object-cover rounded border" />
                       ))}
                     </div>
                   )}

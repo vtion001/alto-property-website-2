@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
     if (batch.length > 0) {
       const { error } = await supabase
         .from('contacts')
-        // @ts-ignore: supabase upsert supports conflict target option
         .upsert(batch, { onConflict: 'phone_number' })
       if (error) {
         console.error('Supabase upsert error:', error)
@@ -71,8 +70,9 @@ export async function POST(request: NextRequest) {
     const res = NextResponse.json({ upserted, totalFetched: rexContacts.length, durationMs })
     res.cookies.set('rex_last_contacts_sync', new Date().toISOString(), { httpOnly: true, secure: true, sameSite: 'lax', path: '/' })
     return res
-  } catch (error: any) {
-    console.error('REX contacts sync error:', error)
-    return NextResponse.json({ error: 'Failed to sync contacts', detail: error?.message || 'unknown' }, { status: 500 })
+  } catch (_e) {
+    console.error('REX contacts sync error:', _e)
+    const detail = _e instanceof Error ? _e.message : 'unknown'
+    return NextResponse.json({ error: 'Failed to sync contacts', detail }, { status: 500 })
   }
 }
