@@ -246,7 +246,7 @@ export default function AdminPage() {
   const [isBlogEditOpen, setIsBlogEditOpen] = useState(false)
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null)
   const [editedBlogPost, setEditedBlogPost] = useState<BlogPost | null>(null)
-  const [isDialerOpen, setIsDialerOpen] = useState(true) // Temporarily open for debugging
+  const [isDialerOpen, setIsDialerOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [callLogs, setCallLogs] = useState<CallLog[]>([])
   const [callAnalytics, setCallAnalytics] = useState<CallAnalytics | null>(null)
@@ -282,6 +282,9 @@ export default function AdminPage() {
   const [debouncedRexSince, setDebouncedRexSince] = useState<string>('')
   const [isValidRexSince, setIsValidRexSince] = useState<boolean>(true)
   const [rexAuthInvalid, setRexAuthInvalid] = useState<boolean>(false)
+  // Gmail integration status
+  const [gmailStatus, setGmailStatus] = useState<{ valid?: boolean; accountEmail?: string; hasAccessToken?: boolean } | null>(null)
+  const [gmailAuthInvalid, setGmailAuthInvalid] = useState<boolean>(false)
 
   const extractAddressFromNotes = (notes?: string) => {
     if (!notes) return ""
@@ -396,6 +399,14 @@ export default function AdminPage() {
         setRexAuthInvalid(invalid)
       } catch {}
     })()
+    ;(async () => {
+      try {
+        const res = await fetch('/api/integrations/gmail/auth/status')
+        const status = await res.json()
+        setGmailStatus(status)
+        setGmailAuthInvalid(status?.valid !== true)
+      } catch {}
+    })()
   }, [])
 
   // Debounce and validate rexSince input
@@ -445,6 +456,13 @@ export default function AdminPage() {
     }
   }, [contactsSource, debouncedRexSince, isValidRexSince])
 
+  // Ensure the dialer only shows when on the Dialer tab
+  useEffect(() => {
+    if (activeTab !== 'dialer' && isDialerOpen) {
+      setIsDialerOpen(false)
+    }
+  }, [activeTab])
+
   // Keep selection filtered to currently loaded contacts
   useEffect(() => {
     setSelectedContactIds(prev => prev.filter(id => contacts.some((c: any) => c.id === id)))
@@ -493,6 +511,7 @@ export default function AdminPage() {
     { value: 'integrations', label: 'Integrations', icon: Settings },
     { value: 'social-planner', label: 'Social Planner', icon: Calendar },
     { value: 'google-reviews', label: 'Google Reviews', icon: Eye },
+    { value: 'account-settings', label: 'Account Settings', icon: Settings },
   ]
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
@@ -503,6 +522,14 @@ export default function AdminPage() {
   const [inquiriesError, setInquiriesError] = useState<string | null>(null)
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
   const [isInquiryViewOpen, setIsInquiryViewOpen] = useState(false)
+  // Email dialog state
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [selectedInquiryForEmail, setSelectedInquiryForEmail] = useState<Inquiry | null>(null)
+  const [emailSubject, setEmailSubject] = useState<string>('')
+  const [emailBody, setEmailBody] = useState<string>('')
+  const [emailSending, setEmailSending] = useState<boolean>(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [emailSuccess, setEmailSuccess] = useState<boolean>(false)
 
   const loadInquiries = async () => {
     setInquiriesLoading(true)
@@ -615,6 +642,50 @@ export default function AdminPage() {
     try {
       localStorage.setItem('alto:vapiToken', vapiToken.trim())
     } catch {}
+  }
+
+  // Account settings state
+  const [newAdminUsername, setNewAdminUsername] = useState<string>('')
+  const [newAdminPassword, setNewAdminPassword] = useState<string>('')
+  const [newAdminRole, setNewAdminRole] = useState<'admin' | 'super_admin'>('admin')
+  const [adminCreateMessage, setAdminCreateMessage] = useState<string>('')
+  const [adminCreateError, setAdminCreateError] = useState<string>('')
+
+  const createAdminAccount = async () => {
+    setAdminCreateMessage('')
+    setAdminCreateError('')
+    const username = newAdminUsername.trim()
+    const password = newAdminPassword
+    const role = newAdminRole
+    if (!username || !password) {
+      setAdminCreateError('Username and password are required')
+      return
+    }
+    try {
+      const res = await fetch('/api/admin/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setAdminCreateError(data?.error || 'Failed to create user')
+        return
+      }
+      setAdminCreateMessage('Admin user created successfully')
+      setNewAdminUsername('')
+      setNewAdminPassword('')
+      setNewAdminRole('admin')
+    } catch (e) {
+      setAdminCreateError('Network error while creating user')
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await fetch('/api/admin/auth/logout', { method: 'POST' })
+    } catch {}
+    router.push('/admin/auth/login')
   }
 
   const vapiBase = 'https://api.vapi.ai'
@@ -2342,10 +2413,17 @@ export default function AdminPage() {
                         <AlertDescription>
                           Connect or refresh REX to fetch contacts. If mock mode is enabled, this can be ignored.
                           <div className="mt-2">
-                            <Button asChild className="bg-brown-800 text-white hover:bg-brown-700">
-                              <Link href="/api/integrations/rex/oauth/start" prefetch={false}>
-                                <ExternalLink className="h-4 w-4 mr-2" /> Connect REX
-                              </Link>
+                            <Button
+                              className="bg-brown-800 text-white hover:bg-brown-700"
+                              onClick={() => {
+                                try {
+                                  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+                                  const url = `/api/integrations/rex/oauth/start${origin ? `?base_url=${encodeURIComponent(origin)}` : ''}`
+                                  window.location.href = url
+                                } catch {}
+                              }}
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" /> Connect REX
                             </Button>
                           </div>
                         </AlertDescription>
@@ -2714,15 +2792,17 @@ export default function AdminPage() {
                   </DialogContent>
                 </Dialog>
               </TabsContent>
-              <Dialog open={isDialerOpen} onOpenChange={setIsDialerOpen}>
-                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Dialer</DialogTitle>
-                    <DialogDescription>Place calls and manage configuration</DialogDescription>
-                  </DialogHeader>
-                  <Dialer />
-                </DialogContent>
-              </Dialog>
+              {activeTab === 'dialer' && (
+                <Dialog open={isDialerOpen} onOpenChange={setIsDialerOpen}>
+                  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Dialer</DialogTitle>
+                      <DialogDescription>Place calls and manage configuration</DialogDescription>
+                    </DialogHeader>
+                    <Dialer />
+                  </DialogContent>
+                </Dialog>
+              )}
 
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
@@ -2959,7 +3039,23 @@ export default function AdminPage() {
                             <TableCell>{inquiryStatusBadge(inq.status)}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="ghost" size="sm" onClick={() => updateInquiryStatus(inq.id, 'contacted')} title="Mark as contacted">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedInquiryForEmail(inq)
+                                    setEmailError(null)
+                                    setEmailSuccess(false)
+                                    setEmailSending(false)
+                                    setEmailSubject(`Re: Your inquiry with Alto Property Group`)
+                                    const greetingName = (inq.name || '').split(' ')[0] || 'there'
+                                    setEmailBody(`Hi ${greetingName},\n\nThanks for getting in touch. We received your inquiry regarding: ${inq.subject || inq.source}.\n\n` +
+                                      `If you have any more details to share, simply reply to this email.\n\n` +
+                                      `Kind regards,\nAlto Property Group`)
+                                    setIsEmailDialogOpen(true)
+                                  }}
+                                  title="Send email"
+                                >
                                   <MessageSquare className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm" onClick={() => updateInquiryStatus(inq.id, 'closed')} title="Close inquiry">
@@ -3018,6 +3114,128 @@ export default function AdminPage() {
                             </div>
                           </div>
                         )}
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+
+                {/* Send Email Dialog */}
+                <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Send Email</DialogTitle>
+                      <DialogDescription>Compose and send an email to this contact</DialogDescription>
+                    </DialogHeader>
+                    {selectedInquiryForEmail && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-3">
+                          <Label htmlFor="email-to">To</Label>
+                          <Input id="email-to" value={selectedInquiryForEmail.email} disabled />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                          <Label htmlFor="email-subject">Subject</Label>
+                          <Input id="email-subject" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                          <Label htmlFor="email-body">Message</Label>
+                          <Textarea id="email-body" value={emailBody} onChange={(e) => setEmailBody(e.target.value)} rows={8} />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                          <Label htmlFor="email-ai-notes">AI notes (optional)</Label>
+                          <Textarea id="email-ai-notes" placeholder="Describe key points to include, tone, next steps…" rows={5} />
+                        </div>
+                        {emailError && (
+                          <Alert>
+                            <AlertTitle>Failed to send</AlertTitle>
+                            <AlertDescription>{emailError}</AlertDescription>
+                          </Alert>
+                        )}
+                        {emailSuccess && (
+                          <Alert>
+                            <AlertTitle>Sent</AlertTitle>
+                            <AlertDescription>Email sent successfully.</AlertDescription>
+                          </Alert>
+                        )}
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>Cancel</Button>
+                          <Button
+                            variant="secondary"
+                            onClick={async () => {
+                              if (!selectedInquiryForEmail) return
+                              const notesEl = document.getElementById('email-ai-notes') as HTMLTextAreaElement | null
+                              const notes = notesEl?.value || ''
+                              setEmailSending(true)
+                              setEmailError(null)
+                              try {
+                                const res = await fetch('/api/inquiries/email/ai', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    inquiryId: selectedInquiryForEmail.id,
+                                    to: selectedInquiryForEmail.email,
+                                    name: selectedInquiryForEmail.name,
+                                    subject: emailSubject.trim(),
+                                    body: emailBody.trim(),
+                                    notes,
+                                  }),
+                                })
+                                if (res.ok) {
+                                  const data = await res.json().catch(() => null)
+                                  if (data?.subject) setEmailSubject(String(data.subject))
+                                  if (data?.body) setEmailBody(String(data.body))
+                                } else {
+                                  const text = await res.text().catch(() => 'Unknown error')
+                                  setEmailError(`AI assist failed (${res.status}): ${text}`)
+                                }
+                              } catch (e: any) {
+                                setEmailError(e?.message || 'AI assist network error')
+                              } finally {
+                                setEmailSending(false)
+                              }
+                            }}
+                          >
+                            {emailSending ? 'Optimizing…' : 'AI Assist'}
+                          </Button>
+                          <Button
+                            className="bg-brown-800 hover:bg-brown-900"
+                            disabled={emailSending || !emailSubject.trim() || !emailBody.trim()}
+                            onClick={async () => {
+                              if (!selectedInquiryForEmail) return
+                              setEmailSending(true)
+                              setEmailError(null)
+                              setEmailSuccess(false)
+                              try {
+                                const res = await fetch('/api/inquiries/email', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    inquiryId: selectedInquiryForEmail.id,
+                                    to: selectedInquiryForEmail.email,
+                                    subject: emailSubject.trim(),
+                                    body: emailBody.trim(),
+                                  })
+                                })
+                                if (res.ok) {
+                                  setEmailSuccess(true)
+                                  setEmailSending(false)
+                                  // Optionally mark as contacted locally
+                                  updateInquiryStatus(selectedInquiryForEmail.id, 'contacted')
+                                  // Close after short delay
+                                  setTimeout(() => setIsEmailDialogOpen(false), 900)
+                                } else {
+                                  const text = await res.text().catch(() => 'Unknown error')
+                                  setEmailError(`Error ${res.status}: ${text}`)
+                                  setEmailSending(false)
+                                }
+                              } catch (e: any) {
+                                setEmailError(e?.message || 'Network error')
+                                setEmailSending(false)
+                              }
+                            }}
+                          >
+                            {emailSending ? 'Sending…' : 'Send Email'}
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </DialogContent>
@@ -3618,6 +3836,41 @@ export default function AdminPage() {
                   </Card>
 
                   {/* Google Reviews Integration */}
+                  {/* Gmail Integration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Gmail Sending</CardTitle>
+                      <CardDescription>Connect Gmail to send emails from Inquiries</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {gmailStatus?.valid ? (
+                          <p className="text-brown-600 text-sm">Connected as <span className="font-medium">{gmailStatus?.accountEmail || 'your account'}</span>.</p>
+                        ) : (
+                          <p className="text-brown-600 text-sm">Not connected. Connect to enable email sending via Gmail.</p>
+                        )}
+                        {gmailAuthInvalid && (
+                          <p className="text-red-700 text-xs">Authorization invalid or expired. Please reconnect Gmail.</p>
+                        )}
+                        <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                          <Button
+                            variant="outline"
+                            className="border-brown-300 text-brown-800"
+                            onClick={() => {
+                              try {
+                                const origin = typeof window !== 'undefined' ? window.location.origin : ''
+                                const url = `/api/integrations/gmail/oauth/start?base_url=${encodeURIComponent(origin)}`
+                                window.location.href = url
+                              } catch {}
+                            }}
+                          >
+                            {gmailStatus?.valid ? 'Reconnect Gmail' : 'Connect Gmail'}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-xl font-light">Google Reviews</CardTitle>
@@ -4077,6 +4330,82 @@ export default function AdminPage() {
                     )}
                   </DialogContent>
                 </Dialog>
+              </TabsContent>
+
+              <TabsContent value="account-settings" className="space-y-6">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-light text-brown-800">Account Management</h2>
+                  <p className="text-brown-600">Create admin users and manage your session</p>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Create Admin Account</CardTitle>
+                      <CardDescription>Add a new admin user</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="admin-username">Username or Email</Label>
+                          <Input
+                            id="admin-username"
+                            value={newAdminUsername}
+                            onChange={(e) => setNewAdminUsername(e.target.value)}
+                            placeholder="e.g. admin@example.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="admin-password">Password</Label>
+                          <Input
+                            id="admin-password"
+                            type="password"
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Role</Label>
+                          <Select
+                            value={newAdminRole}
+                            onValueChange={(v) => setNewAdminRole(v as 'admin' | 'super_admin')}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="super_admin">Super Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {adminCreateError && (
+                          <p className="text-sm text-red-600">{adminCreateError}</p>
+                        )}
+                        {adminCreateMessage && (
+                          <p className="text-sm text-green-700">{adminCreateMessage}</p>
+                        )}
+                        <Button onClick={createAdminAccount}>
+                          Create Admin Account
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-light">Session</CardTitle>
+                      <CardDescription>Manage your current admin session</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <p className="text-sm text-brown-700">Sign out of the Admin UI.</p>
+                        <Button variant="outline" onClick={logout}>Logout</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
             </div>

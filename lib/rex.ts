@@ -43,10 +43,13 @@ export async function exchangeCodeForToken(code: string): Promise<OAuthTokenResp
   if (MOCK) {
     return { access_token: 'mock_access', refresh_token: 'mock_refresh', expires_in: 3600, token_type: 'Bearer' }
   }
+  const cookieStore = await cookies()
+  const redirectOverride = cookieStore.get('rex_redirect')?.value
+  const redirectUri = redirectOverride || REX_CONFIG.redirectUri
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
-    redirect_uri: REX_CONFIG.redirectUri,
+    redirect_uri: redirectUri,
     client_id: REX_CONFIG.clientId,
     client_secret: REX_CONFIG.clientSecret,
   })

@@ -71,11 +71,12 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
 
     setIsSubmitting(true);
     setSubmitError(null);
+    let savedToAdmin = false;
 
     try {
-      // Save to Admin Inquiries
+      // Save to Admin Inquiries (prioritize local persistence)
       try {
-        await fetch('/api/inquiries', {
+        const res = await fetch('/api/inquiries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -89,6 +90,7 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
             currentManager: formData.currentManager,
           })
         })
+        savedToAdmin = res.ok
       } catch {}
 
       const webhookUrl =
@@ -153,19 +155,23 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
             response.status,
             errorText,
           );
-
-          if (response.status === 404) {
-            setSubmitError(
-              `Webhook endpoint not found. Please check if the webhook service is running. (Error: ${response.status})`,
-            );
-          } else if (response.status >= 500) {
-            setSubmitError(
-              `Server error occurred. Please try again in a few moments. (Error: ${response.status})`,
-            );
+          if (savedToAdmin) {
+            // Consider submission successful if saved to Admin, despite webhook failure
+            setSubmitSuccess(true);
           } else {
-            setSubmitError(
-              `Failed to submit form. Please try again. (Error: ${response.status})`,
-            );
+            if (response.status === 404) {
+              setSubmitError(
+                `Webhook endpoint not found. Please check if the webhook service is running. (Error: ${response.status})`,
+              );
+            } else if (response.status >= 500) {
+              setSubmitError(
+                `Server error occurred. Please try again in a few moments. (Error: ${response.status})`,
+              );
+            } else {
+              setSubmitError(
+                `Failed to submit form. Please try again. (Error: ${response.status})`,
+              );
+            }
           }
         }
       } catch (fetchError) {
@@ -174,20 +180,24 @@ export function LeadCapturePopup({ onClose }: LeadCapturePopupProps) {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-
-      if (error instanceof DOMException && error.name === "AbortError") {
-        setSubmitError(
-          "Request timed out. Please check your connection and try again.",
-        );
-      } else if (
-        error instanceof TypeError &&
-        error.message.includes("fetch")
-      ) {
-        setSubmitError(
-          "Unable to connect to the service. Please check your internet connection and try again.",
-        );
+      if (savedToAdmin) {
+        // Treat as success if the inquiry was saved locally
+        setSubmitSuccess(true);
       } else {
-        setSubmitError("An unexpected error occurred. Please try again.");
+        if (error instanceof DOMException && error.name === "AbortError") {
+          setSubmitError(
+            "Request timed out. Please check your connection and try again.",
+          );
+        } else if (
+          error instanceof TypeError &&
+          error.message.includes("fetch")
+        ) {
+          setSubmitError(
+            "Unable to connect to the service. Please check your internet connection and try again.",
+          );
+        } else {
+          setSubmitError("An unexpected error occurred. Please try again.");
+        }
       }
     } finally {
       setIsSubmitting(false);

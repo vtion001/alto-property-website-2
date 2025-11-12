@@ -156,14 +156,7 @@ export default function AdminLoginPage() {
                   {isLoading ? "Signing In..." : "Sign In to Admin Dashboard"}
                 </Button>
 
-                <div className="text-center pt-4 border-t border-brown-100">
-                  <p className="text-brown-600 mb-2">Need an admin account?</p>
-                  <Link href="/admin/auth/signup">
-                    <Button variant="outline" className="border-brown-300 text-brown-800 hover:bg-brown-50">
-                      Create Admin Account
-                    </Button>
-                  </Link>
-                </div>
+                {/* Signup intentionally removed to keep account creation inside protected Admin UI */}
               </form>
             </CardContent>
           </Card>
